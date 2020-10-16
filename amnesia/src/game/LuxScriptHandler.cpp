@@ -439,6 +439,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void FadeOut(float afTime)",(void *)FadeOut);
 	AddFunc("void FadeImageTrailTo(float afAmount, float afSpeed)",(void *)FadeImageTrailTo);
 	AddFunc("void FadeSepiaColorTo(float afAmount, float afSpeed)",(void *)FadeSepiaColorTo);
+	AddFunc("void FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)", (void *)FadeBlackAndWhiteAmountTo);
 	AddFunc("void FadeRadialBlurTo(float afSize, float afSpeed)",(void *)FadeRadialBlurTo);
 	AddFunc("void SetRadialBlurStartDist(float afStartDist)",(void *)SetRadialBlurStartDist);
 
@@ -453,6 +454,10 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEffectVoiceOverCallback(string &in asFunc)", (void *)SetEffectVoiceOverCallback);
 	AddFunc("void StartScreenShake(float afAmount, float afTime, float afFadeInTime,float afFadeOutTime)",(void *)StartScreenShake);
 	AddFunc("bool GetFlashbackIsActive()", (void *)GetFlashbackIsActive);
+
+	AddFunc("void ShowScreenImage(string &in asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut)", (void*)ShowScreenImage);
+	AddFunc("void HideScreenImageImmediately()", (void*)HideScreenImageImmediately);
+	AddFunc("void HideScreenImageWithFade(float afFadeOut)", (void*)HideScreenImageWithFade);
 
 	AddFunc("void SetInsanitySetEnabled(string &in asSet, bool abX)", (void *)SetInsanitySetEnabled);
 	AddFunc("void StartRandomInsanityEvent()", (void *)StartRandomInsanityEvent);
@@ -1147,6 +1152,14 @@ void __stdcall cLuxScriptHandler::FadeSepiaColorTo(float afAmount, float afSpeed
 
 //-----------------------------------------------------------------------
 
+void __stdcall cLuxScriptHandler::FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)
+{
+	gpBase->mpEffectHandler->GetBlackAndWhiteAmount()->FadeTo(afAmount, afSpeed);
+}
+
+
+//-----------------------------------------------------------------------
+
 void __stdcall cLuxScriptHandler::FadeRadialBlurTo(float afSize, float afSpeed)
 {
 	gpBase->mpEffectHandler->GetRadialBlur()->FadeTo(afSize, afSpeed);
@@ -1172,6 +1185,29 @@ void __stdcall cLuxScriptHandler::StartEffectEmotionFlash(string &asTextCat, str
 }
 
 //-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::ShowScreenImage(string& asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut)
+{
+	gpBase->mpEffectHandler->GetScreenImage()->ShowImage(asImageName, afX, afY, afScale, abUseRelativeCoordinates, afDuration, afFadeIn, afFadeOut);
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::HideScreenImageImmediately()
+{
+	gpBase->mpEffectHandler->GetScreenImage()->HideImmediately();
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::HideScreenImageWithFade(float afFadeOut)
+{
+	gpBase->mpEffectHandler->GetScreenImage()->HideWithFade(afFadeOut);
+}
+
+
+//-----------------------------------------------------------------------
+
 
 void __stdcall cLuxScriptHandler::SetInDarknessEffectsActive(bool abX)
 {

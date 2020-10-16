@@ -56,8 +56,19 @@ cLuxEffectHandler::cLuxEffectHandler() : iLuxUpdateable("LuxEffectHandler")
 	mpSepiaColor = hplNew( cLuxEffect_SepiaColor, () );
 	mvEffects.push_back(mpSepiaColor);
 
+	mpBlackAndWhite = hplNew(cLuxEffect_BlackAndWhite, ());
+	mvEffects.push_back(mpBlackAndWhite);
+
+    
+    mpColorGrading = hplNew( cLuxEffect_ColorGrading, () );
+    mpColorGrading->SetActive(true);
+    mvEffects.push_back(mpColorGrading);
+
 	mpRadialBlur = hplNew( cLuxEffect_RadialBlur, () );
 	mvEffects.push_back(mpRadialBlur);
+
+	mpScreenImage = hplNew(cLuxEffect_ScreenImage, ());
+	mvEffects.push_back(mpScreenImage);
 
 	mpEmotionFlash = hplNew( cLuxEffect_EmotionFlash, () );
 	mvEffects.push_back(mpEmotionFlash);
@@ -197,6 +208,154 @@ void cLuxEffect_PlayCommentary::Reset()
 	msTopic = "";
 }
 
+
+//////////////////////////////////////////////////////////////////////////
+// SCREEN IMAGE
+//////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------
+
+
+cLuxEffect_ScreenImage::cLuxEffect_ScreenImage()
+{
+	cGui* pGui = gpBase->mpEngine->GetGui();
+	mpGuiSet = pGui->CreateSet("Effect_ScreenImage", NULL);
+	mpGuiSet->SetRendersBeforePostEffects(false);
+	mpGuiSet->SetDrawMouse(false);
+	mpGuiSet->SetDrawPriority(3);
+	gpBase->mpMapHandler->GetViewport()->AddGuiSet(mpGuiSet);
+	mpTextureGfx = NULL;
+	mbActive = false;
+
+	mfCurrentFade = 0.0f;
+
+	mfFadeInDuration = 1.0f;
+	mfShowDuration = 1.0f;
+	mfFadeOutDuration = 1.0f;
+	mfFadeTimer = 1.0f;
+}
+
+//-----------------------------------------------------------------------
+cLuxEffect_ScreenImage::~cLuxEffect_ScreenImage()
+{
+	if (mpTextureGfx != NULL)
+	{
+		gpBase->mpEngine->GetGui()->DestroyGfx(mpTextureGfx);
+		mpTextureGfx = NULL;
+	}
+
+	if (mpGuiSet != NULL)
+	{
+		gpBase->mpEngine->GetGui()->DestroySet(mpGuiSet);
+		mpGuiSet = NULL;
+	}
+}
+
+//-----------------------------------------------------------------------
+void cLuxEffect_ScreenImage::ShowImage(const tString& asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut)
+{
+	if (mpTextureGfx != NULL)
+	{
+		gpBase->mpEngine->GetGui()->DestroyGfx(mpTextureGfx);
+		mpTextureGfx = NULL;
+	}
+
+	mpTextureGfx = gpBase->mpEngine->GetGui()->CreateGfxTexture(asImageName, eGuiMaterial_Alpha);
+
+	// coordinates are centered around origin, if relative in terms of screen size
+
+	cVector2f screen_size = gpBase->mpEngine->GetGraphics()->GetLowLevel()->GetScreenSizeFloat();
+
+	if (abUseRelativeCoordinates)
+	{
+		afX = afX * screen_size.x;
+		afY = afY * screen_size.y;
+	}
+
+	afX += screen_size.x / 2;
+	afY += screen_size.y / 2;
+
+	mfFadeInDuration = afFadeIn;
+	mfShowDuration = afDuration;
+	mfFadeOutDuration = afFadeOut;
+	mfFadeTimer = 0.0f;
+
+	if (mfFadeInDuration > 0)
+	{
+		mfCurrentFade = 1.0f;
+	}
+	else
+	{
+		mfCurrentFade = 0.0f;
+	}
+
+	mbActive = true;
+	mvPosition = cVector3f(afX, afY, gpBase->mvHudVirtualStartPos.z + 10.0f);
+	mfScale = afScale;
+
+}
+
+//-----------------------------------------------------------------------
+void cLuxEffect_ScreenImage::HideImmediately()
+{
+	mbActive = false;
+
+	if (mpTextureGfx != NULL)
+	{
+		gpBase->mpEngine->GetGui()->DestroyGfx(mpTextureGfx);
+		mpTextureGfx = NULL;
+	}
+}
+
+//-----------------------------------------------------------------------
+void cLuxEffect_ScreenImage::HideWithFade(float afFadeOut)
+{
+	if (mfCurrentFade > 0.0f)
+	{
+		mfFadeInDuration = 0.0f;
+		mfShowDuration = 1.0f;
+		mfFadeOutDuration = afFadeOut;
+	}
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ScreenImage::Update(float afTimeStep)
+{
+	mfFadeTimer += afTimeStep;
+
+	if (mfFadeTimer > (mfFadeInDuration + mfShowDuration + mfFadeOutDuration))
+	{
+		mfCurrentFade = 0.0f;
+		mbActive = false;
+	}
+	else if (mfFadeOutDuration > 0 && mfFadeTimer > mfFadeInDuration + mfShowDuration)
+	{
+		// fading out
+		float mfFadeFactor = (mfFadeTimer - (mfFadeInDuration + mfShowDuration)) / mfFadeOutDuration;    // 0 when starting to fade out, 1 when faded out
+		mfCurrentFade = 1.0f - mfFadeFactor;
+	}
+	else if (mfFadeTimer > mfFadeInDuration)
+	{
+		mfCurrentFade = 1.0f;
+	}
+	else if (mfFadeInDuration > 0.0f)
+	{
+		// fading in
+		float mfFadeFactor = (mfFadeTimer) / mfFadeInDuration;    // 0 when starting to fade in, 1 when faded in
+		mfCurrentFade = mfFadeFactor;
+	}
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ScreenImage::OnDraw(float afFrameTime)
+{
+	if (gpBase->mpGameHudSet && mpTextureGfx)
+	{
+		mpGuiSet->DrawGfx(mpTextureGfx, mvPosition, mfScale, cColor(1.0f, mfCurrentFade));
+	}
+}
 
 //-----------------------------------------------------------------------
 
@@ -492,6 +651,289 @@ void cLuxEffect_SepiaColor::Reset()
 	mfAmountGoal =0;
 	gpBase->mpMapHandler->GetPostEffect_Sepia()->Reset();
 	gpBase->mpMapHandler->GetPostEffect_Sepia()->SetActive(false);
+}
+
+//-----------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////
+// BLACK AND WHITE
+//////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------
+
+cLuxEffect_BlackAndWhite::cLuxEffect_BlackAndWhite()
+{
+	mfAmount = 0;
+	mfAmountGoal = 0;
+}
+
+void cLuxEffect_BlackAndWhite::FadeTo(float afAmount, float afSpeed)
+{
+	mfAmountGoal = afAmount;
+	mfFadeSpeed = afSpeed;
+	SetActive(true);
+	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(true);
+}
+
+void cLuxEffect_BlackAndWhite::Update(float afTimeStep)
+{
+	if (mfAmountGoal < mfAmount)
+	{
+		mfAmount -= mfFadeSpeed * afTimeStep;
+		if (mfAmount <= mfAmountGoal)
+		{
+			mfAmount = mfAmountGoal;
+			SetActive(false);
+		}
+	}
+	else
+	{
+		mfAmount += mfFadeSpeed * afTimeStep;
+		if (mfAmount >= mfAmountGoal)
+		{
+			mfAmount = mfAmountGoal;
+			SetActive(false);
+		}
+	}
+
+	cPostEffectParams_ColorConvTex blackandwhiteParams;
+	blackandwhiteParams.mfFadeAlpha = mfAmount;
+	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetParams(&blackandwhiteParams);
+
+	if (mfAmount <= 0)
+	{
+		gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
+	}
+}
+
+void cLuxEffect_BlackAndWhite::Reset()
+{
+	mfAmount = 0;
+	mfAmountGoal = 0;
+	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->Reset();
+	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
+}
+
+//-----------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////
+// COLOR GRADING
+//////////////////////////////////////////////////////////////////////////
+
+cLuxEffect_ColorGrading::cLuxEffect_ColorGrading()
+{
+    mbIsCrossFading = false;
+    mfCrossFadeAlpha = 0.0f;
+    mbIsFadingUp = false;
+    mfFadeSpeed = 1.0f;
+    mfGameplayFadeTime = 1.0f;
+    msFadeTargetLUT = "";
+    msGameplayLUT = "";
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::InitializeLUT(tString asBaseEnvironmentLUT)
+{
+    mbIsCrossFading = false;
+    mfCrossFadeAlpha = 0.0f;
+    mbIsFadingUp = false;
+    mfFadeSpeed = 1.0f;
+    msFadeTargetLUT = asBaseEnvironmentLUT;
+    msGameplayLUT = "";
+    
+    msEnvironmentLUTs.clear();
+    msEnvironmentLUTs.push_front( asBaseEnvironmentLUT );
+    msEnvironmentLUTFadeTimes.clear();
+    msEnvironmentLUTFadeTimes.push_front( 5.0f );
+    
+    cPostEffectParams_ColorGrading colorGradingParams;
+    colorGradingParams.msTextureFile1 = asBaseEnvironmentLUT;
+    colorGradingParams.msTextureFile2 = "";
+    colorGradingParams.mfCrossFadeAlpha = 0.0f;
+    colorGradingParams.mbIsReinitialisation = true;
+    
+    
+    gpBase->mpMapHandler->GetPostEffect_ColorGrading()->SetParams( &colorGradingParams );
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::EnterLUTEnvironment(tString asEnvironmentLUT, float afFadeTime)
+{
+    if ( afFadeTime < 0.5f ) afFadeTime = 0.5f;
+    
+    if ( !mbIsCrossFading )
+    {
+        // not fading
+        
+        if ( msGameplayLUT != "" )
+        {
+            // we have a gameplay LUT fully active. That means we just push the environment lut, and ignore the fade time. This environment will become active when the gameplay lut fades out
+            msEnvironmentLUTs.push_front( asEnvironmentLUT );
+            msEnvironmentLUTFadeTimes.push_front( afFadeTime );
+        }
+        else
+        {
+            if ( asEnvironmentLUT != *msEnvironmentLUTs.begin() )
+            {
+                // not fading, new map & no current gameplay LUT -> fade to the new map with the new fadetime
+                
+                FadeFromTo( *msEnvironmentLUTs.begin(), asEnvironmentLUT, afFadeTime );
+            }
+            
+            msEnvironmentLUTs.push_front( asEnvironmentLUT );
+            msEnvironmentLUTFadeTimes.push_front( afFadeTime );
+        }
+    }
+    else
+    {
+        // a crossfade is in progress. Queue ours, when fade is finished it will re-fade
+        
+        msEnvironmentLUTs.push_front( asEnvironmentLUT );
+        msEnvironmentLUTFadeTimes.push_front( afFadeTime );
+    }
+}
+
+void cLuxEffect_ColorGrading::FadeFromTo( tString asFromTexture, tString asToTexture, float afFadeTime )
+{
+    if ( !mbIsFadingUp )
+    {
+        cPostEffectParams_ColorGrading colorGradingParams;
+        colorGradingParams.msTextureFile1 = asFromTexture;
+        colorGradingParams.msTextureFile2 = asToTexture;
+        colorGradingParams.mfCrossFadeAlpha = 0.0f;
+        colorGradingParams.mbIsReinitialisation = false;
+        
+        gpBase->mpMapHandler->GetPostEffect_ColorGrading()->SetParams( &colorGradingParams );
+    }
+    else
+    {
+        cPostEffectParams_ColorGrading colorGradingParams;
+        colorGradingParams.msTextureFile1 = asToTexture;
+        colorGradingParams.msTextureFile2 = asFromTexture;
+        colorGradingParams.mfCrossFadeAlpha = 1.0f;
+        colorGradingParams.mbIsReinitialisation = false;
+        
+        gpBase->mpMapHandler->GetPostEffect_ColorGrading()->SetParams( &colorGradingParams );
+    }
+    
+    msFadeTargetLUT = asToTexture;
+    mbIsFadingUp = !mbIsFadingUp;
+    mbIsCrossFading = true;
+    mfFadeSpeed = 1.0f / afFadeTime;
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::LeaveLUTEnvironment(tString asEnvironmentLUT)
+{
+    tStringListIt second = msEnvironmentLUTs.begin();
+    if ( msEnvironmentLUTs.size() > 1 ) second++;
+    
+    if ( mbIsCrossFading
+        || msGameplayLUT != ""
+        || asEnvironmentLUT != *msEnvironmentLUTs.begin()
+        || ( msEnvironmentLUTs.size() > 1 && *second == asEnvironmentLUT )
+        )
+    {
+        tFloatListIt fadeTimeIt = msEnvironmentLUTFadeTimes.begin();
+        
+        // just remove the first occurrence of this map
+        for(tStringListIt it = msEnvironmentLUTs.begin(); it != msEnvironmentLUTs.end(); ++it)
+        {
+            if ( *it == asEnvironmentLUT )
+            {
+                msEnvironmentLUTs.erase( it );
+                msEnvironmentLUTFadeTimes.erase( fadeTimeIt );
+                break;
+            }
+            fadeTimeIt++;
+        }
+    }
+    else
+    {
+        // this means we're the first map, the second is different and we don't have a gameplay map. Start a fade to the second environment map before removing
+        
+        FadeFromTo( asEnvironmentLUT, *second, *msEnvironmentLUTFadeTimes.begin() );
+        
+        msEnvironmentLUTs.erase( msEnvironmentLUTs.begin() );
+        msEnvironmentLUTFadeTimes.erase( msEnvironmentLUTFadeTimes.begin() );
+    }
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::FadeGameplayLUTTo(tString asEnvironmentLUT, float afFadeTime)
+{
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::FadeOutGameplayLUT(float afFadeTime)
+{
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::Update(float afTimeStep)
+{
+    bool bJustFinishedCrossFading = false;
+    
+    if ( mbIsCrossFading )
+    {
+        if ( mbIsFadingUp )
+        {
+            mfCrossFadeAlpha += afTimeStep * mfFadeSpeed;
+            if ( mfCrossFadeAlpha >= 1.0f )
+            {
+                mfCrossFadeAlpha = 1.0f;
+                mbIsCrossFading = false;
+                bJustFinishedCrossFading = true;
+            }
+        }
+        else
+        {
+            mfCrossFadeAlpha -= afTimeStep * mfFadeSpeed;
+            if ( mfCrossFadeAlpha <= 0.0f )
+            {
+                mfCrossFadeAlpha = 0.0f;
+                mbIsCrossFading = false;
+                bJustFinishedCrossFading = true;
+            }
+        }
+        
+        ((cPostEffect_ColorGrading*)gpBase->mpMapHandler->GetPostEffect_ColorGrading())->SetCrossFadeAlpha( mfCrossFadeAlpha );
+    }
+    
+    if ( bJustFinishedCrossFading )
+    {
+        // check if the final state of the crossfade is the current state we want, if not, crossfade.
+        tString sDesiredLUT = "";
+        float fDesiredFadeTime = 1.0f;
+        
+        if ( msGameplayLUT != "" )
+        {
+            sDesiredLUT = msGameplayLUT;
+            fDesiredFadeTime = mfGameplayFadeTime;
+        }
+        else
+        {
+            sDesiredLUT = *msEnvironmentLUTs.begin();
+            fDesiredFadeTime = *msEnvironmentLUTFadeTimes.begin();
+        }
+        
+        if ( sDesiredLUT != msFadeTargetLUT )
+        {
+            FadeFromTo(msFadeTargetLUT,sDesiredLUT,fDesiredFadeTime);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEffect_ColorGrading::Reset()
+{
 }
 
 //-----------------------------------------------------------------------
@@ -1274,6 +1716,7 @@ void cLuxEffectHandler::OnMapLeave(cLuxMap *apMap)
 	//////////////////
 	// Reset some effects on map leave
 	mpSepiaColor->FadeTo(0, 1);
+	mpBlackAndWhite->FadeTo(0, 1);
 	mpRadialBlur->FadeTo(0, 1);
 	if(mpPlayCommentary->IsActive()) mpPlayCommentary->Stop();
 }

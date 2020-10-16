@@ -177,6 +177,8 @@ private:
 	cWidgetCheckBox *mpChBSepia;
 	cWidgetCheckBox *mpChBRadialBlur;
 	cWidgetCheckBox *mpChBInsanity;
+    cWidgetCheckBox *mpChBColorGrading;
+	cWidgetCheckBox* mpChBBlackAndWhite;
 
 	cWidgetCheckBox *mpChBSSAO;
 	cWidgetComboBox *mpCBSSAOSamples;

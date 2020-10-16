@@ -150,11 +150,16 @@ private:
 	static void __stdcall FadeOut(float afTime);
 	static void __stdcall FadeImageTrailTo(float afAmount, float afSpeed);
 	static void __stdcall FadeSepiaColorTo(float afAmount, float afSpeed);
+	static void __stdcall FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed);
 	static void __stdcall FadeRadialBlurTo(float afSize, float afSpeed);
 	static void __stdcall SetRadialBlurStartDist(float afStartDist);
 	static void __stdcall StartEffectFlash(float afFadeIn, float afWhite, float afFadeOut);
 	static void __stdcall StartEffectEmotionFlash(string &asTextCat, string &asTextEntry, string &asSound);
 	static void __stdcall SetInDarknessEffectsActive(bool abX);
+
+	static void __stdcall ShowScreenImage(string& asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut);
+	static void __stdcall HideScreenImageImmediately();
+	static void __stdcall HideScreenImageWithFade(float afFadeOut);
 	
 	//This adds a voice + effect to be played. It is okay to call this many times in order to play many voices in a row. The EffectVoiceOverCallback is not called until ALL voices have finished.
 	static void __stdcall AddEffectVoice(	string& asVoiceFile, string& asEffectFile,

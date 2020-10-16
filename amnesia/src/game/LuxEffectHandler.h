@@ -47,6 +47,42 @@ protected:
 	bool mbActive;    
 };
 
+class cLuxEffect_ScreenImage : public iLuxEffect
+{
+public:
+	cLuxEffect_ScreenImage();
+	~cLuxEffect_ScreenImage();
+
+	void ShowImage(const tString& asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut);
+	void HideImmediately();
+	void HideWithFade(float afFadeOut);
+
+	void Update(float afTimeStep);
+	void OnDraw(float afFrameTime);
+	void Reset() {};
+
+private:
+
+	//////////////////////
+	//Data
+	cGuiSet* mpGuiSet;
+
+	tString msTextureName;
+
+	cGuiGfxElement* mpTextureGfx;
+
+	cVector3f
+		mvPosition;
+
+	float
+		mfFadeInDuration,
+		mfShowDuration,
+		mfFadeOutDuration,
+		mfFadeTimer,
+		mfScale,
+		mfCurrentFade;
+};
+
 
 //----------------------------------------------
 
@@ -155,6 +191,62 @@ private:
 	float mfAmount;
 	float mfAmountGoal;
 	float mfFadeSpeed;
+};
+
+class cLuxEffect_BlackAndWhite : public iLuxEffect
+{
+	friend class cLuxEffectHandler_SaveData;
+public:
+	cLuxEffect_BlackAndWhite();
+
+	void FadeTo(float afAmount, float afSpeed);
+
+	void Update(float afTimeStep);
+	void OnDraw(float afFrameTime) {}
+	void Reset();
+
+private:
+	float mfAmount;
+	float mfAmountGoal;
+	float mfFadeSpeed;
+};
+
+class cLuxEffect_ColorGrading : public iLuxEffect
+{
+    friend class cLuxEffectHandler_SaveData;
+public:
+    cLuxEffect_ColorGrading();
+
+    void InitializeLUT(tString asBaseEnvironmentLUT);
+    void EnterLUTEnvironment(tString asEnvironmentLUT, float afFadeTime);
+    void LeaveLUTEnvironment(tString asEnvironmentLUT);
+    void FadeGameplayLUTTo(tString asEnvironmentLUT, float afFadeTime);
+    void FadeOutGameplayLUT(float afFadeTime);
+
+    virtual bool IsAlwaysOn() { return true; }
+
+    void Update(float afTimeStep);
+    void OnDraw(float afFrameTime){}
+    void Reset();
+
+private:
+
+    void FadeFromTo( tString asFromTexture, tString asToTexture, float afFadeTime );
+
+    bool
+        mbIsCrossFading;
+
+    tStringList msEnvironmentLUTs;
+    tFloatList msEnvironmentLUTFadeTimes;
+
+    tString msGameplayLUT;
+    float mfGameplayFadeTime;
+
+    tString msFadeTargetLUT;
+
+    float mfCrossFadeAlpha;
+    bool mbIsFadingUp;
+    float mfFadeSpeed;
 };
 
 //-----------------------------------------
@@ -390,9 +482,12 @@ public:
 	cLuxEffect_ImageTrail *GetImageTrail(){ return mpImageTrail;}
 	cLuxEffect_ShakeScreen *GetScreenShake(){ return mpScreenShake;}
 	cLuxEffect_SepiaColor *GetSepiaColor(){ return mpSepiaColor;}
+	cLuxEffect_BlackAndWhite* GetBlackAndWhiteAmount() { return mpBlackAndWhite; }
+    cLuxEffect_ColorGrading *GetColorGrading(){ return mpColorGrading;}
 	cLuxEffect_RadialBlur *GetRadialBlur(){ return mpRadialBlur;}
 	cLuxEffect_EmotionFlash *GetEmotionFlash(){ return mpEmotionFlash;}
 	cLuxEffect_PlayCommentary *GetPlayCommentary(){ return  mpPlayCommentary;}
+	cLuxEffect_ScreenImage* GetScreenImage() { return mpScreenImage; }
 
 private:
 	cLuxEffect_Fade *mpFade;
@@ -402,9 +497,12 @@ private:
 	cLuxEffect_ImageTrail *mpImageTrail;
 	cLuxEffect_ShakeScreen *mpScreenShake;
 	cLuxEffect_SepiaColor *mpSepiaColor;
+	cLuxEffect_BlackAndWhite* mpBlackAndWhite;
+    cLuxEffect_ColorGrading *mpColorGrading;
 	cLuxEffect_RadialBlur *mpRadialBlur;
 	cLuxEffect_EmotionFlash *mpEmotionFlash;
 	cLuxEffect_PlayCommentary *mpPlayCommentary;
+	cLuxEffect_ScreenImage* mpScreenImage;
 
 	std::vector<iLuxEffect*> mvEffects;	
 

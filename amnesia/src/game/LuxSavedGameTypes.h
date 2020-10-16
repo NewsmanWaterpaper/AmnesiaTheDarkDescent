@@ -166,6 +166,11 @@ public:
 	float mfSepiaColor_AmountGoal;
 	float mfSepiaColor_FadeSpeed;
 
+	bool mbBlackAndWhite_Active;
+	float mfBlackAndWhite_Amount;
+	float mfBlackAndWhite_AmountGoal;
+	float mfBlackAndWhite_FadeSpeed;
+
 	bool mbRadialBlur_Active;
 	float mfRadialBlur_Size;
 	float mfRadialBlur_BlurStartDist;
