@@ -203,7 +203,7 @@ cLuxMapHandler::cLuxMapHandler() : iLuxUpdateable("LuxMapHandler")
     
     //Color correction
     cPostEffectParams_ColorGrading colorGradingParams;
-    colorGradingParams.msTextureFile1 = "";
+    colorGradingParams.msTextureFile1 = "colorgrading_base.png";
     colorGradingParams.msTextureFile2 = "";
     colorGradingParams.mfCrossFadeAlpha = 0.0f;
     colorGradingParams.mbIsReinitialisation = true;
@@ -574,6 +574,7 @@ void cLuxMapHandler::LoadMainConfig()
 	mpPostEffect_Sepia->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectSepia", true)==false);
 	mpPostEffect_RadialBlur->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectRadialBlur", true)==false);
     mpPostEffect_ColorGrading->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectColorGrading", true)==false);
+	mpPostEffect_BlackAndWhite->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectBlackAndWhite", true)==false);
 
 	cRenderSettings *pRenderSettings = mpViewport->GetRenderSettings();
 	pRenderSettings->mbUseEdgeSmooth = gpBase->mpConfigHandler->mbEdgeSmooth; //This is saved in config handler!
@@ -586,6 +587,7 @@ void cLuxMapHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectSepia", mpPostEffect_Sepia->IsDisabled()==false);
 	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectRadialBlur", mpPostEffect_RadialBlur->IsDisabled()==false);
     gpBase->mpMainConfig->SetBool("Graphics", "PostEffectColorGrading", mpPostEffect_ColorGrading->IsDisabled()==false);
+	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectBlackAndWhite", mpPostEffect_BlackAndWhite->IsDisabled() == false);
 }
 
 //-----------------------------------------------------------------------

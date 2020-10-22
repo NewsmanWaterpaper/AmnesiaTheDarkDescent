@@ -167,13 +167,14 @@ namespace hpl {
             if ( cPlatform::FileExists( _W("textures/gradingmaps/") + cString::To16Char(asLUTName) )
                 || cPlatform::FileExists( cString::To16Char(asLUTName) ) )
             {
+
 		        texture = mpResources->GetTextureManager()->CreateFlattened3D(asLUTName,false);
                 texture->SetWrapSTR(eTextureWrap_ClampToEdge);
                 texture->SetFilter(eTextureFilter_Trilinear);
             }
             else
             {
-		        return LoadLUT("");
+				return LoadLUT("colorgrading_base.png");
             }
 
             mLUTMap[ asLUTName ] = texture;

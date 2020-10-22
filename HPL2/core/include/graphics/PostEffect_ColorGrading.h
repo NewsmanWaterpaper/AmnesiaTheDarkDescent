@@ -34,7 +34,7 @@ namespace hpl {
 	{
 	public:
 		cPostEffectParams_ColorGrading() : iPostEffectParams("ColorGrading"),  
-			msTextureFile1(""),
+			msTextureFile1("colorgrading_base.png"),
 			msTextureFile2(""),
             mfCrossFadeAlpha( 0.0f ),
             mbIsReinitialisation( false )
