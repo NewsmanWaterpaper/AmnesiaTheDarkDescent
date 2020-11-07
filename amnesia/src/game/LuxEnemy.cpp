@@ -361,6 +361,8 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 	{
 		pEnemy->msCallbackFunc = apInstanceVars->GetVarString("CallbackFunc", "");
 		pEnemy->mbDisableTriggers = apInstanceVars->GetVarBool("DisableTriggers", false);
+		pEnemy->mbAutoRemoveAtPathEnd = apInstanceVars->GetVarBool("AutoRemoveAtPathEnd", true);
+		pEnemy->mbAutoReverseAtPathEnd = apInstanceVars->GetVarBool("AutoReverseAtPathEnd", false);
 		pEnemy->mbHallucination =  apInstanceVars->GetVarBool("Hallucination", false);
 		pEnemy->mfHallucinationEndDist = apInstanceVars->GetVarFloat("HallucinationEndDist", false);
 

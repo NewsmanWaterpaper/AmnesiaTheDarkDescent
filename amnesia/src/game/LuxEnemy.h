@@ -696,6 +696,7 @@ protected:
 	bool mbAlignEntityWithGroundRay;
 
 	bool mbAutoRemoveAtPathEnd;
+	bool mbAutoReverseAtPathEnd;
 
 	float mfSightRange;
 	float mfDarknessSightRange;
