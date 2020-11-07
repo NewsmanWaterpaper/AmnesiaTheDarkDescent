@@ -440,6 +440,7 @@ private:
 	static void __stdcall SetEnemyDisableTriggers(string& asName, bool abX);
 	static void __stdcall AddEnemyPatrolNode(string& asName, string& asNodeName, float afWaitTime, string& asAnimation);
 	static void __stdcall ClearEnemyPatrolNodes(string& asEnemyName);
+	static void __stdcall PlayEnemyAnimation(string& asEnemyName, string& asAnimName, bool abLoop, float afFadeTime);
 	static void __stdcall SetEnemySanityDecreaseActive(string& asName, bool abX);
 	static void __stdcall TeleportEnemyToNode(string & asEnemyName, string & asNodeName, bool abChangeY);
 	static void __stdcall TeleportEnemyToEntity(string & asName, string & asTargetEntity, string & asTargetBody, bool abChangeY);

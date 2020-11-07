@@ -641,6 +641,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void ShowEnemyPlayerPosition(string &in asName)",(void *)ShowEnemyPlayerPosition);
 	AddFunc("void AlertEnemyOfPlayerPresence(string &in asName)",(void *)AlertEnemyOfPlayerPresence);
 	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation)",(void *)AddEnemyPatrolNode);
+	AddFunc("void PlayEnemyAnimation(string &in asEnemyName, string &in asAnimName, bool abLoop, float afFadeTime)", (void*)PlayEnemyAnimation);
 	AddFunc("void ClearEnemyPatrolNodes(string &in asEnemyName)",(void *)ClearEnemyPatrolNodes);
 	AddFunc("void SetEnemySanityDecreaseActive(string &in asName, bool abX)",(void *)SetEnemySanityDecreaseActive);
 	AddFunc("void TeleportEnemyToNode(string &in asEnemyName, string &in asNodeName, bool abChangeY)",(void *)TeleportEnemyToNode);
@@ -3111,6 +3112,16 @@ void __stdcall cLuxScriptHandler::ClearEnemyPatrolNodes(string& asName)
 		
 		iLuxEnemy *pEnemy = ToEnemy(pEntity);
 		pEnemy->ClearPatrolNodes();
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::PlayEnemyAnimation(string& asName, string& asAnimName, bool abLoop, float afFadeTime)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->PlayAnim(asAnimName, abLoop, afFadeTime);
 
 	END_SET_PROPERTY
 }
