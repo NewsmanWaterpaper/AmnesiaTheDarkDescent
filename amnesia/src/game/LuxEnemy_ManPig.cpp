@@ -309,12 +309,12 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 	//------------------------------
 
 	kLuxOnMessage(eLuxEnemyMessage_TakeHit)
-		/*mfDamageCount += apMessage->mfCustomValue;
+		mfDamageCount += apMessage->mfCustomValue;
 		if(mfDamageCount > mfGroggyDamageCount)
 		{
 			ChangeState(eLuxEnemyState_Hurt);
 			mfDamageCount =0;
-		}*/
+		}
 	
 	//------------------------------
 
@@ -1835,7 +1835,7 @@ bool cLuxEnemy_ManPig::PlayerIsDetected()
 	}
 	else
 	{
-		return (DistToPlayer() < mpCharBody->GetSize().x && PlayerInFOV())/* || (mfInLanternLightCount>=1 && mbBlind==false)*/;
+		return (DistToPlayer() < mpCharBody->GetSize().x && PlayerInFOV()) || (mfInLanternLightCount>=1);
 	}
 }
 
