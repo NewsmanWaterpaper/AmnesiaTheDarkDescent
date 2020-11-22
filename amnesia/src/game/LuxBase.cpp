@@ -646,7 +646,7 @@ bool cLuxBase::StartCustomStory()
 
 bool cLuxBase::ParseCommandLine(const tString &asCommandline)
 {
-	msDefaultInitConfigFile = _W("config/main_init.cfg");
+	msDefaultInitConfigFile = _W("The Streets Of London/config/main_init.cfg");
 
 	if(asCommandline == "ptest")
 	{

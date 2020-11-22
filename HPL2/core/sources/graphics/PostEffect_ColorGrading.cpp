@@ -164,7 +164,7 @@ namespace hpl {
             iTexture
                 * texture;
 
-            if ( cPlatform::FileExists( _W("textures/gradingmaps/") + cString::To16Char(asLUTName) )
+            if ( cPlatform::FileExists( _W("The Streets Of London/textures/gradingmaps/") + cString::To16Char(asLUTName) )
                 || cPlatform::FileExists( cString::To16Char(asLUTName) ) )
             {
 
