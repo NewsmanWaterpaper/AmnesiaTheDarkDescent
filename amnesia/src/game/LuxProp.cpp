@@ -22,7 +22,7 @@
 #include "LuxMap.h"
 #include "LuxPlayer.h"
 #include "LuxInteractConnections.h"
-
+#include "LuxEffectRenderer.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,7 @@ void iLuxPropLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTra
 		if(pProp->mpMeshEntity)
 		{
 			pProp->mpMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster, apInstanceVars->GetVarBool("CastShadows", true));
+			pProp->mpMeshEntity->SetUpdateBonesWhenCulled(apInstanceVars->GetVarBool("UpdateAnimationWhenCulled", false));
 		}
 
 		tString sConnectedProps = apInstanceVars->GetVarString("ConnectedProps", "");
@@ -739,6 +740,70 @@ void iLuxProp::PlayAnimation(const tString& asName, float afFadeTime, bool abLoo
 	
 	if(abLoop==false)	msAnimCallback = asCallback;
 	else				msAnimCallback = "";
+}
+
+//-------------------------------------------------------------------
+void iLuxProp::StopAnimation()
+{
+	if (mpMeshEntity == NULL) return;
+
+	mpMeshEntity->Stop();
+}
+
+//-------------------------------------------------------------------
+
+void iLuxProp::PlayCurrentAnimation(float afFadeTime, bool abLoop)
+{
+	if (mpMeshEntity == NULL) return;
+
+	mpMeshEntity->FadeInCurrent(afFadeTime, abLoop);
+}
+
+void iLuxProp::PauseCurrentAnimation(float afFadeTime)
+{
+	if (mpMeshEntity == NULL) return;
+
+	mpMeshEntity->FadeOutCurrent(afFadeTime);
+}
+
+//-------------------------------------------------------------------
+
+void iLuxProp::SetAnimationSpeed(float afSpeed)
+{
+	if (mpMeshEntity == NULL) return;
+
+	//////////////
+	// Set the animation speed of all states
+	for (int i = 0; i < mpMeshEntity->GetAnimationStateNum(); ++i)
+	{
+		cAnimationState* pState = mpMeshEntity->GetAnimationState(i);
+
+		if (pState)
+		{
+			////////////
+			// Set the speed
+			pState->SetSpeed(afSpeed);
+		}
+	}
+}
+
+void iLuxProp::SetAnimationPosition(float afPosition)
+{
+	if (mpMeshEntity == NULL) return;
+
+	//////////////
+	// Set the animation speed of all states
+	for (int i = 0; i < mpMeshEntity->GetAnimationStateNum(); ++i)
+	{
+		cAnimationState* pState = mpMeshEntity->GetAnimationState(i);
+
+		if (pState->IsActive())
+		{
+			////////////
+			// Set the speed
+			pState->SetTimePosition(afPosition);
+		}
+	}
 }
 
 //-------------------------------------------------------------------

@@ -88,11 +88,26 @@ void cLuxHandObject_LightSource::ImplementedCreateEntity(cLuxMap *apMap)
 		mvLights[i]->SetFlickerActive(false);
 	}
 
-	mvDefaultSubMeshMatrix.resize(mpMeshEntity->GetSubMeshEntityNum());
-	for(size_t i=0; i<mpMeshEntity->GetSubMeshEntityNum(); ++i)
+	if (mpMeshEntity)
 	{
-		cSubMeshEntity *pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
-		mvDefaultSubMeshMatrix[i] = pSubEnt->GetLocalMatrix();
+		mvDefaultSubMeshMatrix.resize(mpMeshEntity->GetSubMeshEntityNum());
+		for (size_t i = 0; i < mpMeshEntity->GetSubMeshEntityNum(); ++i)
+		{
+			cSubMeshEntity* pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
+			mvDefaultSubMeshMatrix[i] = pSubEnt->GetLocalMatrix();
+		}
+	}
+
+	mvDefaultLightMatrix.resize(mvLights.size());
+	for (size_t i = 0; i < mvLights.size(); ++i)
+	{
+		mvDefaultLightMatrix[i] = mvLights[i]->GetLocalMatrix();
+	}
+
+	mvDefaultBillboardMatrix.resize(mvBillboards.size());
+	for (size_t i = 0; i < mvBillboards.size(); ++i)
+	{
+		mvDefaultBillboardMatrix[i] = mvBillboards[i]->GetLocalMatrix();
 	}
 }
 
@@ -285,17 +300,32 @@ void cLuxHandObject_LightSource::UpdateSwayPhysics(float afTimeStep)
 	/////////////////////////////
 	// Update Model matrix
 	cMatrixf mtxSway = cMath::MatrixRotate(mvSwayPinDir * mfSwayAngle, eEulerRotationOrder_XYZ);
+	cMatrixf mtxSwayLight = cMath::MatrixRotate(mvSwayPinDir * mfSwayAngle * 0.125f, eEulerRotationOrder_XYZ);
 	//cMatrixf mtxTrans = cMath::MatrixMul(m_mtxOffset, mtxSway);
 	//mpMeshEntity->SetMatrix(mtxTrans);
 
-	for(size_t i=0; i<mpMeshEntity->GetSubMeshEntityNum(); ++i)
+	if (mpMeshEntity)
 	{
-		cSubMeshEntity *pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
-		if(pSubEnt->GetSubMesh()->GetName() == msSkipSwaySubMesh) continue;
-		//Log("'%s'\n",pSubEnt->GetSubMesh()->GetName().c_str());
-		
-		pSubEnt->SetMatrix(cMath::MatrixMul(mtxSway, mvDefaultSubMeshMatrix[i]) );
+		for (size_t i = 0; i < mpMeshEntity->GetSubMeshEntityNum(); ++i)
+		{
+			cSubMeshEntity* pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
+			if (pSubEnt->GetSubMesh()->GetName() == msSkipSwaySubMesh) continue;
+			//Log("'%s'\n",pSubEnt->GetSubMesh()->GetName().c_str());
+
+			pSubEnt->SetMatrix(cMath::MatrixMul(mtxSway, mvDefaultSubMeshMatrix[i]));
+		}
 	}
+
+	for (size_t i = 0; i < mvLights.size(); ++i)
+	{
+		mvLights[i]->SetMatrix(cMath::MatrixMul(mtxSwayLight, mvDefaultLightMatrix[i]));
+	}
+
+	for (size_t i = 0; i < mvBillboards.size(); ++i)
+	{
+		mvBillboards[i]->SetMatrix(cMath::MatrixMul(mtxSway, mvDefaultBillboardMatrix[i]));
+	}
+
 	mpMeshEntity->SetMatrix(m_mtxOffset);
 }
 

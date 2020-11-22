@@ -87,6 +87,10 @@ void cLuxPropLoader_Lamp::LoadInstanceVariables(iLuxProp *apProp, cResourceVarsO
 	pLamp->mfConnectionLightAmount = apInstanceVars->GetVarFloat("ConnectionLightAmount",0);
 	pLamp->mbConnectionLightUseOnColor = apInstanceVars->GetVarBool("ConnectionLightUseOnColor",false);
 	pLamp->mbConnectionLightUseSpec = apInstanceVars->GetVarBool("ConnectionLightUseSpec",false);
+
+	pLamp->mbSynchronizeFlickering = apInstanceVars->GetVarBool("SynchronizeFlickering", false);
+
+	pLamp->SetFlickerActive(apInstanceVars->GetVarBool("FlickerActive", false));
 }
 //-----------------------------------------------------------------------
 
@@ -254,6 +258,36 @@ bool cLuxProp_Lamp::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 }
 
 //-----------------------------------------------------------------------
+void cLuxProp_Lamp::SynchronizeFlickering()
+{
+	if (mvLights.size() > 0)
+	{
+		for (size_t i = 0; i < mvBillboards.size(); ++i)
+		{
+			mvBillboards[i]->SetVisible(mvLights[0]->GetFlickerOn());
+		}
+
+		if (mbSynchronizeFlickering)
+		{
+			for (size_t i = 0; i < mvLights.size(); ++i)
+			{
+				if (mvLights[0]->GetFlickerOn())
+				{
+					mvLights[i]->SetDiffuseColor(mvLights[i]->GetFlickerOnColor());
+					mvLights[i]->SetRadius(mvLights[i]->GetFlickerOnRadius());
+
+				}
+				else
+				{
+					mvLights[i]->SetDiffuseColor(mvLights[i]->GetFlickerOffColor());
+					mvLights[i]->SetRadius(mvLights[i]->GetFlickerOffRadius());
+				}
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------
 
 void cLuxProp_Lamp::OnResetProperties()
 {
@@ -274,6 +308,38 @@ void cLuxProp_Lamp::UpdatePropSpecific(float afTimeStep)
 	if(mbLightConnectionSetup == false)
 	{
 		SetupLampLightConnection();
+	}
+
+	if (mbFlickerActive && mvLights.size() > 0)
+	{
+		SynchronizeFlickering();
+
+		bool flickerOn = mvLights[0]->GetFlickerOn();
+
+		for (size_t i = 0; i < mvParticleSystems.size(); ++i)
+		{
+			cParticleSystem* pPS = mvParticleSystems[i];
+			if (pPS && mpWorld->ParticleSystemExists(pPS)) pPS->SetFlickerMultiplier(flickerOn ? 1.0f : 0.25f);
+		}
+	}
+
+	if (mpMeshEntity)
+	{
+		if (mbFlickerActive && mvLights.size() > 0)
+		{
+			if (mvLights[0]->GetFlickerFade())
+			{
+				mpMeshEntity->SetIlluminationAmount(mfEffectsAlpha * (mvLights[0]->GetFlickerOn() ? mvLights[0]->GetFadeProgress() : 0.0f));
+			}
+			else
+			{
+				mpMeshEntity->SetIlluminationAmount(mfEffectsAlpha * (mvLights[0]->GetFlickerOn() ? 1.0f : 0.0f));
+			}
+		}
+		else
+		{
+			mpMeshEntity->SetIlluminationAmount(mfEffectsAlpha);
+		}
 	}
 }
 
@@ -305,6 +371,67 @@ tWString cLuxProp_Lamp::GetFocusText()
 		return _W("x ") + cString::ToStringW(gpBase->mpPlayer->GetTinderboxes());
 	}
 	return _W("");
+}
+
+//-----------------------------------------------------------------------
+void cLuxProp_Lamp::SetFlickerActive(bool abFlickerActive)
+{
+	mbFlickerActive = abFlickerActive;
+
+	if (mvLights.size() > 0)
+	{
+		mvLights[0]->SetFlickerActive(abFlickerActive);
+		mvEffectLightData[0].mbFlickering = abFlickerActive;
+
+		if (!abFlickerActive)
+		{
+			for (size_t i = 0; i < mvBillboards.size(); ++i)
+			{
+				mvBillboards[i]->SetVisible(true);
+			}
+
+			if (mbSynchronizeFlickering)
+			{
+				for (size_t i = 0; i < mvLights.size(); ++i)
+				{
+					mvLights[i]->SetDiffuseColor(mvLights[i]->GetFlickerOnColor());
+					mvLights[i]->SetRadius(mvLights[i]->GetFlickerOnRadius());
+				}
+			}
+		}
+	}
+
+	/*if ( abFlickerActive )
+	{
+		mvLights[0]->SetFlickerActive( abFlickerActive );
+		mvEffectLightData[0].mbFlickering = true;
+	}
+	else
+	{
+		for(size_t i=0; i<mvLights.size(); ++i)
+		{
+			mvLights[0]->SetFlickerActive( false );
+			mvEffectLightData[i].mbFlickering = false;
+		}
+	}
+
+	for(size_t i=0; i<mvBillboards.size(); ++i)
+	{
+		mvBillboards[i]->SetVisible( mvLights[0]->GetFlickerOn() );
+	}
+
+	if(mpMeshEntity)
+	{
+		mpMeshEntity->SetIlluminationAmount(mfEffectsAlpha * (mvLights[0]->GetFlickerOn() ? mvLights[0]->GetFadeProgress() : 0.0f ));
+	}
+}
+else
+{
+	if(mpMeshEntity)
+	{
+		mpMeshEntity->SetIlluminationAmount(mfEffectsAlpha);
+	}
+}*/
 }
 
 //-----------------------------------------------------------------------
@@ -387,6 +514,8 @@ kSerializeVar(msConnectionLight,			eSerializeType_String)
 kSerializeVar(mfConnectionLightAmount,		eSerializeType_Float32)
 kSerializeVar(mbConnectionLightUseOnColor,	eSerializeType_Bool)
 kSerializeVar(mbConnectionLightUseSpec,		eSerializeType_Bool)
+kSerializeVar(mbSynchronizeFlickering,		eSerializeType_Bool)
+kSerializeVar(mbFlickerActive,		eSerializeType_Bool)														  
 kEndSerialize()
 
 //-----------------------------------------------------------------------
@@ -413,6 +542,8 @@ void cLuxProp_Lamp::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mfConnectionLightAmount);
 	kCopyToVar(pData,mbConnectionLightUseOnColor);
 	kCopyToVar(pData,mbConnectionLightUseSpec);
+	kCopyToVar(pData,mbSynchronizeFlickering);
+	kCopyToVar(pData,mbFlickerActive);							   
 }
 
 //-----------------------------------------------------------------------
@@ -432,6 +563,8 @@ void cLuxProp_Lamp::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mfConnectionLightAmount);
 	kCopyFromVar(pData,mbConnectionLightUseOnColor);
 	kCopyFromVar(pData,mbConnectionLightUseSpec);
+	kCopyFromVar(pData,mbSynchronizeFlickering);
+	kCopyFromVar(pData,mbFlickerActive);						
 }
 
 //-----------------------------------------------------------------------

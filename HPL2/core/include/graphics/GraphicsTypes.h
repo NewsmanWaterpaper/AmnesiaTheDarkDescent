@@ -878,6 +878,9 @@ namespace hpl {
 
 	class cBoneState;
 
+	typedef std::vector<cBoneState*> tBoneStateVec;
+	typedef tBoneStateVec::iterator tBoneStateVecIt;
+
 	typedef std::vector<cBoneState*> tNodeStateVec;
 	typedef tNodeStateVec::iterator tNodeStateVecIt;
 

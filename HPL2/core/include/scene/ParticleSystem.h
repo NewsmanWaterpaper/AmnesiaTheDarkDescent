@@ -127,6 +127,9 @@ namespace hpl {
 
 		cParticleSystemData *GetData(){ return mpData;}
 
+		void SetFlickerMultiplier(const float afFlickerMultiplier) { mfFlickerMultiplier = afFlickerMultiplier; }
+		float GetFlickerMultiplier() { return mfFlickerMultiplier; }
+
 	private:
 		cResources *mpResources;
 		cGraphics *mpGraphics;
@@ -138,6 +141,7 @@ namespace hpl {
 		bool mbRemoveWhenDead;
 
 		bool mbIsVisible;
+		float mfFlickerMultiplier;
 
 		cColor mColor;
 		bool mbFadeAtDistance;

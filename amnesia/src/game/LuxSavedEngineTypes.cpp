@@ -455,6 +455,7 @@ void cEngineMeshEntity_SaveData::FromMeshEntity(cMeshEntity *apMeshEntity)
 	mbVisible = apMeshEntity->IsVisible();
 	mfIlluminationAmount = apMeshEntity->GetIlluminationAmount();
 	m_mtxTransform = apMeshEntity->GetLocalMatrix();
+	mbUpdateWhenCulled = apMeshEntity->GetUpdateBonesWhenCulled();
 
 	mvAnimations.Resize(apMeshEntity->GetAnimationStateNum());
 	//if(mvAnimations.Size()>0) Log("Saving anims  for '%s'\n", apMeshEntity->GetName().c_str());
@@ -480,6 +481,7 @@ void cEngineMeshEntity_SaveData::ToMeshEntity(cMeshEntity *apMeshEntity)
 	apMeshEntity->SetVisible(mbVisible);
 	apMeshEntity->SetIlluminationAmount(mfIlluminationAmount);
 	apMeshEntity->SetMatrix(m_mtxTransform);
+	apMeshEntity->SetUpdateBonesWhenCulled(mbUpdateWhenCulled);
 	
 	//If not equal, something is wrong so skip!
 	if(mvAnimations.Size() == apMeshEntity->GetAnimationStateNum())
@@ -509,6 +511,7 @@ kBeginSerializeBase(cEngineMeshEntity_SaveData)
 kSerializeVar(mbActive, eSerializeType_Bool)
 kSerializeVar(mbVisible, eSerializeType_Bool)
 kSerializeVar(mfIlluminationAmount, eSerializeType_Float32)
+kSerializeVar(mbUpdateWhenCulled, eSerializeType_Bool)
 kSerializeVar(m_mtxTransform, eSerializeType_Matrixf)
 kSerializeClassContainer(mvAnimations, cEngineAnimationState_SaveData, eSerializeType_Class)
 kSerializeClassContainer(mvSubMeshEntities, cEngineSubMeshEntity_SaveData, eSerializeType_Class)

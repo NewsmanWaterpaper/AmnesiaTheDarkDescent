@@ -217,6 +217,77 @@ cLuxEnemy_ManPig::~cLuxEnemy_ManPig()
 void cLuxEnemy_ManPig::OnSetupAfterLoad(cWorld *apWorld)
 {
 	if(mbIsTelsa) mpMeshEntity->SetVisible(false);
+
+	////////////////////////////////////////
+	// Walk start transition
+	AddTransitionAnimation("WalkBiped", "WalkStartBiped", "IdleBiped");
+	AddTransitionAnimation("WalkBiped", "WalkStartBiped", "IdleBipedExtra1");
+	AddTransitionAnimation("WalkBiped", "WalkStartBiped", "IdleBipedExtra2");
+	AddTransitionAnimation("WalkBiped", "WalkStartBiped", "NoticeBiped");
+
+	AddTransitionAnimation("IdleBiped", "WalkStopBiped", "WalkBiped");
+	AddTransitionAnimation("IdleBiped", "WalkStopBiped", "RunBiped");
+	AddTransitionAnimation("IdleBiped", "WalkStopBiped", "FleeBiped");
+	AddTransitionAnimation("IdleBiped", "WalkStopBiped", "ChargeBiped");
+
+	AddTransitionAnimation("WalkQuadruped", "WalkStartQuadruped", "IdleQuadruped");
+	AddTransitionAnimation("WalkQuadruped", "WalkStartQuadruped", "IdleQuadrupedExtra1");
+	AddTransitionAnimation("WalkQuadruped", "WalkStartQuadruped", "IdleQuadrupedExtra2");
+	AddTransitionAnimation("WalkQuadruped", "WalkStartQuadruped", "NoticeQuadruped");
+
+	AddTransitionAnimation("IdleQuadruped", "WalkStopQuadruped", "WalkQuadruped");
+	AddTransitionAnimation("IdleQuadruped", "WalkStopQuadruped", "JogQuadruped");
+	AddTransitionAnimation("IdleQuadruped", "WalkStopQuadruped", "RunQuadruped");
+
+	//////////////////////////////
+	//Threat transition stuff
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "IdleBiped");
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "IdleBipedExtra1");
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "IdleBipedExtra2");
+	//AddTransitionAnimation("ThreatLoop", "ThreatStartBiped", "NoticeBiped"); //bad blend
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "WalkBiped");
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "JogBiped");
+	AddTransitionAnimation("ThreatLoopBiped", "ThreatStartBiped", "RunBiped");
+
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "IdleQuadruped");
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "IdleQuadrupedExtra1");
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "IdleQuadrupedExtra2");
+	//AddTransitionAnimation("ThreatLoop", "ThreatStartQuadruped", "NoticeQuadruped");//bad blend
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "WalkQuadruped");
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "JogQuadruped");
+	AddTransitionAnimation("ThreatLoopQuadruped", "ThreatStartQuadruped", "RunQuadruped");
+
+	AddTransitionAnimation("WalkBiped", "ThreatEndBiped", "ThreatLoopBiped");
+	AddTransitionAnimation("IdleBiped", "ThreatEndBiped", "ThreatLoopBiped");
+	AddTransitionAnimation("RunBiped", "ThreatEndBiped", "ThreatLoopBiped");
+
+	AddTransitionAnimation("IdleQuadruped", "ThreatEndQuadruped", "ThreatLoopQuadruped");
+	AddTransitionAnimation("WalkQuadruped", "ThreatEndQuadruped", "ThreatLoopQuadruped");
+	AddTransitionAnimation("JogQuadruped", "ThreatEndQuadruped", "ThreatLoopQuadruped");
+	AddTransitionAnimation("RunQuadruped", "ThreatEndQuadruped", "ThreatLoopQuadruped");
+
+	//////////////////////////////
+	//Pose change transitions
+	AddTransitionAnimation("WalkBiped", "IdleQuadrupedToBiped", "WalkQuadruped");
+	AddTransitionAnimation("RunBiped", "IdleQuadrupedToBiped", "RunQuadruped");
+	AddTransitionAnimation("JogBiped", "IdleQuadrupedToBiped", "WalkQuadruped");
+	AddTransitionAnimation("IdleBiped", "IdleQuadrupedToBiped", "IdleQuadruped");
+	AddTransitionAnimation("IdleBiped", "IdleQuadrupedToBiped", "WalkQuadruped");
+	AddTransitionAnimation("IdleBiped", "IdleQuadrupedToBiped", "RunQuadruped");
+	AddTransitionAnimation("IdleBipedExtra1", "IdleQuadrupedToBiped", "IdleQuadruped");
+	AddTransitionAnimation("IdleBipedExtra2", "IdleQuadrupedToBiped", "IdleQuadruped");
+	AddTransitionAnimation("NoticeBiped", "IdleQuadrupedToBiped", "IdleQuadruped");
+
+	AddTransitionAnimation("WalkQuadruped", "IdleBipedToQuadruped", "WalkBiped");
+	AddTransitionAnimation("JogQuadruped", "IdleBipedToQuadruped", "JogBiped");
+	AddTransitionAnimation("RunQuadruped", "IdleBipedToQuadruped", "RunBiped");
+	AddTransitionAnimation("IdleQuadruped", "IdleBipedToQuadruped", "IdleBiped");
+	AddTransitionAnimation("IdleQuadruped", "IdleBipedToQuadruped", "WalkQuadruped");
+	AddTransitionAnimation("IdleQuadruped", "IdleBipedToQuadruped", "JogQuadruped");
+	AddTransitionAnimation("IdleQuadruped", "IdleBipedToQuadruped", "RunQuadruped");
+	AddTransitionAnimation("IdleQuadrupedExtra1", "IdleBipedToQuadruped", "IdleBiped");
+	AddTransitionAnimation("IdleQuadrupedExtra2", "IdleBipedToQuadruped", "IdleBiped");
+	AddTransitionAnimation("NoticeQuadruped", "IdleBipedToQuadruped", "IdleBiped");
 }
 
 
@@ -264,7 +335,17 @@ void cLuxEnemy_ManPig::ChangePose(eLuxEnemyPoseType aPose, bool abSendMessage)
 	if(abSendMessage)
 		SendMessage(eLuxEnemyMessage_ChangePose, 0, false, 0,0, aPose);
 }
+//-----------------------------------------------------------------------
 
+void cLuxEnemy_ManPig::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
+{
+	if (mPatrolMoveSpeed == aSpeedType) return;
+
+	mPatrolMoveSpeed = aSpeedType;
+
+	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
+	mpMover->UpdateMoveAnimation(0.001f);
+}
 //-----------------------------------------------------------------------
 
 void cLuxEnemy_ManPig::ChangeMoveType(eLuxEnemyMoveType aMoveType)
@@ -2581,6 +2662,7 @@ kBeginSerialize(cLuxEnemy_ManPig_SaveData, iLuxEnemy_SaveData)
 kSerializeVar(mbThreatenOnAlert, eSerializeType_Bool)
 kSerializeVar(mbFleeFromPlayer, eSerializeType_Bool)
 kSerializeVar(mbAutoDisableAfterFlee, eSerializeType_Bool)
+kSerializeVar(mbPlayActivateSound, eSerializeType_Bool)
 kSerializeVar(mfLanternSensitivity, eSerializeType_Float32)
 kSerializeVar(mIdleBehavior, eSerializeType_Int32)
 kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
@@ -2596,6 +2678,7 @@ kSerializeVar(mbTeslaEasyEscapeDisabled, eSerializeType_Bool)
 kSerializeVar(mlCurrentPose, eSerializeType_Int32)
 kSerializeVar(mlCurrentMoveType, eSerializeType_Int32)
 kSerializeVar(mbSkipVisibilityRangeHandicaps, eSerializeType_Bool)
+
 
 kEndSerialize()
 
@@ -2628,6 +2711,8 @@ void cLuxEnemy_ManPig::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mfInLanternLightCount);
 	kCopyToVar(pData,mbAllowZeroWaitTime);
 	kCopyToVar(pData,mfHuntPauseTimeMul);
+	kCopyToVar(pData, mbPlayActivateSound);
+	
 	kCopyToVar(pData,mbTeslaTerror);
 	kCopyToVar(pData,mbTeslaFadeDisabled);
 	kCopyToVar(pData,mbTeslaSoundDisabled);
@@ -2653,6 +2738,7 @@ void cLuxEnemy_ManPig::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mbThreatenOnAlert);
 	kCopyFromVar(pData,mbFleeFromPlayer);
 	kCopyFromVar(pData,mbAutoDisableAfterFlee);
+	kCopyToVar(pData, mbPlayActivateSound);
 	kCopyFromVar(pData,mfLanternSensitivity);
 	mIdleBehavior  = (eLuxIdleBehavior)pData->mIdleBehavior;
 	mPatrolMoveSpeed  = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;

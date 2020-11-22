@@ -140,6 +140,7 @@ namespace hpl {
 		void FadeTo(const cColor& aCol, float afRadius, float afTime);
 		void StopFading();
 		bool IsFading();
+		float GetFadeProgress() { return 1.0f - mfFadeTime / mfFadeDuration; }
 		cColor GetDestColor(){ return mDestCol;}
 		float GetDestRadius(){ return mfDestRadius;}
 
@@ -218,6 +219,8 @@ namespace hpl {
 
 		void SetWorld(cWorld *apWorld){ mpWorld = apWorld;}
 
+		bool GetFlickerOn() { return mbFlickerOn; }
+
 
 	protected:
 		void OnFlickerOff();
@@ -267,6 +270,7 @@ namespace hpl {
 		cColor mDestCol;
 		float mfDestRadius;
 		float mfFadeTime;
+		float mfFadeDuration;
 
 		///////////////////////////
 		//Flicker

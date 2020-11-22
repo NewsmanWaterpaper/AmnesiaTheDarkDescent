@@ -57,6 +57,7 @@ private:
 	static iLuxEntity* GetEntity(const tString& asName, eLuxEntityType aType, int alSubType);
 	static iPhysicsBody* GetBodyInEntity(iLuxEntity* apEntity, const tString& asName);
 
+	static bool GetParticleSystems(const tString& asName, std::list<cParticleSystem*>& alstParticleSystems);
 	// Debug
 	static void __stdcall Print(string& asString);
 	static void __stdcall AddDebugMessage(string& asString, bool abCheckForDuplicates);
@@ -321,6 +322,7 @@ private:
 															bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd);
 	static void __stdcall DestroyParticleSystem(string& asName);
 
+	static void __stdcall SetParticleSystemActive(string& asName, bool abActive);
 	//asEntity can be "Player". If abSaveSound = true the sound is never attached to the entity! Also note that saving should on be used on looping sounds!
 	static void __stdcall PlaySoundAtEntity(string& asSoundName, string& asSoundFile, string& asEntity, float afFadeTime, bool abSaveSound);
 	static void __stdcall FadeInSound(string& asSoundName, float afFadeTime, bool abPlayStart);
@@ -338,6 +340,7 @@ private:
 	 */
 	static void __stdcall FadeLightTo(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime);
 	static void __stdcall SetLightFlickerActive(string& asLightName, bool abActive);
+	static void __stdcall SetLampFlickerActive(string& asName, bool abActive);
 
 
 
@@ -397,6 +400,7 @@ private:
 	static void __stdcall SetSwingDoorLocked(string& asName, bool abLocked, bool abEffects);
 	static void __stdcall SetSwingDoorClosed(string& asName, bool abClosed, bool abEffects);
 	static void __stdcall SetSwingDoorDisableAutoClose(string& asName, bool abDisableAutoClose);
+	static void __stdcall SetSwingDoorOpenAmount(string& asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle);
 	static bool __stdcall GetSwingDoorLocked(string &asName);
 	static bool __stdcall GetSwingDoorClosed(string &asName);
 	/**
@@ -449,6 +453,7 @@ private:
 	 * Pose can be "Biped" or "Quadruped"
 	 */
 	static void __stdcall ChangeManPigPose(string& asName, string& asPoseType);
+	static void __stdcall ChangeManPigPatrolSpeed(string& asName, string& asSpeedType);
 	
 	static void __stdcall SetTeslaPigFadeDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigSoundDisabled(string& asName, bool abX);

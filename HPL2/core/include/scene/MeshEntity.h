@@ -104,6 +104,9 @@ namespace hpl {
 		cAnimationState* GetAnimationStateFromName(const tString &asName);
 		int GetAnimationStateNum();
 
+		bool IsMeshCulled();
+		void SetIsOccluder(bool abX);
+
 		//Animation controller
 		void Play(int alIndex,bool abLoop, bool bStopPrev);
 		void PlayName(const tString &asName,bool abLoop, bool bStopPrev);
@@ -111,6 +114,9 @@ namespace hpl {
 
 		void PlayFadeTo(int alIndex,bool abLoop, float afTime);
 		void PlayFadeToName(const tString &asName,bool abLoop, float afTime);
+
+		void FadeOutCurrent(float afTime);
+		void FadeInCurrent(float afTime, bool abLoop);
 
 		bool AnimationIsOver(const tString &asName);
 
@@ -182,6 +188,9 @@ namespace hpl {
 		void SetStatic(bool abX);
 		bool IsStatic(){ return mbStatic;}
 
+		void SetUpdateBonesWhenCulled(bool abX) { mbUpdateBonesWhenCulled = abX; }
+		bool GetUpdateBonesWhenCulled() { return mbUpdateBonesWhenCulled; }
+
 		void SetRenderFlagBit(tRenderableFlag alFlagBit, bool abSet);
 		//bool GetRenderFlagBit(tRenderableFlag alFlagBit){ return (mlRenderFlags & alFlagBit)!=0;} 
 		//inline tRenderableFlag GetRenderFlags() const { return mlRenderFlags;}
@@ -191,6 +200,9 @@ namespace hpl {
 
 		void SetCoverageAmount(float afX);
 		float GetCoverageAmount(){ return mfCoverageAmount;}
+
+		void SetShaderTimer(float afX);
+		float GetShaderTimer() { return mfShaderTimer; }
 
 		void UpdateLogic(float afTimeStep);
 
@@ -216,7 +228,11 @@ namespace hpl {
 		void UpdateBVFromSkeleton();
 		void GetAABBFromBones(cVector3f &avMin, cVector3f &avMax);
 
+		void UpdateSkeletonBounds(cAnimation* apAnimation, cAnimationState* apState);
+
 		void BuildBoneStatesRec(cBone *apBone, cNode3D *apParent);
+
+		bool GetAABBFromSkeletonBounds(cVector3f &avMin, cVector3f &avMax);
 
 		cMaterialManager* mpMaterialManager;
 		cMeshManager* mpMeshManager;
@@ -226,14 +242,18 @@ namespace hpl {
 
 		bool mbIsVisible;
 		float mfIlluminationAmount;
+		float mfShaderTimer;
 		float mfCoverageAmount;
 		tRenderableFlag mlRenderFlags;
 		
 		bool mbBoneMatricesNeedUpdate;
 		int mlBoneMatricesTransformCount;
+		int mlBoneMatricesUpdateCount;
 
 		cMatrixf m_mtxInvWorldMatrix;
 		int mlInvWorldMatrixTransformCount;
+
+		bool mbUpdateBonesWhenCulled;
 
 		bool mbStatic;
 

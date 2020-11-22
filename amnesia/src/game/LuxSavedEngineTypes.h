@@ -180,6 +180,7 @@ public:
 	bool mbVisible;
 	float mfIlluminationAmount;
 	cMatrixf m_mtxTransform;
+	bool mbUpdateWhenCulled;
 	cContainerVec<cEngineAnimationState_SaveData> mvAnimations;
 	cContainerVec<cEngineSubMeshEntity_SaveData> mvSubMeshEntities;
 };

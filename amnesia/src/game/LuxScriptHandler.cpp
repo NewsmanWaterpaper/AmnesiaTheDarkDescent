@@ -321,6 +321,69 @@ iLuxEntity* cLuxScriptHandler::GetEntity(const tString& asName, eLuxEntityType a
 
 //-----------------------------------------------------------------------
 
+bool cLuxScriptHandler::GetParticleSystems(const tString& asName, std::list<cParticleSystem*>& alstParticleSystems)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL)
+	{
+		Error("GetParticleSystems(..) failed! No map was set!\n");
+		return false;
+	}
+
+	///////////////////
+	// Exact match
+	if (cString::CountCharsInString(asName, "*") == 0)
+	{
+		cParticleSystem* pPS = pMap->GetWorld()->GetParticleSystem(asName);
+		if (pPS == NULL)
+		{
+			Warning("Particle system '%s' does not exist!\n", asName.c_str());
+			return false;
+		}
+
+		alstParticleSystems.push_back(pPS);
+	}
+	///////////////////
+	// Wild card
+	else
+	{
+		tStringVec vWantedStrings;
+		tString sSepp = "*";
+		cString::GetStringVec(asName, vWantedStrings, &sSepp);
+
+		cParticleSystemIterator it = pMap->GetWorld()->GetParticleSystemIterator();
+		while (it.HasNext())
+		{
+			cParticleSystem* pPS = it.Next();
+			bool bContainsStrings = true;
+			int lLastPos = -1;
+
+			//Iterate wanted strings and name make sure they exist and show up in correct order.
+			for (size_t i = 0; i < vWantedStrings.size(); ++i)
+			{
+				int lPos = cString::GetFirstStringPos(pPS->GetName(), vWantedStrings[i]);
+				if (lPos <= lLastPos)
+				{
+					bContainsStrings = false;
+					break;
+				}
+			}
+
+			if (bContainsStrings) alstParticleSystems.push_back(pPS);
+		}
+
+		if (alstParticleSystems.empty())
+		{
+			Warning("Could not find any particle systems with string '%s'\n", asName.c_str());
+			return false;
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------
+
 iPhysicsBody* cLuxScriptHandler::GetBodyInEntity(iLuxEntity* apEntity, const tString& asName)
 {
 	if(apEntity == NULL){
@@ -367,6 +430,15 @@ iPhysicsBody* cLuxScriptHandler::GetBodyInEntity(iLuxEntity* apEntity, const tSt
 	iLuxEntity *pEntity = *it;
 
 #define END_SET_PROPERTY }
+
+#define BEGIN_ITERATE_PARTICLESYSTEM()\
+	std::list<cParticleSystem *> lstParticleSystems;\
+	if(GetParticleSystems(asName, lstParticleSystems)==false) return;\
+	for(std::list<cParticleSystem *>::iterator it = lstParticleSystems.begin(); it != lstParticleSystems.end(); ++it)\
+	{\
+	cParticleSystem * pParticleSystem = *it;
+
+#define END_ITERATE_PARTICLESYSTEM }
 
 //-----------------------------------------------------------------------
 
@@ -563,6 +635,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void CreateParticleSystemAtEntity(string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS)",(void *)CreateParticleSystemAtEntity);
 	AddFunc("void CreateParticleSystemAtEntityExt(	string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS, float afR, float afG, float afB, float afA, bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd)", (void *)CreateParticleSystemAtEntityExt);
 	AddFunc("void DestroyParticleSystem(string &in asName)",(void *)DestroyParticleSystem); 
+	AddFunc("void SetParticleSystemActive(string &in asName, bool abActive)", (void*)SetParticleSystemActive);
 	
 	AddFunc("void PlaySoundAtEntity(string &in asSoundName, string &in asSoundFile, string &in asEntity, float afFadeSpeed, bool abSaveSound)",(void *)PlaySoundAtEntity);
 	AddFunc("void FadeInSound(string& asSoundName, float afFadeTime, bool abPlayStart)",(void *)FadeInSound);
@@ -575,6 +648,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetLightVisible(string &in asLightName, bool abVisible)",(void *)SetLightVisible);
 	AddFunc("void FadeLightTo(string &in asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",(void *)FadeLightTo);
 	AddFunc("void SetLightFlickerActive(string& asLightName, bool abActive)", (void *)SetLightFlickerActive);
+	AddFunc("void SetLampFlickerActive(string &in asName, bool abActive)", (void*)SetLampFlickerActive);
 
 	AddFunc("void SetEntityActive(string &in asName, bool abActive)",(void *)SetEntityActive);
 	AddFunc("void SetEntityVisible(string &in asName, bool abVisible)",(void *)SetEntityVisible);
@@ -615,6 +689,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("bool GetSwingDoorLocked(string &in asName)",(void *)GetSwingDoorLocked);
 	AddFunc("bool GetSwingDoorClosed(string &in asName)",(void *)GetSwingDoorClosed);
 	AddFunc("int GetSwingDoorState(string &in asName)",(void *)GetSwingDoorState);
+	AddFunc("void SetSwingDoorOpenAmount(string &in asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle)", (void*)SetSwingDoorOpenAmount);
 	AddFunc("void SetPropObjectStuckState(string &in asName, int alState)",(void *)SetPropObjectStuckState);
 	AddFunc("void SetWheelAngle(string &in asName, float afAngle, bool abAutoMove)",(void *)SetWheelAngle);
 	AddFunc("void SetWheelStuckState(string &in asName, int alState, bool abEffects)",(void *)SetWheelStuckState);
@@ -648,6 +723,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void TeleportEnemyToEntity(string &in asEnemyName, string &in asTargetEntity, string &in asTargetBody, bool abChangeY)",(void *)TeleportEnemyToEntity);
 
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
+	AddFunc("void ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeManPigPatrolSpeed);
 	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigFadeDisabled);
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
@@ -2057,6 +2133,13 @@ void __stdcall cLuxScriptHandler::DestroyParticleSystem(string& asName)
 	if(bFound==false) Error("Could not find particle system '%s'\n", asName.c_str());
 }
 
+void __stdcall cLuxScriptHandler::SetParticleSystemActive(string& asName, bool bActive)
+{
+	BEGIN_ITERATE_PARTICLESYSTEM()
+		pParticleSystem->SetActive(bActive);
+	END_ITERATE_PARTICLESYSTEM
+}
+
 //-----------------------------------------------------------------------
 
 
@@ -2218,6 +2301,20 @@ void __stdcall cLuxScriptHandler::SetLightFlickerActive(string& asLightName, boo
 	}
 
 	pLight->SetFlickerActive(abActive);
+}
+
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetLampFlickerActive(string& asName, bool abActive)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return;
+
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, eLuxPropType_Lamp)
+
+		cLuxProp_Lamp* pLamp = ToLamp(pEntity);
+	pLamp->SetFlickerActive(abActive);
+
+	END_SET_PROPERTY
 }
 
 //-----------------------------------------------------------------------
@@ -2756,6 +2853,18 @@ void __stdcall cLuxScriptHandler::SetSwingDoorDisableAutoClose(string& asName, b
 }
 
 //-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetSwingDoorOpenAmount(string& asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, eLuxPropType_SwingDoor)
+
+		cLuxProp_SwingDoor* pSwingDoor = ToSwingDoor(pEntity);
+	pSwingDoor->SetOpenAmount(afOpenAmount, afDuration, abOpenTowardsMaxAngle);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
 
 bool __stdcall cLuxScriptHandler::GetSwingDoorLocked(string &asName)
 {
@@ -3206,6 +3315,28 @@ void __stdcall cLuxScriptHandler::ChangeManPigPose(string& asName, string& asPos
 		cLuxEnemy_ManPig *pEnemy = ToManPig(pEntity);
 		if (!pEnemy) continue;
 		pEnemy->ChangePose(pose);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)
+{
+	eLuxEnemyMoveSpeed speed = eLuxEnemyMoveSpeed_LastEnum;
+	if (asSpeedType == "Run")			speed = eLuxEnemyMoveSpeed_Run;
+	else if (asSpeedType == "Walk")	speed = eLuxEnemyMoveSpeed_Walk;
+
+	if (speed == eLuxEnemyMoveSpeed_LastEnum)
+	{
+		Error("Could not set Patrol Speed '%s' for enemy '%s'. Patrol Speed  does not exist!\n", asSpeedType.c_str(), asName.c_str());
+		return;
+	}
+
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetPatrolSpeed(speed);
 
 	END_SET_PROPERTY
 }

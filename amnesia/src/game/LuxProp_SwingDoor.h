@@ -39,6 +39,12 @@ public:
 	bool mbDisableBreakable;
 	bool mbDisableAutoClose;
 
+	float mfGoalOpenAmount;
+	bool mbOpeningTowardsMaxAngle;
+	float mfCurrentOpenAmount;
+	float mfOpenSpeed;
+	bool mbIsUpdatingOpenAmount;
+
 	int mlCurrentMeshEntity;
 
 
@@ -55,6 +61,7 @@ public:
 	iPhysicsBody *mpChildBody;
 
     float mfMaxAngle;
+	float mfMinAngle;
 };
 
 
@@ -79,6 +86,7 @@ public:
 	void OnResetProperties();
 
 	void UpdatePropSpecific(float afTimeStep);
+	void UpdateOpening(float afTimeStep);
 	
 	void BeforePropDestruction();
 
@@ -107,6 +115,8 @@ public:
 	void SetDisableAutoClose(bool abX){ mbDisableAutoClose=abX;}
 	bool GetDisableAutoClose(){ return mbDisableAutoClose;}
 
+	void SetOpenAmount(float afOpenAmount, float afDuration, bool abGoTowardsMaxAngle);
+
 	void SetCurrentDamageLevel(int alX);
 
 	cMeshEntity* GetEffectMeshEntity();
@@ -126,7 +136,7 @@ public:
 	void SetupSaveData(iLuxEntity_SaveData *apSaveData);
 
 private:
-	void SetupDoorPhysics(float afOpenAmount);
+	void SetupDoorPhysics(float afOpenAmount, bool abOpenTowardsMaxAngle);
 
 	cLuxSwingDoorJointData* GetJointDataFromBody(iPhysicsBody *apBody);
 	cLuxSwingDoorJointData* GetJointDataFromJoint(iPhysicsJoint *apJoint);
@@ -143,6 +153,14 @@ private:
 	tString msLockOnSound;
 	tString msLockOffSound;
 	tString msInteractLockedSound;
+
+	bool
+		mbIsUpdatingOpenAmount,
+		mbOpeningTowardsMaxAngle;
+	float
+		mfGoalOpenAmount,
+		mfOpenSpeed,
+		mfCurrentOpenAmount;
 	
 	bool mbDisableBreakable;
 	bool mbBreakable;

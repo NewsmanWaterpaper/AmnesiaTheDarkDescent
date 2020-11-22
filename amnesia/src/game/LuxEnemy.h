@@ -166,6 +166,13 @@ public:
 	float mfAnimationSpeedMul;
 	bool mbUseMoveAnimWhenCurrentIsOver;
 
+	int mlNextAnimationIndex;
+	bool mbNextAnimationLoop;
+	bool mbNextAnimationDependsOnSpeed;
+	float mfNextAnimSpeedMul;
+	bool mbNextAnimUseMoveAnimWhenCurrentIsOver;
+	bool mbNextAnimOverideMoveState;
+
 	cVector3f mvStartPosition;
 
 	cVector3f mvLastKnownPlayerPos;
@@ -402,7 +409,9 @@ public:
 					bool abDependsOnSpeed=false, float afSpeedMul=1.0f,
 					bool abSyncWithPrevFrame=false,
 					bool abOverideMoveState=true,
-					bool abUseMoveAnimWhenCurrentIsOver=true);
+					bool abUseMoveAnimWhenCurrentIsOver = true,
+					bool abCanBlend = true,
+					bool abPlayTransition = true);
 	void FadeOutCurrentAnim(float afFadeTime);
 	float ConvertAnimToAbsoluteTime(float afRelativeTimePostion);
     
@@ -517,6 +526,7 @@ public:
 protected:
     //////////////////////////////
 	// Update and related
+	void AddTransitionAnimation(const tString& asMainAnim, const tString& asTransAnim, const tString& asPrevAnim, float afMinTime = -1, float afMaxTime = -1);
 
 	tString GetCurrentPoseSuffix();
 
@@ -653,6 +663,13 @@ protected:
 	bool mbAnimationIsSpeedDependant;
 	float mfAnimationSpeedMul;
 	bool mbUseMoveAnimWhenCurrentIsOver;
+
+	int mlNextAnimationIndex;
+	bool mbNextAnimationLoop;
+	bool mbNextAnimationDependsOnSpeed;
+	float mfNextAnimSpeedMul;
+	bool mbNextAnimUseMoveAnimWhenCurrentIsOver;
+	bool mbNextAnimOverideMoveState;
 
 	tLuxStateMessageList mlstMessages;
 

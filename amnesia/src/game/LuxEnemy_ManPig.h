@@ -81,6 +81,7 @@ public:
 	//Actions
 	void ChangePose(eLuxEnemyPoseType aPose, bool abSendMessage=true);
 	void ChangeMoveType(eLuxEnemyMoveType aMoveType);
+	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
 
 	//////////////////////

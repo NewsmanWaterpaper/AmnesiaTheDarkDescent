@@ -268,6 +268,13 @@ public:
 	 */
 	void PlayAnimation(const tString& asName, float afFadeTime, bool abLoop, const tString& asCallback);
 
+	void StopAnimation();
+
+	void PlayCurrentAnimation(float afFadeTime, bool abLoop);
+	void PauseCurrentAnimation(float afFadeTime);
+	void SetAnimationSpeed(float afSpeed);
+	void SetAnimationPosition(float afPos);
+
 	//////////////////////
 	//Properties
 	eLuxPropType GetPropType(){ return mPropType;}

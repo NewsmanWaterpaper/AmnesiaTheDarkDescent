@@ -601,6 +601,8 @@ void iLuxEnemy::SetupAfterLoad(cWorld *apWorld)
 	///////////////////////
 	// Setup default move speeds
 	SetMoveSpeed(eLuxEnemyMoveSpeed_Walk);
+
+	if (mpMeshEntity) mpMeshEntity->SetUpdateBonesWhenCulled(true);
 }
 
 //-----------------------------------------------------------------------
@@ -887,7 +889,9 @@ void iLuxEnemy::PlayAnim(	const tString &asName, bool abLoop, float afFadeTime,
 							bool abDependsOnSpeed, float afSpeedMul,
 							bool abSyncWithPrevFrame,
 							bool abOverideMoveState,
-							bool abUseMoveAnimWhenCurrentIsOver)
+							bool abUseMoveAnimWhenCurrentIsOver,
+							bool abCanBlend,
+							bool abPlayTransition)
 {
 	//if not using animations, then return.
 	if(mbUseAnimations==false) return;
@@ -910,15 +914,62 @@ void iLuxEnemy::PlayAnim(	const tString &asName, bool abLoop, float afFadeTime,
 		return;
 	}
 
+	///////////////////////////////
+	// Handle transition
+	if (abPlayTransition)
+	{
+		float fCurrentTimePos = -1;
+		if (mpCurrentAnimation != NULL)
+		{
+			fCurrentTimePos = mpCurrentAnimation->GetTimePosition();
+		}
+
+
+		int lPrevIndex = mpCurrentAnimation ? mpMeshEntity->GetAnimationStateIndex(mpCurrentAnimation->GetName()) : -1;
+		if (mlNextAnimationIndex >= 0) lPrevIndex = mlNextAnimationIndex;
+		cAnimationTransition* pTrans = pNewAnim->GetTransitionFromPrevAnim(lPrevIndex, fCurrentTimePos);
+		if (pTrans)
+		{
+			mlNextAnimationIndex = mpMeshEntity->GetAnimationStateIndex(asName);
+			mbNextAnimationLoop = abLoop;
+			mbNextAnimationDependsOnSpeed = abDependsOnSpeed;
+			mfNextAnimSpeedMul = afSpeedMul;
+			mbNextAnimUseMoveAnimWhenCurrentIsOver = abUseMoveAnimWhenCurrentIsOver;
+			mbNextAnimOverideMoveState = abOverideMoveState;
+
+			pNewAnim = GetMeshEntity()->GetAnimationState(pTrans->mlAnimId);
+			abLoop = false; //transitions never loop!
+			abDependsOnSpeed = false;
+			afSpeedMul = 1.0f;
+			abUseMoveAnimWhenCurrentIsOver = false;
+		}
+		else
+		{
+			mlNextAnimationIndex = -1;
+		}
+	}
+	else
+	{
+		mlNextAnimationIndex = -1;
+	}
+
 	//////////////////////////
 	//Start animation and fade previous
 	pNewAnim->SetActive(true);
 	if(mpCurrentAnimation && mpCurrentAnimation != pNewAnim) 
 	{
-		mpCurrentAnimation->FadeOut(afFadeTime);
+		if (afFadeTime == 0.0f)
+		{
+			mpCurrentAnimation->SetActive(false);
+			pNewAnim->SetWeight(1.0f);
+		}
+		else
+		{
+			mpCurrentAnimation->FadeOut(afFadeTime);
 
-		if(pNewAnim->IsFading()==false) pNewAnim->SetWeight(0);
-		pNewAnim->FadeIn(afFadeTime);
+			if (pNewAnim->IsFading() == false || abLoop == false) pNewAnim->SetWeight(0);
+			pNewAnim->FadeIn(afFadeTime);
+		}
 	}
 	else
 	{
@@ -938,6 +989,10 @@ void iLuxEnemy::PlayAnim(	const tString &asName, bool abLoop, float afFadeTime,
 	}
 
 
+	/////////////////////////////////////////
+	//Set up vars according to args
+	pNewAnim->SetCanBlend(abCanBlend);
+
 	mpCurrentAnimation  = pNewAnim;
 
 	mbAnimationIsSpeedDependant = abDependsOnSpeed;
@@ -952,11 +1007,12 @@ void iLuxEnemy::PlayAnim(	const tString &asName, bool abLoop, float afFadeTime,
 void iLuxEnemy::FadeOutCurrentAnim(float afFadeTime)
 {
 	if(mpCurrentAnimation==NULL) return;
-	if(mpCurrentAnimation->IsLooping()) return;
+	if (mpCurrentAnimation->IsLooping() || (mlNextAnimationIndex >= 0 && mbNextAnimationLoop)) return;
 
 	mpCurrentAnimation->FadeOut(afFadeTime);
 
 	mpCurrentAnimation = NULL;
+	mlNextAnimationIndex = -1;
 
 	if(mbUseMoveAnimWhenCurrentIsOver) mpMover->UseMoveStateAnimations();
 }
@@ -1203,6 +1259,33 @@ float iLuxEnemy::DrawDebug(cGuiSet *apSet,iFontData *apFont,float afStartY)
 
 //-----------------------------------------------------------------------
 
+
+void iLuxEnemy::AddTransitionAnimation(const tString& asMainAnim, const tString& asTransAnim, const tString& asPrevAnim, float afMinTime, float afMaxTime)
+{
+	cAnimationState* pMainAnim = mpMeshEntity->GetAnimationStateFromName(asMainAnim);
+	if (pMainAnim == NULL)
+	{
+		Error("Could not find animation '%s' to add a transitional animation to.\n", asMainAnim.c_str());
+		return;
+	}
+
+	int lTransAnim = mpMeshEntity->GetAnimationStateIndex(asTransAnim);
+	if (lTransAnim < 0)
+	{
+		Error("Could not find animation '%s' to be used as a transitional animation\n", asTransAnim.c_str());
+		return;
+	}
+
+	int lPrevAnim = asPrevAnim != "" ? mpMeshEntity->GetAnimationStateIndex(asPrevAnim) : -1;
+	if (lPrevAnim < 0 && asPrevAnim != "")
+	{
+		Error("Could not find animation '%s' to be used as a previous transitional animation\n", asPrevAnim.c_str());
+		return;
+	}
+
+	pMainAnim->AddTransition(lTransAnim, lPrevAnim, afMinTime, afMaxTime);
+}
+//-----------------------------------------------------------------------
 tString iLuxEnemy::GetCurrentPoseSuffix()
 {
 	switch(mCurrentPose)
@@ -1331,12 +1414,13 @@ void iLuxEnemy::UpdateSoundState(float afTimeStep)
 void iLuxEnemy::UpdateAnimation(float afTimeStep)
 {
 	if(mbUseAnimations==false) return;
-	if(mpMover->GetOverideMoveState()==false || mpCurrentAnimation==NULL) return;
+	if (mpCurrentAnimation == NULL) return;
 
 
 	//////////////////
 	// Check for special event
-	if(	mpCurrentAnimation->GetPreviousTimePosition() <= mpCurrentAnimation->GetSpecialEventTime() &&
+	if (mpMover->GetOverideMoveState() &&
+		mpCurrentAnimation->GetPreviousTimePosition() <= mpCurrentAnimation->GetSpecialEventTime() &&
 		mpCurrentAnimation->GetTimePosition() > mpCurrentAnimation->GetSpecialEventTime())
 	{
 		SendMessage(eLuxEnemyMessage_AnimationSpecialEvent,0,false);
@@ -1346,13 +1430,46 @@ void iLuxEnemy::UpdateAnimation(float afTimeStep)
 	// Check if over
 	if(mpCurrentAnimation->IsOver())
 	{
-		if(mbUseMoveAnimWhenCurrentIsOver) mpMover->UseMoveStateAnimations();
-		SendMessage(eLuxEnemyMessage_AnimationOver,0,false);
+		//Log("Anim over, next anim: %d\n", mlNextAnimationIndex);
+
+		////////////////////////////////////
+		// The transition animation is over, start the main one
+		if (mlNextAnimationIndex >= 0)
+		{
+
+			cAnimationState* pAnim = mpMeshEntity->GetAnimationState(mlNextAnimationIndex);
+			mlNextAnimationIndex = -1;
+
+			if (pAnim)
+			{
+				PlayAnim(pAnim->GetName(), mbNextAnimationLoop, 0.3f, mbNextAnimationDependsOnSpeed,
+					mfNextAnimSpeedMul, false, mbNextAnimOverideMoveState, mbNextAnimUseMoveAnimWhenCurrentIsOver,
+					pAnim->CanBlend(), false);
+			}
+			else
+			{
+				if (mpMover->GetOverideMoveState())
+				{
+					if (mbUseMoveAnimWhenCurrentIsOver) mpMover->UseMoveStateAnimations();
+					SendMessage(eLuxEnemyMessage_AnimationOver, 0, false);
+				}
+			}
+		}
+		////////////////////////////////////
+		// No transition!
+		else
+		{
+			if (mpMover->GetOverideMoveState())
+			{
+				if (mbUseMoveAnimWhenCurrentIsOver) mpMover->UseMoveStateAnimations();
+				SendMessage(eLuxEnemyMessage_AnimationOver, 0, false);
+			}
+		}
 	}
 
 	//////////////////
 	// Update speed if needed.
-	if(mbAnimationIsSpeedDependant)
+	if (mbAnimationIsSpeedDependant && mpMover->GetOverideMoveState())
 	{
 		float fSpeed = mpCharBody->GetVelocity(afTimeStep).Length();
 		if(mpCharBody->GetMoveSpeed(eCharDir_Forward) <0) fSpeed = -fSpeed;
@@ -2352,6 +2469,13 @@ kSerializeVar(mbAnimationIsSpeedDependant, eSerializeType_Bool)
 kSerializeVar(mfAnimationSpeedMul, eSerializeType_Float32)
 kSerializeVar(mbUseMoveAnimWhenCurrentIsOver, eSerializeType_Bool)
 
+kSerializeVar(mlNextAnimationIndex, eSerializeType_Int32)
+kSerializeVar(mbNextAnimationLoop, eSerializeType_Bool)
+kSerializeVar(mbNextAnimationDependsOnSpeed, eSerializeType_Bool)
+kSerializeVar(mfNextAnimSpeedMul, eSerializeType_Float32)
+kSerializeVar(mbNextAnimUseMoveAnimWhenCurrentIsOver, eSerializeType_Bool)
+kSerializeVar(mbNextAnimOverideMoveState, eSerializeType_Bool)
+
 kSerializeVar(mvStartPosition, eSerializeType_Vector3f)
 
 kSerializeVar(mvLastKnownPlayerPos, eSerializeType_Vector3f)
@@ -2464,6 +2588,13 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mbAnimationIsSpeedDependant);
 	kCopyToVar(pData, mfAnimationSpeedMul);
 	kCopyToVar(pData, mbUseMoveAnimWhenCurrentIsOver);
+
+	kCopyToVar(pData, mlNextAnimationIndex);
+	kCopyToVar(pData, mbNextAnimationLoop);
+	kCopyToVar(pData, mbNextAnimationDependsOnSpeed);
+	kCopyToVar(pData, mfNextAnimSpeedMul);
+	kCopyToVar(pData, mbNextAnimUseMoveAnimWhenCurrentIsOver);
+	kCopyToVar(pData, mbNextAnimOverideMoveState);
 
 	kCopyToVar(pData, mvStartPosition);
 

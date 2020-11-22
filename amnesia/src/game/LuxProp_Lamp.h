@@ -37,6 +37,8 @@ public:
 	float mfConnectionLightAmount;
 	bool mbConnectionLightUseOnColor;
 	bool mbConnectionLightUseSpec;
+	bool mbSynchronizeFlickering;
+	bool mbFlickerActive;						
 };
 
 
@@ -100,6 +102,7 @@ public:
 	eLuxFocusCrosshair GetFocusCrosshair(iPhysicsBody *apBody, const cVector3f &avPos);
 	tWString GetFocusText();
 	
+	void SetFlickerActive(bool abFlickerActive);
 
 	//////////////////////
 	//Properties
@@ -124,6 +127,7 @@ public:
 
 private:
 	void SetupLampLightConnection();
+	void SynchronizeFlickering();
 
 	//Vars
 	bool mbLit;
@@ -135,6 +139,10 @@ private:
 	float mfConnectionLightAmount;
 	bool mbConnectionLightUseOnColor;
 	bool mbConnectionLightUseSpec;
+
+	bool mbSynchronizeFlickering;
+
+	bool mbFlickerActive;
 
 	
 	//Data
