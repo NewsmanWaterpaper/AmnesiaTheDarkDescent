@@ -76,6 +76,8 @@ public:
 
 	float mfStuckCounter;
 
+	cVector3f mvCurrentGoal;
+
 	int mlMoveState;
 	bool mbOverideMoveState;
 };
@@ -149,6 +151,7 @@ public:
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
 
+	float mfRunSpeedMul;
 	float mfForwardSpeed;
 	float mfBackwardSpeed;
 	float mfForwardAcc;
@@ -435,10 +438,12 @@ public:
 	//Patrol nodes
 	void AddPatrolNode(cAINode *apNode, float afWaitTime, const tString & asAnimation, bool abLoopAnimation=false);
 	void ClearPatrolNodes();
-
     cLuxEnemyPatrolNode* GetCurrentPatrolNode();
+	cLuxEnemyPatrolNode* GetPreviousPatrolNode();
 	bool IsAtLastPatrolNode();
+	bool IsAtFirstPatrolNode();
 	void IncCurrentPatrolNode(bool abLoopIfAtEnd);
+	void DecCurrentPatrolNode(bool abLoopIfAtStart);
 
 	cLuxEnemyPatrolNode* GetPatrolNode(int alIdx){ return &mvPatrolNodes[alIdx];}
 	int GetPatrolNodeNum(){ return (int)mvPatrolNodes.size();}
@@ -470,7 +475,11 @@ public:
 	bool GetPlayerDetected(){ return mbPlayerDetected;}
 	bool GetPlayerInRange(){ return mbPlayerInRange;}
 
+	void SetHealth(float afX) { mfHealth = afX; }
 	float GetHealth(){ return mfHealth; }
+
+	void SetRunSpeedMul(float afX) { mfRunSpeedMul = afX; }
+	float GetRunSpeedMul() { return mfRunSpeedMul; }
 
 	cAnimationState* GetCurrentAnimation(){ return mpCurrentAnimation;}
 
@@ -522,6 +531,8 @@ public:
 	virtual void SaveToSaveData(iLuxEntity_SaveData* apSaveData);
 	virtual void LoadFromSaveData(iLuxEntity_SaveData* apSaveData);
 	virtual void SetupSaveData(iLuxEntity_SaveData *apSaveData);
+
+	virtual void SetHeardSound(tString asSoundName) { msHeardSoundName = asSoundName; }
 
 protected:
     //////////////////////////////
@@ -581,6 +592,8 @@ protected:
 	bool IsSeenByPlayer();
 	bool IsInPlayerFovAtFeetPos(const cVector3f& avFeetPos);
 	bool IsVisibleToPlayerAtFeetPos(const cVector3f& avFeetPos);
+
+	float GetPathNodeReachedCheckVolumeScaleFactor() { return mfPathNodeReachedCheckVolumeScaleFactor; }
 	
 	cVector3f GetPlayerFeetPos();
 
@@ -601,6 +614,8 @@ protected:
 	
 	bool OutsideStartRadius();
 	bool InFOV(const cVector3f &avPos);
+	bool InFOV(const cVector3f& avPos, float fFOV);
+	bool PlayerInFOV(float fFOV);
 	bool PlayerInFOV();
 
 	void OnSetActive(bool abX);
@@ -621,6 +636,7 @@ protected:
 
 	bool mbHallucination;
 	float mfHallucinationEndDist;
+	float mfRunSpeedMul;
 
 	float mfHealth;
 	bool mbCausesSanityDecrease;
@@ -649,6 +665,8 @@ protected:
 	float mfDarknessGlowAlpha;
 	float mfDarknessGlowAlphaGoal;
 	float mfDarknessGlowUpdateCount;
+
+	float mfPathNodeReachedCheckVolumeScaleFactor;
 
 	float mfForwardSpeed;
 	float mfBackwardSpeed;
@@ -796,6 +814,8 @@ protected:
 	cMatrixf m_mtxCharMeshOffset;
 
 	string msPolledEnemyStateName;
+
+	tString msHeardSoundName;
 
 	tString msIdleAnimationName[eLuxEnemyMoveType_LastEnum][eLuxEnemyPoseType_LastEnum];
 	tString msWalkAnimationName[eLuxEnemyMoveType_LastEnum][eLuxEnemyPoseType_LastEnum];

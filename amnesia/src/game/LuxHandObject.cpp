@@ -108,6 +108,7 @@ void cLuxHandObjectLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_
 
 			mpEntity->AddChild(pLight);
 		}
+		mpEntity->SetUpdateBonesWhenCulled(true);								   
 	}
 }
 
@@ -174,6 +175,7 @@ void iLuxHandObject::CreateEntity(cLuxMap *apMap)
 		mpMeshEntity->SetMatrix(m_mtxOffset);
 		mpMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster,false);
 		mpMeshEntity->SetRenderFlagBit(eRenderableFlag_VisibleInReflection,false);
+		mpMeshEntity->SetUpdateBonesWhenCulled(true);									   
 	}
 
 	ImplementedCreateEntity(apMap);

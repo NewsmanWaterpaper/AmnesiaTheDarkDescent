@@ -724,11 +724,16 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
 	AddFunc("void ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeManPigPatrolSpeed);
+	AddFunc("void SetManPigToFlee(string& asName, bool abX)", (void*)SetManPigToFlee);
 	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigFadeDisabled);
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
+	AddFunc("float GetEnemyHealth(string& asName)", (void*) GetEnemyHealth);
+	AddFunc("void SetEnemyHealth(string &in asName, float afHealth)", (void*)SetEnemyHealth);
+	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
+	AddFunc("void SetEnemyRunSpeedMul(string &in asName, float afRunSpeedMul)", (void*)SetEnemyRunSpeedMul);
 
 	AddFunc("void SetPropHealth(string &in asName, float afHealth)",(void *)SetPropHealth);
 	AddFunc("void AddPropHealth(string &in asName, float afHealth)",(void *)AddPropHealth);
@@ -3340,6 +3345,17 @@ void __stdcall cLuxScriptHandler::ChangeManPigPatrolSpeed(string& asName, string
 
 	END_SET_PROPERTY
 }
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetManPigToFlee(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetToFlee(abX);
+
+	END_SET_PROPERTY
+}
 
 //-----------------------------------------------------------------------
 
@@ -3406,6 +3422,51 @@ string& __stdcall cLuxScriptHandler::GetEnemyStateName(string& asName)
 
 	return pEnemy->GetCurrentEnemyStateName();
 }
+
+float __stdcall cLuxScriptHandler::GetEnemyHealth(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetHealth();
+}
+
+void __stdcall cLuxScriptHandler::SetEnemyHealth(string& asName, float afHealth)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetHealth(afHealth);
+
+	END_SET_PROPERTY
+}
+
+float __stdcall cLuxScriptHandler::GetEnemyRunSpeedMul(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetRunSpeedMul();
+}
+
+void __stdcall cLuxScriptHandler::SetEnemyRunSpeedMul(string& asName, float afRunSpeedMul)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetRunSpeedMul(afRunSpeedMul);
+
+	END_SET_PROPERTY
+}
+
 
 //-----------------------------------------------------------------------
 

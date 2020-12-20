@@ -1320,6 +1320,8 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 	{
 		mfTerror -= mfTerrorDecSpeed * afTimeStep;
 		if(mfTerror < 0) mfTerror =0;
+		//mfFOVMulGoal = 1.0f;
+		//mfFOVMulSpeed = 1.0f;
 	}
 	else
 	{
@@ -1337,6 +1339,8 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 		if(mpTerrorSound == NULL)
 		{
 			mpTerrorSound = pSoundHandler->PlayGui(msTerrorSound,true,1.0f);
+			//mfFOVMulGoal = 1.15f;
+			//mfFOVMulSpeed = 1.0f;
 			if(mpTerrorSound)
 			{
 				mpTerrorSound->SetVolumeMul(0.0f);
@@ -1352,6 +1356,8 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 			mpTerrorSound->GetChannel()->Stop();
 			mpTerrorSound = NULL;
 			mlTerrorSoundID = -1;
+			//mfFOVMulGoal = 1.0f;
+			//mfFOVMulSpeed = 1.0f;
 		}
 	}
 }

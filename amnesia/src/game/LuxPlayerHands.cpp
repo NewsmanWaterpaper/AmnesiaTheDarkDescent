@@ -95,6 +95,7 @@ void cLuxPlayerHandsLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a
 {
 	mpPlayerHands->mpHandsEntity = mpEntity;
 	if(mpEntity) mpEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster,false);
+	if (mpEntity) mpEntity->SetUpdateBonesWhenCulled(true);
 	
 	if(mpMesh && mpPlayerHands->mpHandsMesh==NULL)
 	{

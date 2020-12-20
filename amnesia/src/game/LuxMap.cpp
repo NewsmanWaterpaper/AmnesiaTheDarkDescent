@@ -696,7 +696,7 @@ void cLuxMap::BroadcastEnemyMessage(eLuxEnemyMessage aType, bool abHasPosition, 
 
 //-----------------------------------------------------------------------
 
-void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume ,float afMinDist, float afMaxDist)
+void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume, float afMinDist, float afMaxDist, tString asSoundName)
 {
 	cLuxEnemyIterator it =GetEnemyIterator();
 	while(it.HasNext())
@@ -722,6 +722,7 @@ void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume 
 
 		/////////////////////////
 		//Send message
+		pEnemy->SetHeardSound(asSoundName);
 		pEnemy->SendMessage(eLuxEnemyMessage_SoundHeard, 0, false, avPos, fHearVolume,0);
 	}
 }

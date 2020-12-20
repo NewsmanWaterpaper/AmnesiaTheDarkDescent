@@ -65,7 +65,12 @@ public:
 	void TurnToPos(const cVector3f& avFeetPos);
 	void TurnToAngle(float afAngle);
 
+	void MoveBackwardsToPos(const cVector3f& avFeetPos);
+	void TurnAwayFromPos(const cVector3f& avFeetPos);
+
 	void UseMoveStateAnimations();
+
+	void ForceMoveState(eLuxEnemyMoveState aMoveState);
 	
 	//////////////////////
 	//Properties
@@ -79,13 +84,29 @@ public:
 	//This gets speed / wanted_speed
 	float GetWantedSpeedAmount();
 
-	void SetOverideMoveState(bool abX){ mbOverideMoveState = abX;}
+	void SetOverideMoveState(bool abX);
 	bool GetOverideMoveState(){ return mbOverideMoveState;}
 
 	float GetStuckCounter(){ return mfStuckCounter; }
 	float GetMaxStuckCounter(){ return mfMaxStuckCounter; }
 	bool GetStuckCounterIsAtMax(){ return mfStuckCounter >= mfMaxStuckCounter;}
 	void ResetStuckCounter(){ mfStuckCounter =0; }
+
+	void StopTurning() { mbTurning = false; }
+
+	void SetWallAvoidanceActive(bool abX) { mbWallAvoidActive = abX; }
+
+	void SetupWallAvoidance(float afRadius, float afSteerAmount, int alSamples);
+
+	//////////////////////
+	//UPdate
+	void UpdateMoveAnimation(float afTimeStep);
+	void UpdateWallAvoidance(float afTimeStep);
+
+	//////////////////////
+	//Debug
+	void OnRenderSolid(cRendererCallbackFunctions* apFunctions);
+
 
 	
 	//////////////////////
@@ -97,8 +118,11 @@ public:
 private:
 	void UpdateStuckCounter(float afTimeStep);	
 	void UpdateTurning(float afTimeStep);
-	void UpdateMoveAnimation(float afTimeStep);
+
 	void UpdateStepEffects(float afTimeStep);
+
+	void ConvertLocalDirTo2D(cVector3f& avLocalDir);
+	cMatrixf GetMovementDirectionMatrix();
 
 	///////////////////
 	// Data
@@ -108,6 +132,11 @@ private:
 	float mfStuckLimit;
 	float mfMaxStuckCounter;
 
+	float mfWallAvoidRadius;
+	float mfWallAvoidSteerAmount;
+
+	static std::vector<cVector3f> mvPrecalcSampleDirs;
+
 
 	///////////////////
 	// Variables
@@ -116,10 +145,23 @@ private:
 	float mfTurnSpeed;
 	float mfTurnBreakAcc;
 
+	cVector3f mvCurrentGoal;
+
 	float mfStuckCounter;
+
+	cVector3f mvSteeringVec;
 
 	eLuxEnemyMoveState mMoveState;
 	bool mbOverideMoveState;
+
+	bool mbWallAvoidActive;
+	float mfWallAvoidCount;
+	std::vector<cVector3f> mvSampleRays;
+	std::vector<cVector3f> mvSampleRayBaseDir;
+	std::vector<bool> mvSampleRaysCollide;
+	std::vector<float> mvSampleRaysAmount;
+	std::vector<int> mvSamplePartitionUsed;
+	int mlSampleMaxPartCount;
 };
 
 //----------------------------------------------

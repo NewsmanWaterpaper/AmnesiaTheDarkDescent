@@ -252,6 +252,8 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 	pEnemy->mfWaterStepSpeedWalk = GetVarFloat("WaterStepSpeedWalk", 0);
 	pEnemy->mfWaterStepSpeedRun = GetVarFloat("WaterStepSpeedRun", 0);
 	pEnemy->mfWaterStepSpeedMisc = GetVarFloat("WaterStepSpeedMisc", 0);
+
+	pEnemy->mfPathNodeReachedCheckVolumeScaleFactor = GetVarFloat("PathNodeReachedCheckVolumeScaleFactor", 1.2f);
 	
 	//////////////////////////////
 	// Load hit variables
@@ -365,7 +367,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbAutoReverseAtPathEnd = apInstanceVars->GetVarBool("AutoReverseAtPathEnd", false);
 		pEnemy->mbHallucination =  apInstanceVars->GetVarBool("Hallucination", false);
 		pEnemy->mfHallucinationEndDist = apInstanceVars->GetVarFloat("HallucinationEndDist", false);
-
+		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
 		LoadInstanceVariables(pEnemy, apInstanceVars);
@@ -494,6 +496,8 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 
 	mbHallucination = false;
 	mfHallucinationEndDist = 3.0f;
+
+	mfRunSpeedMul = 1.0f;
 	
 	mfEnemyDarknessGlowMaxDistance = gpBase->mpGameCfg->GetFloat("Enemy", "EnemyDarknessGlowMaxDistance",0);
 
@@ -1160,10 +1164,30 @@ cLuxEnemyPatrolNode* iLuxEnemy::GetCurrentPatrolNode()
 	return &mvPatrolNodes[mlCurrentPatrolNode];
 }
 
+cLuxEnemyPatrolNode* iLuxEnemy::GetPreviousPatrolNode()
+{
+	if (mlCurrentPatrolNode >= (int)mvPatrolNodes.size() || mlCurrentPatrolNode < 0)
+		return NULL;
+
+	if (mlCurrentPatrolNode == 0)
+	{
+		return &mvPatrolNodes[mvPatrolNodes.size() - 1];
+	}
+	else
+	{
+		return &mvPatrolNodes[mlCurrentPatrolNode - 1];
+	}
+}
+
 bool iLuxEnemy::IsAtLastPatrolNode()
 {
 	return mlCurrentPatrolNode >= (int)mvPatrolNodes.size()-1;
 }
+bool iLuxEnemy::IsAtFirstPatrolNode()
+{
+	return mlCurrentPatrolNode <= 0;
+}
+
 
 void iLuxEnemy::IncCurrentPatrolNode(bool abLoopIfAtEnd)
 {
@@ -1174,6 +1198,18 @@ void iLuxEnemy::IncCurrentPatrolNode(bool abLoopIfAtEnd)
 			mlCurrentPatrolNode =0;
 		else
 			mlCurrentPatrolNode = (int)mvPatrolNodes.size()-1;
+	}
+}
+void iLuxEnemy::DecCurrentPatrolNode(bool abLoopIfAtStart)
+{
+	mlCurrentPatrolNode--;
+
+	if (mlCurrentPatrolNode < 0)
+	{
+		if (abLoopIfAtStart)
+			mlCurrentPatrolNode = (int)mvPatrolNodes.size() - 1;
+		else
+			mlCurrentPatrolNode = 0;
 	}
 }
 
@@ -1864,7 +1900,7 @@ void iLuxEnemy::UpdateAlignEntityWithGroundRay(float afTimeStep)
 	cVector3f vMoveDir = cMath::MatrixMul(cMath::MatrixRotateY(mpCharBody->GetYaw()),cVector3f(0,0,-1));
 	cVector3f vStartPos = mpCharBody->GetFeetPosition()+cVector3f(0,fStartAdd,0) + vMoveDir * mpCharBody->GetSize().x*0.5f;
 
-    bool bIntersect = gpBase->mpMapHelper->GetClosestCharCollider(vStartPos, cVector3f(0,-1,0),0.5f,&fDist,&vNormal,NULL);
+	bool bIntersect = gpBase->mpMapHelper->GetClosestCharCollider(vStartPos, cVector3f(0, -1, 0), 0.5f, true, &fDist, &vNormal, NULL);
     if(bIntersect==false) return;
 	fDist -= fStartAdd;
 
@@ -2353,6 +2389,38 @@ bool iLuxEnemy::InFOV(const cVector3f &avPos)
 	return true;
 }
 
+//-----------------------------------------------------------------------
+
+bool iLuxEnemy::InFOV(const cVector3f& avPos, float fFOV)
+{
+	if (fFOV < k2Pif)
+	{
+		cVector3f vStartCenter = mpCharBody->GetPosition() + cVector3f(0, mpCharBody->GetSize().y / 2 - 0.2f, 0); //Use eye pos
+
+		const cVector3f vDirToPos = cMath::Vector3Normalize(avPos - vStartCenter);
+		cVector3f vEnemyForward = mpCharBody->GetForward();
+
+		cVector3f vToPlayerAngle = cMath::GetAngleFromPoints3D(0, vDirToPos);
+		cVector3f vEnemyAngle = cMath::GetAngleFromPoints3D(0, vEnemyForward);
+
+		float fAngleX = cMath::Abs(cMath::GetAngleDistanceRad(vToPlayerAngle.x, vEnemyAngle.x));
+		float fAngleY = cMath::Abs(cMath::GetAngleDistanceRad(vToPlayerAngle.y, vEnemyAngle.y));
+
+		if (fAngleY > fFOV * 0.5f) return false;
+		if (fAngleX > fFOV * 0.5f) return false;
+	}
+	return true;
+}
+
+//-----------------------------------------------------------------------
+
+bool iLuxEnemy::PlayerInFOV(float fFOV)
+{
+	return InFOV(gpBase->mpPlayer->GetCharacterBody()->GetPosition(), fFOV);
+}
+
+//-----------------------------------------------------------------------
+
 bool iLuxEnemy::PlayerInFOV()
 {
 	return InFOV(gpBase->mpPlayer->GetCharacterBody()->GetPosition());
@@ -2453,6 +2521,7 @@ kSerializeVar(mbStuckAtDoor, eSerializeType_Bool)
 kSerializeVar(mlStuckDoorID, eSerializeType_Int32)
 
 kSerializeVar(mfForwardSpeed, eSerializeType_Float32)
+kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
 kSerializeVar(mfBackwardSpeed, eSerializeType_Float32)
 kSerializeVar(mfForwardAcc, eSerializeType_Float32)
 kSerializeVar(mfForwardDeacc, eSerializeType_Float32)
@@ -2573,6 +2642,7 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mbStuckAtDoor);
 	kCopyToVar(pData, mlStuckDoorID);
 
+	kCopyToVar(pData, mfRunSpeedMul);
 	kCopyToVar(pData, mfForwardSpeed);
 	kCopyToVar(pData, mfBackwardSpeed);
 	kCopyToVar(pData, mfForwardAcc);
@@ -2735,6 +2805,7 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mbStuckAtDoor);
 	kCopyFromVar(pData, mlStuckDoorID);
 
+	kCopyFromVar(pData, mfRunSpeedMul);
 	kCopyFromVar(pData, mfForwardSpeed);
 	kCopyFromVar(pData, mfBackwardSpeed);
 	kCopyFromVar(pData, mfForwardAcc);

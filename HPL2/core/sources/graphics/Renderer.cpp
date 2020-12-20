@@ -1094,7 +1094,7 @@ namespace hpl {
 		////////////////////////////
 		//Check if object is translucent or has no material
 		// If so, do not render it.
-		if( pMaterial==NULL || pMaterial->GetType()->IsTranslucent())
+		if( pMaterial==NULL || pMaterial->GetType()->IsTranslucent() || apObject->IsOccluder() == false)
 		{
 			return false;
 		}

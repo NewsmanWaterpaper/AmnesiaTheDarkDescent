@@ -176,7 +176,7 @@ namespace hpl {
 			{
 				hplDelete(pDoc);
 
-				return NULL;
+				return false;
 			}
 			bLoadedFromNormalFile = true;
 		}
@@ -188,7 +188,7 @@ namespace hpl {
 			if(compBuffer.Load(asFile)==false)
 			{
 				//Log("Could not load compressed map!\n");
-				return NULL;
+				return false;
 			}
 
 			int lKey = kEncryptKey;
@@ -198,14 +198,14 @@ namespace hpl {
 			if(textBuff.DecompressAndAddFromBuffer(&compBuffer, false)==false)
 			{
 				//Log("Could not decompress map!\n");
-				return NULL;
+				return false;
 			}
 
-			if(pDoc->CreateFromString(textBuff.GetDataPointer())==false)
+			if (pDoc->CreateFromString(textBuff.GetDataPointerAtCurrentPos()) == false)
 			{
 				hplDelete(pDoc);
 				//Log("Could not parse map!\n");
-				return NULL;
+				return false;
 			}
 		}
 
@@ -226,7 +226,7 @@ namespace hpl {
 				textBuff.AddCharArray(sData.c_str(), sData.size()+1);
 
 				cBinaryBuffer compBuff;
-				compBuff.CompressAndAdd(textBuff.GetDataPointer(), textBuff.GetSize());
+				compBuff.CompressAndAdd(textBuff.GetDataPointerAtCurrentPos(), textBuff.GetSize());
 				
 				int lKey = kEncryptKey;
 				compBuff.XorTransform((char*)&lKey, sizeof(lKey));
@@ -557,6 +557,7 @@ namespace hpl {
 			binBuff.GetString(&sName);
 			binBuff.GetString(&sMaterial);
 			bool bCastShadows = binBuff.GetBool();
+			bool bIOccluder = binBuff.GetBool();
 
 			if(gbLogCacheLoad) Log("Mesh %d: '%s' '%s'\n", mesh, sName.c_str(), sMaterial.c_str());
 
@@ -682,6 +683,7 @@ namespace hpl {
 			//Create mesh entity
             cMeshEntity *pMeshEntity = mpCurrentWorld->CreateMeshEntity(sName, pMesh, true);	
 			pMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster, bCastShadows);
+			pMeshEntity->SetIsOccluder(bIOccluder);
 		}
 
 
@@ -778,7 +780,7 @@ namespace hpl {
 			binBuff.AddString(pEntity->GetName());
 			binBuff.AddString(pSubMesh->GetMaterialName());
 			binBuff.AddBool(pSubEnt->GetRenderFlagBit(eRenderableFlag_ShadowCaster));
-
+			binBuff.AddBool(pSubEnt->IsOccluder());
 			
 			////////////////////////////
 			//Add Vertices
@@ -1087,6 +1089,10 @@ namespace hpl {
 			return	apObjectDataA->GetRenderFlagBit(eRenderableFlag_ShadowCaster) <
 					apObjectDataB->GetRenderFlagBit(eRenderableFlag_ShadowCaster);
 		}
+		if (apObjectDataA->IsOccluder() != apObjectDataB->IsOccluder())
+		{
+			return	apObjectDataA->IsOccluder() < apObjectDataB->IsOccluder();
+		}
 		//Material check
 		if( apObjectDataA->GetMaterial() != apObjectDataB->GetMaterial())
 		{
@@ -1241,6 +1247,7 @@ namespace hpl {
 				//Check if next object is not part of sequence, if so combine current sequence.
 				if(	pNextObject->GetMaterial() != pMeshObject->GetMaterial() ||
 					pNextObject->GetRenderFlagBit(eRenderableFlag_ShadowCaster) != pMeshObject->GetRenderFlagBit(eRenderableFlag_ShadowCaster) ||
+					pNextObject->IsOccluder() != pMeshObject->IsOccluder() ||
 					pNextObjectUserData->mbCombine == false)
 				{
 					CombineObjectsAndCreateMeshEntity(vMeshObjects, lFirstInSequence, (int) i);
@@ -1456,7 +1463,7 @@ namespace hpl {
 		
 		//Set up variables
 		pMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster, pFirstObject->GetRenderFlagBit(eRenderableFlag_ShadowCaster));
-
+		pMeshEntity->SetIsOccluder(pFirstObject->IsOccluder());
 		//Add to list
 		mlstStaticMeshEntities.push_back(pMeshEntity);
 		mlStaticMeshEntitiesCreated++;
@@ -1621,6 +1628,7 @@ namespace hpl {
 		
 		bool bCollides = apElement->GetAttributeBool("Collides", true);
 		bool bCastsShadows = apElement->GetAttributeBool("CastShadows", true);
+		bool bIsOccluder = apElement->GetAttributeBool("IsOccluder", true);
 
 		int lID = apElement->GetAttributeInt("ID",-1);
 
@@ -1652,6 +1660,7 @@ namespace hpl {
 														mpResources->GetAnimationManager()) );
 		pMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster, bCastsShadows);
 		pMeshEntity->SetUniqueID(lID);
+		pMeshEntity->SetIsOccluder(bIsOccluder);
 
 		alstMeshEntities.push_back(pMeshEntity);
 
@@ -1888,6 +1897,7 @@ namespace hpl {
 		tString sMaterialName = sMaterial;
 		bool bCastsShadows = apElement->GetAttributeBool("CastShadows", true);
 		bool bCollides = apElement->GetAttributeBool("Collides", true);
+		bool bIsOccluder = apElement->GetAttributeBool("IsOccluder", true);
 		int lID = apElement->GetAttributeInt("ID",-1);
 
 		if((mlCurrentFlags & eWorldLoadFlag_FastStaticLoad))
@@ -1933,6 +1943,7 @@ namespace hpl {
 												mpResources->GetAnimationManager()) );
 			pMeshEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster, bCastsShadows);
 			pMeshEntity->GetSubMeshEntity(0)->GetSubMesh()->SetMaterialName(sMaterialName);
+			pMeshEntity->SetIsOccluder(bIsOccluder);
 		}
 
 		//////////////////////////////////
@@ -2031,6 +2042,7 @@ namespace hpl {
 											mpResources->GetMeshManager(), 
 											mpResources->GetAnimationManager()) );
 		
+		pMeshEntity->SetIsOccluder(false);
 		//////////////////////////////////
 		// General Final Stuff
 		if(pMeshEntity)
@@ -2040,6 +2052,7 @@ namespace hpl {
 
 			//Id
 			pMeshEntity->SetUniqueID(lID);
+
             
 			// Add all sub meshes to a new vector
 			for(int i=0; i<pMeshEntity->GetSubMeshEntityNum(); ++i)

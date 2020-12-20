@@ -73,6 +73,9 @@ namespace hpl {
 		*/
 		static cColor RandRectColor(const cColor &aMin,const cColor &aMax);
 
+		static cVector3f RandomSphereSurfacePoint(float afRadius);
+		static cVector3f RandomSphereInsidePoint(float afRadius);
+
 		
 		/**
 		 * Randomize the rand funcs.
@@ -670,6 +673,8 @@ namespace hpl {
 
 		static void Vector3OrthonormalizeBasis(const cVector3f& avSrcRight, const cVector3f& avSrcUp, const cVector3f& avSrcForward,
 											cVector3f& avDstRight, cVector3f& avDstUp, cVector3f& avDstForward);
+
+		static cVector3f Vector3SphereSurfacePoint(const cVector2f& avSeed, float afRadius);
 
 		//////////////////////////////////////////////////////
 		////////// SPHERICAL COORDS ////////////////////////

@@ -454,6 +454,7 @@ private:
 	 */
 	static void __stdcall ChangeManPigPose(string& asName, string& asPoseType);
 	static void __stdcall ChangeManPigPatrolSpeed(string& asName, string& asSpeedType);
+	static void __stdcall SetManPigToFlee(string& asName, bool abX);
 	
 	static void __stdcall SetTeslaPigFadeDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigSoundDisabled(string& asName, bool abX);
@@ -461,6 +462,10 @@ private:
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
 	static string& __stdcall GetEnemyStateName(string& asName);
+	static float __stdcall GetEnemyHealth(string& asName);
+	static void __stdcall SetEnemyHealth(string& asName, float afHealth);
+	static float __stdcall GetEnemyRunSpeedMul(string& asName);
+	static void __stdcall SetEnemyRunSpeedMul(string& asName, float afRunSpeedMul);
 
 	static void __stdcall SetPropHealth(string& asName, float afHealth);
 	static void __stdcall AddPropHealth(string& asName, float afHealth);

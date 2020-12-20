@@ -82,6 +82,18 @@ namespace hpl {
 	}
 
 	//-----------------------------------------------------------------------
+	cVector3f cMath::RandomSphereSurfacePoint(float afRadius)
+	{
+		return Vector3SphereSurfacePoint(cVector2f(cMath::RandRectf(0, 1), cMath::RandRectf(0, 1)), afRadius);
+	}
+
+	cVector3f cMath::RandomSphereInsidePoint(float afRadius)
+	{
+		float fR = powf(cMath::RandRectf(0, 1), 1.0f / 3.0f); //Need uniform distribution
+		return Vector3SphereSurfacePoint(cVector2f(cMath::RandRectf(0, 1), cMath::RandRectf(0, 1)), afRadius * fR);
+	}
+
+	//-----------------------------------------------------------------------
 
 	void cMath::Randomize(int alSeed)
 	{
@@ -1736,6 +1748,18 @@ namespace hpl {
 		float fInvLen3 = 1/u3.Length();
 		avDst3 = u3*fInvLen3;
 		*/
+	}
+	//-----------------------------------------------------------------------
+	cVector3f cMath::Vector3SphereSurfacePoint(const cVector2f& avSeed, float afRadius)
+	{
+		cVector3f vOut;
+		vOut.x = avSeed.x * 2.0f - 1.0;
+		float fT = k2Pif * avSeed.y;
+		float fW = sqrt(1 - vOut.x * vOut.x);
+		vOut.y = fW * sin(fT);
+		vOut.z = fW * cos(fT);
+
+		return vOut * afRadius;
 	}
 
 	//-----------------------------------------------------------------------

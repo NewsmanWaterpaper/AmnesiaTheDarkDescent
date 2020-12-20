@@ -52,6 +52,7 @@ namespace hpl {
 		mbFadeStart = false;
 		mbFadeStop = false;
 
+		mfAIVolume = 1;
 		mfVolume = 1;
 		mfMaxDistance =0;
 		mfMinDistance=0;
@@ -59,6 +60,7 @@ namespace hpl {
 		mbStream  = false;
 		mbLoop = false;
 		mbUse3D = true;
+		mbKeepPlayingOutOfRange = false;
 
 		mfRandom = 1;
 		mfInterval =0;
@@ -214,13 +216,16 @@ namespace hpl {
 		mbBlockable = pPropElem->GetAttributeBool("Blockable",false);
 		mfBlockVolumeMul = pPropElem->GetAttributeFloat("BlockVolumeMul",0.6f);
 
+		mfAIVolume = pPropElem->GetAttributeFloat("AIVolume", mfVolume);
 		mfVolume = pPropElem->GetAttributeFloat("Volume",1);
 		mfMaxDistance = pPropElem->GetAttributeFloat("MaxDistance",1);
 		mfMinDistance = pPropElem->GetAttributeFloat("MinDistance",1);
 
 		mbFadeStart = pPropElem->GetAttributeBool("FadeStart",true);
 		mbFadeStop = pPropElem->GetAttributeBool("FadeStop",true);
-		
+		mbKeepPlayingOutOfRange = pPropElem->GetAttributeBool("KeepPlayingOutOfRange", false);
+
+
 		mfRandom = pPropElem->GetAttributeFloat("Random",1);
 		mfInterval = pPropElem->GetAttributeFloat("Interval",0);
 

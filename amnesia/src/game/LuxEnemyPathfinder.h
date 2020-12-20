@@ -61,7 +61,7 @@ public:
 	tAINodeList* GetNodeList(){ return &mlstPathNodes;}
 
 	bool IsMoving(){ return mbMoving;}
-	cVector3f GetNextGoalPos();
+	const cVector3f& GetNextGoalPos();
 	const cVector3f& GetFinalGoalPos();
 
 	cAINodeContainer* GetNodeContainer(){ return mpNodeContainer;}

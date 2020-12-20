@@ -45,7 +45,7 @@ namespace hpl {
 	{
 	public:
 		float mfDistance;
-		float mfSqrDistance;
+
 		cAINode *mpNode;
 	};
 
@@ -70,17 +70,20 @@ namespace hpl {
 		
 		const tString& GetName(){ return msName;}
 		int GetID(){ return mlID; }
+
+		int GetListID() { return mlListID; }
 		
 	private:
 		tString msName;
 		int mlID;
+		int mlListID;
 		cVector3f mvPosition;
 		void *mpUserData;
 
 		tAINodeEdgeVec mvEdges;
 	};
 
-	typedef std::vector<cAINode*> tAINodeVec;
+	typedef std::vector<cAINode> tAINodeVec;
 	typedef tAINodeVec::iterator tAINodeVecIt;
 
 	typedef std::list<cAINode*> tAINodeList;
@@ -192,7 +195,9 @@ namespace hpl {
 		 * Get a node.
 		 * \param alIdx index of node.
 		 */
-		inline cAINode* GetNode(int alIdx){return mvNodes[alIdx];}
+		inline cAINode* GetNode(int alIdx){return &mvNodes[alIdx];}
+		int GetListNum() { return mlListNum; }
+		inline int GetUniqueID(cAINode* apNode) { return int(apNode - &mvNodes.front()); };
 
 		/**
 		 * Gets a node based on the name.
@@ -211,6 +216,13 @@ namespace hpl {
 		 * Build a grid map for nodes. (Used internally mostly)
 		 */
 		void BuildNodeGridMap();
+
+		/**
+		 * Connect the nodes to a list id to easially determine if two seperate nodes are connected
+		 */
+		void SetupListID();
+		void SetupListIDIterative(cAINode* apNode, int alID);
+
 
 		/**
 		 * Returns a node iterator. Note that the radius is not checked, some nodes may lie outside.
@@ -302,6 +314,8 @@ namespace hpl {
 		int mlMinNodeEnds;
 		float mfMaxEndDistance;
 		float mfMaxHeight;
+
+		int mlListNum;
 	};
 
 };

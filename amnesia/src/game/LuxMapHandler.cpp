@@ -44,7 +44,7 @@ cMapHandlerSoundCallback::cMapHandlerSoundCallback()
 {
 	///////////////////////
 	//Load document
-	tString sFile = "sounds/EnemySounds.dat";
+	tString sFile = "The Streets of London/sounds/EnemySounds.dat";
 	iXmlDocument* pXmlDoc = gpBase->mpEngine->GetResources()->LoadXmlDocument(sFile);
 	if(pXmlDoc ==NULL)
 	{
@@ -93,10 +93,10 @@ void cMapHandlerSoundCallback::OnStart(cSoundEntity *apSoundEntity)
 	//Iterate enemies and send sound message to those close enough
 	float fMaxDist = apSoundEntity->GetMaxDistance();
 	float fMinDist = apSoundEntity->GetMaxDistance();
-	float fVolume = apSoundEntity->GetVolume();
+	float fVolume = apSoundEntity->GetData()->GetAIVolume();
 	cVector3f vPos = apSoundEntity->GetWorldPosition();
 	
-	pMap->BroadcastEnemySoundMessage(vPos, fVolume, fMinDist, fMaxDist);
+	pMap->BroadcastEnemySoundMessage(vPos, fVolume, fMinDist, fMaxDist, sTypeName);
 }	
 
 //-----------------------------------------------------------------------

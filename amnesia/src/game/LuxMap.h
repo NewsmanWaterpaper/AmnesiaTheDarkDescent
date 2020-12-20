@@ -121,7 +121,7 @@ public:
 
 	void BroadcastEnemyMessage(eLuxEnemyMessage aType, bool abHasPosition, const cVector3f& avPos, float afRadius,
 								float afTime=0, bool abLocalScope=false, const cVector3f& avX=0,float afX=0, int alX=0);
-	void BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume ,float afMinDist, float afMaxDist);
+	void BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume, float afMinDist, float afMaxDist, tString asSoundName);
 	/**
 	 * Gets number of enemies that are in range of player
 	 */

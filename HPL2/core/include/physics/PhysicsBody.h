@@ -186,6 +186,9 @@ namespace hpl {
 		void SetCollide(bool abX){mbCollide = abX;}
 		bool GetCollide(){ return mbCollide;}
 
+		void SetBlocksPathfinding(bool abX) { mbBlocksPathfinding = abX; }
+		bool GetBlocksPathfinding() { return mbBlocksPathfinding; }
+
 		void SetIsCharacter(bool abX){ mbIsCharacter = abX;}
 		bool IsCharacter(){ return mbIsCharacter;}
 
@@ -296,6 +299,7 @@ namespace hpl {
 		bool mbBlocksLight;
 		bool mbIsCharacter;
 		bool mbCollideCharacter;
+		bool mbBlocksPathfinding;
 		bool mbIsRagDoll;
 		bool mbCollideRagDoll;
 		bool mbVolatile;

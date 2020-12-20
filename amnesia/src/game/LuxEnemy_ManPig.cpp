@@ -125,7 +125,6 @@ void cLuxEnemyLoader_ManPig::LoadInstanceVariables(iLuxEnemy *apEnemy, cResource
 	pManPig->mPatrolMoveSpeed = ToMoveSpeed(apInstanceVars->GetVarString("PatrolMoveSpeed", "Walk"));
 	pManPig->mbAllowZeroWaitTime = apInstanceVars->GetVarBool("AllowZeroNodeWaitTimes", false);
 	pManPig->mfDamageMul = apInstanceVars->GetVarFloat("DamageMul", 1.0f);
-	pManPig->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
 	pManPig->mbPlayActivateSound = apInstanceVars->GetVarBool("PlayActivateSound", true);
 	pManPig->mfLanternSensitivity = apInstanceVars->GetVarFloat("LanternSensitivity", 1.0f);
 	pManPig->mfHuntPauseTimeMul = apInstanceVars->GetVarFloat("HuntPauseTimeMul", 1.0f);
@@ -216,6 +215,11 @@ cLuxEnemy_ManPig::~cLuxEnemy_ManPig()
 
 void cLuxEnemy_ManPig::OnSetupAfterLoad(cWorld *apWorld)
 {
+	////////////////////////////////////////
+	// Wall avoidance
+	mpMover->SetupWallAvoidance(0.9f, 8, 4);
+	mpMover->SetWallAvoidanceActive(true);
+
 	if(mbIsTelsa) mpMeshEntity->SetVisible(false);
 
 	////////////////////////////////////////
@@ -334,6 +338,13 @@ void cLuxEnemy_ManPig::ChangePose(eLuxEnemyPoseType aPose, bool abSendMessage)
 
 	if(abSendMessage)
 		SendMessage(eLuxEnemyMessage_ChangePose, 0, false, 0,0, aPose);
+}
+//-----------------------------------------------------------------------
+void cLuxEnemy_ManPig::SetToFlee(bool abX)
+{
+	mbFleeFromPlayer = abX;
+
+	ChangeState(eLuxEnemyState_Alert);
 }
 //-----------------------------------------------------------------------
 

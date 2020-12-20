@@ -21,6 +21,13 @@
 
 #include "LuxEnemy.h"
 #include "LuxMap.h"
+#include "LuxMapHelper.h"
+
+ //-----------------------------------------------------------------------
+
+std::vector<cVector3f> cLuxEnemyMover::mvPrecalcSampleDirs;
+
+#define kNumOfDirectionPartitions (4)
 
 //-----------------------------------------------------------------------
 
@@ -47,6 +54,95 @@ cLuxEnemyMover::cLuxEnemyMover(iLuxEnemy *apEnemy, iCharacterBody *apCharBody)
 
 	mMoveState = eLuxEnemyMoveState_LastEnum;
 	mbOverideMoveState = false;
+
+	mbWallAvoidActive = false;
+	mfWallAvoidRadius = 0;
+	mfWallAvoidSteerAmount = 0;
+	mlSampleMaxPartCount = 0;
+
+	mvSteeringVec = 0;
+
+	mvCurrentGoal = 0;
+
+	//////////////////////////
+	// Generate sample directions
+	if (mvPrecalcSampleDirs.empty())
+	{
+		cMath::Randomize(1013); //Want to make sure the same directions are always generated.
+
+		///////////////////////////////
+		// Setup data
+		mvPrecalcSampleDirs.resize(200);
+		std::vector<int> vPartionCount;
+		vPartionCount.resize(kNumOfDirectionPartitions, 0);
+		int lMaxPartCount = mvPrecalcSampleDirs.size() / kNumOfDirectionPartitions;
+		int lPartionsFull = 0;
+
+		float TopZ = sin(cMath::ToRad(60));
+
+		///////////////////////////////
+		// Generate directions and filter the samples into partitions
+		while (1)
+		{
+			cVector3f vDir = cMath::RandomSphereSurfacePoint(1);
+			if (vDir.z < 0) vDir.z = -vDir.z;
+
+			/////////////////////////////
+			// Calculate the partition
+			int lPart = 0;
+			cVector3f vAngles = cMath::Vector3ToDeg(cMath::GetAngleFromPoints3D(0, vDir));
+			vAngles.x = cMath::GetAngleDistanceDeg(0, vAngles.x);
+			vAngles.y = cMath::GetAngleDistanceDeg(0, vAngles.y);
+
+			if (vAngles.x < -35)
+			{
+				if (vAngles.y > 0)	lPart = 0;
+				else				lPart = 1;
+			}
+			else if (vAngles.x > 35)
+			{
+				if (vAngles.y > 0)	lPart = 2;
+				else				lPart = 3;
+			}
+			else
+			{
+				//Part of upper circle, just skip
+				if (vDir.z > TopZ)
+				{
+					continue;
+				}
+				//part of the other pieces
+				else
+				{
+					if (vAngles.x < 0)
+					{
+						if (vAngles.y > 0)	lPart = 0;
+						else				lPart = 1;
+					}
+					else
+					{
+						if (vAngles.y > 0)	lPart = 2;
+						else				lPart = 3;
+					}
+				}
+			}
+
+			//If partition is already full, just skip it.
+			if (vPartionCount[lPart] == lMaxPartCount) continue;
+
+			//Add to partition and see if full. 
+			mvPrecalcSampleDirs[lPart * lMaxPartCount + vPartionCount[lPart]] = vDir;
+			vPartionCount[lPart]++;
+
+			if (vPartionCount[lPart] == lMaxPartCount) lPartionsFull++;
+
+			//Check if all partitions are full
+			if (lPartionsFull == (int)vPartionCount.size()) break;
+		}
+
+		cMath::Randomize(); //Go pure random again
+
+	}
 }
 
 //-----------------------------------------------------------------------
@@ -71,6 +167,8 @@ void cLuxEnemyMover::SetupAfterLoad(cWorld *apWorld)
 
 void cLuxEnemyMover::OnUpdate(float afTimeStep)
 {
+	mvSteeringVec = 0;
+	UpdateWallAvoidance(afTimeStep);
 	UpdateStuckCounter(afTimeStep);
 	UpdateTurning(afTimeStep);	
 	UpdateMoveAnimation(afTimeStep);
@@ -81,8 +179,48 @@ void cLuxEnemyMover::OnUpdate(float afTimeStep)
 
 void cLuxEnemyMover::MoveToPos(const cVector3f& avFeetPos)
 {
-	TurnToPos(avFeetPos);
+	mvCurrentGoal = avFeetPos;
+
+	/////////////////////////////////
+	// Turn
+	float fDist = cMath::Vector3Dist(mpCharBody->GetPosition(), avFeetPos);
+	float fMaxDist = 2.0f + mpCharBody->GetSize().x * 2;
+
+	float fSteerAmount = cMath::Min(fDist / fMaxDist, 1.0f);
+	cVector3f vSteerVec = mvSteeringVec * fSteerAmount;
+	vSteerVec.y = 0;
+
+	TurnToPos(avFeetPos + vSteerVec);
+
+	/////////////////////////////////
+	// Move
 	mpCharBody->Move(eCharDir_Forward,1.0f);
+}
+
+//-----------------------------------------------------------------------
+void cLuxEnemyMover::MoveBackwardsToPos(const cVector3f& avFeetPos)
+{
+	TurnAwayFromPos(avFeetPos);
+	mpCharBody->Move(eCharDir_Forward, -1.0f);
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEnemyMover::TurnAwayFromPos(const cVector3f& avFeetPos)
+{
+	cVector3f vStartPos = mpCharBody->GetPosition();
+
+	float fGoalAngle = -cMath::GetAngleFromPoints2D(cVector2f(vStartPos.x, vStartPos.z),
+		cVector2f(avFeetPos.x, avFeetPos.z));
+
+	if (fGoalAngle >= 0)
+	{
+		TurnToAngle(fGoalAngle - kPif);
+	}
+	else
+	{
+		TurnToAngle(fGoalAngle + kPif);
+	}
 }
 
 //-----------------------------------------------------------------------
@@ -156,6 +294,81 @@ float cLuxEnemyMover::GetWantedSpeedAmount()
 
 	return fRealSpeed / fWantedSpeed;
 }
+//-----------------------------------------------------------------------
+
+void cLuxEnemyMover::SetupWallAvoidance(float afRadius, float afSteerAmount, int alSamples)
+{
+	mfWallAvoidRadius = afRadius;
+	mfWallAvoidSteerAmount = afSteerAmount;
+
+	mvSampleRays.resize(alSamples);
+	mvSampleRayBaseDir.resize(alSamples);
+	mvSampleRaysCollide.resize(alSamples, false);
+	mvSampleRaysAmount.resize(alSamples, 0);
+	mvSamplePartitionUsed.resize(alSamples, -1);
+
+	mlSampleMaxPartCount = (alSamples - 1) / kNumOfDirectionPartitions + 1;
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEnemyMover::OnRenderSolid(cRendererCallbackFunctions* apFunctions)
+{
+	bool bMoving = fabs(mpCharBody->GetMoveSpeed(eCharDir_Forward)) > 0.001f ||
+		fabs(mpCharBody->GetMoveSpeed(eCharDir_Right)) > 0.001f;
+
+	/////////////////////////////////////////
+	// Steer amount
+	if (bMoving && mbWallAvoidActive)
+	{
+		float fDist = cMath::Vector3Dist(mpCharBody->GetPosition(), mvCurrentGoal);
+
+		float fSteerAmount = cMath::Min(fDist / (mfWallAvoidRadius * 2), 1.0f);
+
+		cVector3f vGoal = mvCurrentGoal;
+		vGoal.y = mpCharBody->GetPosition().y;
+
+		apFunctions->GetLowLevelGfx()->DrawLine(mpCharBody->GetPosition(), vGoal + mvSteeringVec * fSteerAmount, cColor(1, 0, 0));
+		apFunctions->GetLowLevelGfx()->DrawSphere(vGoal + mvSteeringVec * fSteerAmount, 0.3f, cColor(1, 0, 0));
+	}
+	/////////////////////////////////////////
+	// Wall avoid
+	if (mbWallAvoidActive && bMoving)
+	{
+
+		for (size_t i = 0; i < mvSampleRays.size(); ++i)
+		{
+			cColor col = cColor(0, 1, 0);
+			if (mvSampleRaysCollide[i])
+			{
+				col = cColor(0, mvSampleRaysAmount[i], 1);
+			}
+
+			apFunctions->GetLowLevelGfx()->DrawLine(mpCharBody->GetPosition(), mpCharBody->GetPosition() + mvSampleRays[i] * mfWallAvoidRadius,
+				col);
+		}
+
+		/*int lPartCount = mvPrecalcSampleDirs.size() / kNumOfDirectionPartitions;
+
+		cVector3f vMoveAngles(mpCharBody->GetPitch(), mpCharBody->GetYaw(), 0);
+		cMatrixf mtxMoveRot = cMath::MatrixRotate(vMoveAngles, eEulerRotationOrder_XYZ);
+
+		cColor vDebugColors[] = {cColor(1,0,0), cColor(0,1,0), cColor(0,0,1), cColor(1,0,1), cColor(1,1,0), cColor(1,1,1)};
+		for(size_t i=0; i<mvPrecalcSampleDirs.size(); ++i)
+		{
+			cVector3f vLocalDir = mvPrecalcSampleDirs[i];
+
+			if(mbUse3DMovement==false) ConvertLocalDirTo2D(vLocalDir);
+
+			cVector3f vDir = cMath::MatrixMul(mtxMoveRot, vLocalDir)*-1;
+
+			//cVector3f &vDir = mvPrecalcSampleDirs[i];
+
+			//apFunctions->GetLowLevelGfx()->DrawLine(mpCharBody->GetPosition(), mpCharBody->GetPosition()+vDir*2, vDebugColors[i / lPartCount]);
+			apFunctions->GetLowLevelGfx()->DrawSphere(mpCharBody->GetPosition()+vDir*2, 0.05f, vDebugColors[i /lPartCount]);
+		}*/
+	}
+}
 
 //-----------------------------------------------------------------------
 
@@ -163,6 +376,28 @@ float cLuxEnemyMover::GetWantedSpeedAmount()
 // PRIVATE METHODS
 //////////////////////////////////////////////////////////////////////////
 
+//-----------------------------------------------------------------------
+void cLuxEnemyMover::ConvertLocalDirTo2D(cVector3f& avLocalDir)
+{
+	if (fabs(avLocalDir.x) < fabs(avLocalDir.y))
+	{
+		float fTemp = avLocalDir.x;
+		avLocalDir.x = fabs(avLocalDir.y) * cMath::Sign(avLocalDir.x);
+		avLocalDir.y = fabs(fTemp) * cMath::Sign(avLocalDir.y);
+	}
+
+	avLocalDir.y *= 0.15f;
+	avLocalDir.Normalize();
+}
+
+//-----------------------------------------------------------------------
+
+cMatrixf cLuxEnemyMover::GetMovementDirectionMatrix()
+{
+	cVector3f vMoveAngles(mpCharBody->GetPitch(), mpCharBody->GetYaw(), 0);
+
+	return cMath::MatrixRotate(vMoveAngles, eEulerRotationOrder_XYZ);
+}
 //-----------------------------------------------------------------------
 
 void cLuxEnemyMover::UpdateStuckCounter(float afTimeStep)
@@ -222,6 +457,48 @@ void cLuxEnemyMover::UpdateTurning(float afTimeStep)
 	if(fAngleDist < 0)	mpCharBody->AddYaw(-mfTurnSpeed * afTimeStep);
 	else				mpCharBody->AddYaw(mfTurnSpeed * afTimeStep);
 }
+
+//-----------------------------------------------------------------------
+
+void cLuxEnemyMover::ForceMoveState(eLuxEnemyMoveState aMoveState)
+{
+	switch (aMoveState)
+	{
+	case eLuxEnemyMoveState_Running:
+	case eLuxEnemyMoveState_Walking:
+	{
+		mpEnemy->GetMeshEntity()->Stop();
+		mpCharBody->StopMovement();
+		mpCharBody->SetMoveSpeed(eCharDir_Forward, mpEnemy->mfForwardSpeed);
+		mpCharBody->SetMoveAcc(eCharDir_Forward, 0.0f);
+		mpCharBody->Move(eCharDir_Forward, 1.0f);
+		mpCharBody->SetLastPosition(mpCharBody->GetPosition() - mpCharBody->GetForward() * mpEnemy->mfForwardSpeed * gpBase->mpEngine->GetStepSize());
+		mpEnemy->PlayAnim(
+			aMoveState == eLuxEnemyMoveState_Running ? mpEnemy->GetRunAnimationName() : mpEnemy->GetWalkAnimationName(),
+			true,
+			0.0f,
+			true,
+			mpEnemy->mfMoveSpeedAnimMul,
+			false,
+			false
+		);
+		break;
+	}
+	}
+
+	mMoveState = aMoveState;
+}
+
+//-----------------------------------------------------------------------
+
+void cLuxEnemyMover::SetOverideMoveState(bool abX)
+{
+	if (mbOverideMoveState == abX) return;
+
+	mbOverideMoveState = abX;
+	if (mbOverideMoveState == false) mMoveState = eLuxEnemyMoveState_LastEnum;
+}
+
 //-----------------------------------------------------------------------
 
 void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
@@ -253,11 +530,21 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 	// Stopped State
 	case eLuxEnemyMoveState_Stopped:
 		if(fSpeed < -0.05f)
+		{
 			mMoveState = eLuxEnemyMoveState_Backward;
-		else if(fSpeed >= mpEnemy->mfStoppedToWalkSpeed[pose])
+		}
+		else if (fSpeed >= mpEnemy->mfStoppedToWalkSpeed[pose])
+		{
 			mMoveState = eLuxEnemyMoveState_Walking;
-		else if(std::fabs(mfTurnSpeed) > 0.07f && mpCharBody->GetMoveDelay()<=0)
+		}
+		else if (std::fabs(mfTurnSpeed) > 0.07f && mpCharBody->GetMoveDelay() <= 0)
+		{
 			mMoveState = eLuxEnemyMoveState_Walking;
+		}
+		else if (fSpeed >= mpEnemy->mfWalkToRunSpeed[pose])
+		{
+			mMoveState = eLuxEnemyMoveState_Running;
+		}
 
 		break;
 
@@ -265,7 +552,9 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 	// Walking State
 	case eLuxEnemyMoveState_Walking:
 		if(fSpeed >= mpEnemy->mfWalkToRunSpeed[pose])
+		{
 			mMoveState = eLuxEnemyMoveState_Running;
+		}
 		else if(fSpeed <= mpEnemy->mfWalkToStoppedSpeed[pose])
 		{
 			if(std::fabs(mfTurnSpeed) < 0.03f) mMoveState = eLuxEnemyMoveState_Stopped;
@@ -276,15 +565,40 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 	/////////////////
 	// Running State
 	case eLuxEnemyMoveState_Running:
-		if(fSpeed <= mpEnemy->mfRunToWalkSpeed[pose])
+		if (fSpeed <= mpEnemy->mfWalkToStoppedSpeed[pose])
+		{
+			mMoveState = eLuxEnemyMoveState_Stopped;
+		}
+		else if (fSpeed <= mpEnemy->mfRunToWalkSpeed[pose])
+		{
 			mMoveState = eLuxEnemyMoveState_Walking;
+		}
 
 		break;
 
 	/////////////////
 	// NULL
 	case eLuxEnemyMoveState_LastEnum:
-		mMoveState = eLuxEnemyMoveState_Stopped;
+		if (fSpeed < -0.05f)
+		{
+			mMoveState = eLuxEnemyMoveState_Backward;
+		}
+		else if (fSpeed >= mpEnemy->mfStoppedToWalkSpeed[pose])
+		{
+			mMoveState = eLuxEnemyMoveState_Walking;
+		}
+		else if (std::fabs(mfTurnSpeed) > 0.07f && mpCharBody->GetMoveDelay() <= 0)
+		{
+			mMoveState = eLuxEnemyMoveState_Walking;
+		}
+		else if (fSpeed >= mpEnemy->mfWalkToRunSpeed[pose])
+		{
+			mMoveState = eLuxEnemyMoveState_Running;
+		}
+		else
+		{
+			mMoveState = eLuxEnemyMoveState_Stopped;
+		}
 		break;
 	}
 	
@@ -292,17 +606,18 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 	//If move state has changed, change animation
 	if(prevMoveState != mMoveState)
 	{
+		float fFadeSpeed = prevMoveState == eLuxEnemyMoveState_Stopped ? 0.3f : 0.5f;
 		//Backward
 		if(mMoveState == eLuxEnemyMoveState_Backward)
 		{
 			//Log(" To Backward\n");
-			mpEnemy->PlayAnim(mpEnemy->GetBackwardAnimationName(), true, 0.4f, true, mpEnemy->mfMoveSpeedAnimMul, false, false);
+			mpEnemy->PlayAnim(mpEnemy->GetBackwardAnimationName(), true, fFadeSpeed, true, mpEnemy->mfMoveSpeedAnimMul, false, false);
 		}
 		//Stopped
 		else if(mMoveState == eLuxEnemyMoveState_Stopped)
 		{
 			//Log(" To Stop\n");
-			mpEnemy->PlayAnim(mpEnemy->GetIdleAnimationName(),true,0.7f,false,1.0f,false,false);
+			mpEnemy->PlayAnim(mpEnemy->GetIdleAnimationName(), true, fFadeSpeed, false, 1.0f, false, false);
 		}
 		//Walking
 		else if(mMoveState == eLuxEnemyMoveState_Walking)
@@ -310,7 +625,7 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 			bool bSync = prevMoveState == eLuxEnemyMoveState_Running ? true : false;
 			//Log(" To Walk. Synch: %d\n", bSync);
 
-			mpEnemy->PlayAnim(mpEnemy->GetWalkAnimationName(),true, 0.5f, true, mpEnemy->mfMoveSpeedAnimMul, bSync, false);
+			mpEnemy->PlayAnim(mpEnemy->GetWalkAnimationName(), true, fFadeSpeed, true, mpEnemy->mfMoveSpeedAnimMul, bSync, false);
 		}
 		//Running
 		else if(mMoveState == eLuxEnemyMoveState_Running)
@@ -318,13 +633,13 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 			bool bSync = prevMoveState == eLuxEnemyMoveState_Walking ? true : false;
 			//Log(" To Run. Synch: %d\n", bSync);
 			
-          mpEnemy->PlayAnim(mpEnemy->GetRunAnimationName(),true, 0.5f, true, mpEnemy->mfMoveSpeedAnimMul, bSync, false);
+			mpEnemy->PlayAnim(mpEnemy->GetRunAnimationName(), true, fFadeSpeed, true, mpEnemy->mfMoveSpeedAnimMul, bSync, false);
 		}
 	}
 
 	/////////////////////////////////
 	//Update animation speed
-	if(mpEnemy->mpCurrentAnimation && mMoveState != eLuxEnemyMoveState_Stopped)
+	if (mbOverideMoveState == false && mpEnemy->mpCurrentAnimation && mMoveState != eLuxEnemyMoveState_Stopped)
 	{
 		if(std::fabs(fSpeed) > 0.05f)
 		{
@@ -400,7 +715,137 @@ void cLuxEnemyMover::UpdateStepEffects(float afTimeStep)
 		if(pSound) pSound->SetPosition(vEffectPos);
 	}
 }
+//-----------------------------------------------------------------------
 
+
+void cLuxEnemyMover::UpdateWallAvoidance(float afTimeStep)
+{
+	const float fUpdateTime = 0.1f;
+
+	if (mbWallAvoidActive == false) return;
+
+	///////////////////////////////////////
+	// Check if character is moving
+	if (fabs(mpCharBody->GetMoveSpeed(eCharDir_Forward)) < 0.001f &&
+		fabs(mpCharBody->GetMoveSpeed(eCharDir_Right)) < 0.001f)
+	{
+		return;
+	}
+
+	///////////////////////////////////////
+	// Check if time for update
+	mfWallAvoidCount += afTimeStep;
+	if (mfWallAvoidCount >= fUpdateTime)
+	{
+		mfWallAvoidCount = 0;
+
+		///////////////////////////////////
+		// Set up variables
+		iPhysicsWorld* pPhysicsWorld = mpEnemy->GetMap()->GetPhysicsWorld();
+
+		bool bIntersect = false;
+		float fSamples = (float)mvSampleRays.size();
+		int lNumOfPartAngles = mvPrecalcSampleDirs.size() / kNumOfDirectionPartitions;
+
+		cMatrixf mtxMoveRot = GetMovementDirectionMatrix();
+
+
+		///////////////////////////////////
+		// Calculate the usage count for each partition
+		std::vector<int> vParitionUsageCount;
+		vParitionUsageCount.resize(kNumOfDirectionPartitions, 0);
+
+		for (size_t i = 0; i < mvSamplePartitionUsed.size(); ++i)
+		{
+			if (mvSamplePartitionUsed[i] < 0) continue;
+
+			vParitionUsageCount[mvSamplePartitionUsed[i]]++;
+		}
+
+		///////////////////////////////////
+		// Cast rays
+		for (size_t i = 0; i < mvSampleRays.size(); ++i)
+		{
+			//////////////////////////////////////
+			// Get the ray direction
+			cVector3f vDir;
+			if (mvSampleRaysCollide[i] == false)
+			{
+				/////////////////////////////////////////////
+				// Get the angle ID and make sure it is not used
+				int lAngleIdx = cMath::RandRectl(0, mvPrecalcSampleDirs.size() - 1);
+				int lPart = lAngleIdx / lNumOfPartAngles;
+				while (vParitionUsageCount[lPart] == mlSampleMaxPartCount)
+				{
+					lAngleIdx += lNumOfPartAngles;
+					if (lAngleIdx >= (int)mvPrecalcSampleDirs.size()) lAngleIdx -= (int)mvPrecalcSampleDirs.size();
+
+					lPart = lAngleIdx / lNumOfPartAngles;
+				}
+
+				/////////////////////////////////////////////
+				// Get the direction of the ray.
+				cVector3f vLocalDir = mvPrecalcSampleDirs[lAngleIdx];
+				ConvertLocalDirTo2D(vLocalDir);
+
+				vDir = cMath::MatrixMul(mtxMoveRot, vLocalDir) * -1;
+
+				mvSampleRays[i] = vDir;
+				mvSampleRaysAmount[i] = fUpdateTime;
+				mvSamplePartitionUsed[i] = lPart;
+			}
+			else
+			{
+				vDir = mvSampleRays[i];
+			}
+
+			//////////////////////////////////////
+			// Check for intersection
+			float fDistance = 0;
+			bool bCollide = gpBase->mpMapHelper->GetClosestCharCollider(mpCharBody->GetPosition(), vDir, mfWallAvoidRadius, false, &fDistance, NULL, NULL);
+
+			if (bCollide == false)
+				mvSamplePartitionUsed[i] = -1;
+			else if (mvSampleRaysCollide[i] == false)
+				vParitionUsageCount[mvSamplePartitionUsed[i]]++;
+
+			mvSampleRaysCollide[i] = bCollide;
+
+
+			//////////////////////////////////////
+			// If intersection, increase the steering.
+			if (bCollide)
+			{
+				mvSampleRayBaseDir[i] = vDir * -(1 - fDistance / mfWallAvoidRadius);
+			}
+		}
+	}
+
+
+	///////////////////////////////////////
+	// Calculate steering amount (and fade each one in)
+	float fTotalHits = 0;
+	float fTotalAmount = 0;
+	cVector3f vTotalSteer = 0;
+	for (size_t i = 0; i < mvSampleRays.size(); ++i)
+	{
+		if (mvSampleRaysCollide[i])
+		{
+			mvSampleRaysAmount[i] += afTimeStep * 5;
+			if (mvSampleRaysAmount[i] > 1.0f) mvSampleRaysAmount[i] = 1.0f;
+
+			vTotalSteer += mvSampleRayBaseDir[i] * mvSampleRaysAmount[i];
+			fTotalHits += 1;
+		}
+	}
+
+	if (fTotalHits > 0)
+	{
+		if (vTotalSteer.SqrLength() > 1) vTotalSteer.Normalize();
+
+		mvSteeringVec += vTotalSteer * mfWallAvoidSteerAmount;
+	}
+}
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////
@@ -418,6 +863,8 @@ kSerializeVar(mfTurnBreakAcc, eSerializeType_Float32)
 
 kSerializeVar(mfStuckCounter, eSerializeType_Float32)
 
+
+kSerializeVar(mvCurrentGoal, eSerializeType_Vector3f)													 
 kSerializeVar(mlMoveState, eSerializeType_Int32)
 kSerializeVar(mbOverideMoveState, eSerializeType_Bool)
 
@@ -433,6 +880,7 @@ void cLuxEnemyMover_SaveData::FromMover(cLuxEnemyMover *apMover)
 	mfTurnBreakAcc = apMover->mfTurnBreakAcc;
 
 	mfStuckCounter = apMover->mfStuckCounter;
+	mvCurrentGoal = apMover->mvCurrentGoal;
 
 	mlMoveState = apMover->mMoveState;
 	mbOverideMoveState = apMover->mbOverideMoveState;
@@ -448,6 +896,7 @@ void cLuxEnemyMover_SaveData::ToMover(cLuxEnemyMover *apMover)
 	apMover->mfTurnBreakAcc = mfTurnBreakAcc;
 
 	apMover->mfStuckCounter = mfStuckCounter;
+	apMover->mvCurrentGoal = mvCurrentGoal;
 
 	apMover->mMoveState = (eLuxEnemyMoveState)mlMoveState;
 	apMover->mbOverideMoveState = mbOverideMoveState;

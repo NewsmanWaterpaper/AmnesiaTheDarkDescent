@@ -29,9 +29,13 @@
 class cLuxEnemy_Grunt_SaveData : public iLuxEnemy_SaveData
 {
 	kSerializableClassInit(cLuxEnemy_Grunt_SaveData)
+
 public:
 	////////////////
 	//Properties
+	int mPatrolMoveSpeed;
+	bool mbAllowZeroWaitTime;
+	float mfRunSpeedMul;
 		
 };
 
@@ -107,6 +111,8 @@ private:
 	//Variables
 	float mfWaitTime;
 	float mfAlertRunTowardsCount;
+	eLuxEnemyMoveSpeed mPatrolMoveSpeed;
+	bool mbAllowZeroWaitTime;
 	
 };
 

@@ -43,6 +43,11 @@ void cLuxLineOfSightCallback::Reset()
 
 bool cLuxLineOfSightCallback::BeforeIntersect(iPhysicsBody *apBody)
 {
+	if (apBody->GetBlocksPathfinding())
+	{
+		return false;
+	}
+
 	if(apBody->IsCharacter() || apBody->GetCollide()==false || (mbCheckShadow && apBody->GetBlocksLight()==false) )
 	{
 		return false;
@@ -165,7 +170,10 @@ void cLuxClosestCharColliderCallback::Reset()
 
 bool cLuxClosestCharColliderCallback::BeforeIntersect(iPhysicsBody *apBody)
 {
-	return apBody->GetCollideCharacter() && apBody->IsCharacter()==false;
+	if (apBody->GetCollideCharacter() == false || apBody->IsCharacter()) return false;
+	if (mbCheckDynamic == false && apBody->GetMass() > 0) return false;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------
@@ -326,14 +334,20 @@ bool cLuxMapHelper::ShapeDamage(iCollideShape *apShape, const cMatrixf& a_mtxTra
 		
 		bool bCollide = pPhysicsWorld->CheckShapeCollision(apShape, a_mtxTransform, pBody->GetShape(), pBody->GetLocalMatrix(),
 															collideData,4, false);
-		if(bCollide==false) continue;
+		if (bCollide == false)
+		{
+			continue;
+		}
 
 		///////////////////////
 		//Check ray cast
 		mAttackRayCallback.Setup(pBody);
 
-		pPhysicsWorld->CastRay(&mAttackRayCallback, avOrigin, pBody->GetWorldPosition(), false, false, false, true);
-		if(mAttackRayCallback.mbIntersection) continue;
+		pPhysicsWorld->CastRay(&mAttackRayCallback, avOrigin, pBody->GetWorldPosition(), true, false, false, true);
+		if (mAttackRayCallback.mbIntersection)
+		{
+			continue;
+		}
 		
 		//////////////////////
 		//Set up entities
@@ -476,6 +490,7 @@ bool cLuxMapHelper::GetClosestEntity(	const cVector3f& avStart,const cVector3f& 
 	mClosestEntityCallback.Reset();
 	cVector3f vEnd = avStart + avDir*afRayLength;
 	pPhysicsWorld->CastRay(	&mClosestEntityCallback, avStart,vEnd,true,false,false,true);
+	
 
 	//LogUpdate(" - Bodies checked: %d, Length: %f\n", mClosestEntityCallback.mlCheckCount, (vEnd - avStart).Length());
 
@@ -489,7 +504,7 @@ bool cLuxMapHelper::GetClosestEntity(	const cVector3f& avStart,const cVector3f& 
 
 //-----------------------------------------------------------------------
 
-bool cLuxMapHelper::GetClosestCharCollider(const cVector3f& avStart,const cVector3f& avDir, float afRayLength, float *afDistance, cVector3f *avNormal, iPhysicsBody** apBody)
+bool cLuxMapHelper::GetClosestCharCollider(const cVector3f& avStart, const cVector3f& avDir, float afRayLength, bool abCheckDynamic, float* afDistance, cVector3f* avNormal, iPhysicsBody** apBody)
 {
 	cLuxMap *pCurrentMap = gpBase->mpMapHandler->GetCurrentMap();
 	if(pCurrentMap==NULL) return false;
@@ -499,6 +514,7 @@ bool cLuxMapHelper::GetClosestCharCollider(const cVector3f& avStart,const cVecto
 	mClosestharColliderCallback.Reset();
 	cVector3f vEnd = avStart + avDir*afRayLength;
 	pPhysicsWorld->CastRay(	&mClosestharColliderCallback, avStart,vEnd,true,true,false,true);
+	mClosestharColliderCallback.mbCheckDynamic = abCheckDynamic;
 
 	iPhysicsBody *pBodyFound = mClosestharColliderCallback.mpClosestBody;
 	if(afDistance)	*afDistance = mClosestharColliderCallback.mfClosestDist;
@@ -668,6 +684,68 @@ void cLuxMapHelper::GetLightsAtNode(iRenderableContainerNode *apNode, tLightList
 		}
 	}
 
+}
+//-----------------------------------------------------------------------
+
+void cLuxMapHelper::GetLightsAtNode(iRenderableContainerNode* apNode, tLightList& alstLights, const cVector3f& avPos, float afRadius, bool includeInvisible, bool includeBoxLights)
+{
+	///////////////////////////////////////
+	//Make sure node is updated and check point in bv
+	apNode->UpdateBeforeUse();
+
+	////////////////////////
+	//Iterate children
+	if (apNode->HasChildNodes())
+	{
+		tRenderableContainerNodeListIt childIt = apNode->GetChildNodeList()->begin();
+		for (; childIt != apNode->GetChildNodeList()->end(); ++childIt)
+		{
+			iRenderableContainerNode* pChildNode = *childIt;
+
+			//Make sure point is in node AABB.
+			if (cMath::CheckPointInAABBIntersection(avPos, apNode->GetMin(), apNode->GetMax()))
+			{
+				GetLightsAtNode(pChildNode, alstLights, avPos, afRadius, includeInvisible, includeBoxLights);
+			}
+		}
+	}
+
+	/////////////////////////////
+	//Iterate objects
+	if (apNode->HasObjects())
+	{
+		tRenderableListIt it = apNode->GetObjectList()->begin();
+		for (; it != apNode->GetObjectList()->end(); ++it)
+		{
+			iRenderable* pObject = *it;
+			if ((pObject->IsVisible() == false && !includeInvisible) || pObject->GetRenderType() != eRenderableType_Light) continue;
+
+			bool bAdd = false;
+
+			iLight* pLight = static_cast<iLight*>(pObject);
+			switch (pLight->GetLightType())
+			{
+			case eLightType_Box:
+				bAdd = includeBoxLights && (cMath::CheckPointInBVIntersection(avPos, *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(afRadius, 0, 0), *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(-afRadius, 0, 0), *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(0, 0, afRadius), *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(0, 0, -afRadius), *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(0, afRadius, 0), *pLight->GetBoundingVolume())
+					|| cMath::CheckPointInBVIntersection(avPos + cVector3f(0, -afRadius, 0), *pLight->GetBoundingVolume()));
+				break;
+			case eLightType_Point:
+				bAdd = cMath::Vector3DistSqr(avPos, pLight->GetWorldPosition()) <= pLight->GetRadius() * pLight->GetRadius() * afRadius * afRadius;
+				break;
+			case eLightType_Spot:
+				cLightSpot* pSpotLight = static_cast<cLightSpot*>(pLight);
+				bAdd = pSpotLight->GetFrustum()->CollideSphere(avPos, afRadius) != eCollision_Outside;
+				break;
+			}
+
+			if (bAdd) alstLights.push_back(pLight);
+		}
+	}
 }
 
 //-----------------------------------------------------------------------

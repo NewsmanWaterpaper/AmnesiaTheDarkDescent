@@ -60,6 +60,13 @@ namespace hpl {
 		void SetMinDistance(float afX){mfMinDistance = afX;}
 		float GetMinDistance(){return mfMinDistance;}
 
+		void SetKeepPlayingOutOfRange(bool abX) { mbKeepPlayingOutOfRange = abX; }
+		bool GetKeepPlayingOutOfRange() { return mbKeepPlayingOutOfRange; }
+
+
+		void SetAIVolume(float afX) { mfAIVolume = afX; }
+		float GetAIVolume() { return mfAIVolume; }
+
 		void SetStream(bool abX){mbStream = abX;}
 		bool GetStream(){return mbStream;}
 		void SetLoop(bool abX){mbLoop = abX;}
@@ -98,6 +105,9 @@ namespace hpl {
 		bool mbFadeStart;
 		bool mbFadeStop;
         
+		bool mbKeepPlayingOutOfRange;
+
+		float mfAIVolume;
 		float mfVolume;
 		float mfMaxDistance;
 		float mfMinDistance;

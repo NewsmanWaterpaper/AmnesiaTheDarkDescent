@@ -370,6 +370,7 @@ namespace hpl {
 			//Set entity properties
 			//TODO...
 			mpEntity->SetRenderFlagBit(eRenderableFlag_ShadowCaster,true); //<- Temp
+			if (apInstanceVars) mpEntity->SetIsOccluder(apInstanceVars->GetVarBool("IsOccluder", false));
 		}
 
 		////////////////////////////////////////	
@@ -1016,6 +1017,7 @@ namespace hpl {
 		apBody->SetAngularDamping(apElem->GetAttributeFloat("AngularDamping"));
 		apBody->SetLinearDamping(apElem->GetAttributeFloat("LinearDamping"));
 
+		apBody->SetBlocksPathfinding(apElem->GetAttributeBool("BlocksPathfinding", false));
 		apBody->SetBlocksSound(apElem->GetAttributeBool("BlocksSound",false));
 		apBody->SetCollideCharacter(apElem->GetAttributeBool("CollideCharacter",true));
 		apBody->SetCollide(apElem->GetAttributeBool("CollideNonCharacter",true));

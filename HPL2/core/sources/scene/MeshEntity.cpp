@@ -803,6 +803,13 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
+	void cMeshEntity::SetIsOccluder(bool abX)
+	{
+		for (size_t i = 0; i < mvSubMeshes.size(); i++)
+		{
+			mvSubMeshes[i]->SetIsOccluder(abX);
+		}
+	}
 
 	//----------------------------------------------------------------------
 	bool cMeshEntity::IsMeshCulled()

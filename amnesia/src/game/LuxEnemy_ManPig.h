@@ -48,7 +48,6 @@ public:
 	float mfHuntPauseTimeMul;
 
 	float mfDamageMul;
-	float mfRunSpeedMul;
 
 	bool mbTeslaTerror;
 	bool mbTeslaFadeDisabled;
@@ -82,7 +81,9 @@ public:
 	void ChangePose(eLuxEnemyPoseType aPose, bool abSendMessage=true);
 	void ChangeMoveType(eLuxEnemyMoveType aMoveType);
 	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
+	void SetToFlee(bool abX);
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
+
 
 	//////////////////////
 	// Movement animation names
@@ -176,7 +177,7 @@ private:
 	int mlMindFuckSoundId;
 
 	float mfDamageMul;
-	float mfRunSpeedMul;
+
 	
 	bool mbThreatenOnAlert;
 	bool mbFleeFromPlayer;

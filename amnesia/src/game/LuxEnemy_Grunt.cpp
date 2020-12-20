@@ -77,10 +77,21 @@ void cLuxEnemyLoader_Grunt::LoadVariables(iLuxEnemy *apEnemy, cXmlElement *apRoo
 }
 
 //-----------------------------------------------------------------------
+static eLuxEnemyMoveSpeed ToMoveSpeed(const tString& asStr)
+{
+	if (asStr == "Run") return eLuxEnemyMoveSpeed_Run;
+	if (asStr == "Walk") return eLuxEnemyMoveSpeed_Walk;
+
+	Error("eLuxEnemyMoveSpeed '%s' does not exist, falling back to walk!\n", asStr.c_str());
+	return eLuxEnemyMoveSpeed_Walk;
+}
 
 void cLuxEnemyLoader_Grunt::LoadInstanceVariables(iLuxEnemy *apEnemy, cResourceVarsObject *apInstanceVars)
 {
-
+	cLuxEnemy_Grunt* pGrunt = static_cast<cLuxEnemy_Grunt*>(apEnemy);
+	
+	pGrunt->mPatrolMoveSpeed = ToMoveSpeed(apInstanceVars->GetVarString("PatrolMoveSpeed", "Walk"));
+	pGrunt->mbAllowZeroWaitTime = apInstanceVars->GetVarBool("AllowZeroNodeWaitTimes", false);
 }
 
 //-----------------------------------------------------------------------
@@ -95,6 +106,7 @@ cLuxEnemy_Grunt::cLuxEnemy_Grunt(const tString &asName, int alID, cLuxMap *apMap
 {
 	mfWaitTime =0;
 	mfAlertRunTowardsCount = 0;
+	mfRunSpeedMul = 1.0f;
 
 	mbAlignEntityWithGroundRay = true;
 }
@@ -223,10 +235,21 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 	// Wait
 	kLuxState(eLuxEnemyState_Wait)
 		kLuxOnEnter
-			if(mfWaitTime <= 0)
+			if (mfWaitTime <= 0)
+			{
+			//gpBase->mpDebugHandler->AddMessage(_W("wait time=0"), false);
+				if (mbAllowZeroWaitTime)
+				{
+				//gpBase->mpDebugHandler->AddMessage(_W("Zero wait time!!"), false);
+				SendMessage(eLuxEnemyMessage_TimeOut, 0.01f, true);
+				}
+				else
 				SendMessage(eLuxEnemyMessage_TimeOut, cMath::RandRectf(1, 3), true);
+			}
 			else
+			{
 				SendMessage(eLuxEnemyMessage_TimeOut, mfWaitTime, true);
+			}
 			mfWaitTime =0;
 
 			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(mfIdleExtraTimeMin, mfIdleExtraTimeMax), true);
@@ -273,7 +296,8 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 	kLuxState(eLuxEnemyState_Patrol)
 		kLuxOnEnter
 			ChangeSoundState(eLuxEnemySoundState_Idle);
-			SetMoveSpeed(eLuxEnemyMoveSpeed_Walk);
+			SetMoveSpeed(mPatrolMoveSpeed);
+			if (mPatrolMoveSpeed == eLuxEnemyMoveSpeed_Run) mfForwardSpeed *= mfRunSpeedMul;
 			PatrolUpdateGoal();
 
 
@@ -541,6 +565,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			{
 				ChangeSoundState(eLuxEnemySoundState_Hunt);
 				SetMoveSpeed(eLuxEnemyMoveSpeed_Run);
+				mfForwardSpeed *= mfRunSpeedMul;
 				SendMessage(eLuxEnemyMessage_TimeOut, 0.1f, true);
 				mfFOVMul = 4.0f;
 				
@@ -1013,7 +1038,7 @@ void cLuxEnemy_Grunt::PatrolEndOfPath()
 //-----------------------------------------------------------------------
 
 kBeginSerialize(cLuxEnemy_Grunt_SaveData, iLuxEnemy_SaveData)
-
+kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kEndSerialize()
 
 //-----------------------------------------------------------------------
@@ -1035,6 +1060,11 @@ void cLuxEnemy_Grunt::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	//////////////////
 	//Set variables
 	//kCopyToVar(pData,mbLit);
+	kCopyToVar(pData, mPatrolMoveSpeed);
+	kCopyToVar(pData, mbAllowZeroWaitTime);
+	kCopyToVar(pData, mfRunSpeedMul);
+	
+
 }
 
 //-----------------------------------------------------------------------
@@ -1048,7 +1078,9 @@ void cLuxEnemy_Grunt::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 
 	//////////////////
 	//Set variables
-	
+	mPatrolMoveSpeed = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;
+	kCopyFromVar(pData, mbAllowZeroWaitTime);
+	kCopyFromVar(pData, mfRunSpeedMul);
 	////////////////////////
 	// Handle changed enums
 	if (mCurrentState >= eLuxEnemyState_PigEnumStart) mCurrentState = eLuxEnemyState_LastEnum;

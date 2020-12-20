@@ -858,8 +858,8 @@ void cLuxMoveState_Normal::FootSound(eLuxFootSound aType)
 		}
 	}
 	
-	pMap->BroadcastEnemySoundMessage(	mpPlayer->GetCharacterBody()->GetFeetPosition() + cVector3f(0,0.1f,0),extraData.mfVolume * fVolumeMul,
-										extraData.mfMinDistance, extraData.mfMaxDistance * fDistanceMul);
+	pMap->BroadcastEnemySoundMessage(mpPlayer->GetCharacterBody()->GetFeetPosition() + cVector3f(0, 0.1f, 0), extraData.mfAIVolume,
+		extraData.mfMinDistance, extraData.mfMaxDistance, sSoundDataName);
 }
 
 //-----------------------------------------------------------------------
