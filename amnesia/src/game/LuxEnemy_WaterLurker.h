@@ -32,7 +32,8 @@ class cLuxEnemy_WaterLurker_SaveData : public iLuxEnemy_SaveData
 public:
 	////////////////
 	//Properties
-	float mfPlayerDetectionHeight;	
+	float mfPlayerDetectionHeight;
+	float mfRunSpeedMul;
 };
 
 //----------------------------------------------
@@ -101,6 +102,7 @@ private:
 	//////////////
 	//Data
 	float mfPlayerDetectionHeight;
+	float mfRunSpeedMul;
 	float mfEatDamage;
 	float mfAfterAttackPauseTime;
 

@@ -140,6 +140,11 @@ namespace hpl {
 		float GetFPS();
 		float GetAvgFrameTimeInMS();
 
+		float GetGameLogicTime(float& afIterations) { afIterations = (float)mfGameLogicIterations; return (float)mfGameLogicTime; }
+		float GetRenderingLogicTime();
+
+		float GetMaxGameLogic() { return mfMaxGameLogic; }
+		float GetMaxRenderLogic() { return mfMaxRenderLogic; }																													 
 		void SetFPSUpdateRate(float afSec);
 		float GetFPSUpdateRate();
 
@@ -179,6 +184,7 @@ namespace hpl {
 		const tString& GetEngineTypeString(eVariableType aType) { return mvEngineTypeStrings[aType]; }
 		
 
+			static int mlNumLogicLoops;						  
 	private:
 		void UpdateFrameTimer();
 
@@ -205,10 +211,26 @@ namespace hpl {
 		iMutex *mpMutex;
 
 		cFPSCounter* mpFPSCounter;
+		iTimer *mpGameLogicTimer;
+		iTimer *mpInnerGameLogicTimer;
+		iTimer *mpRenderingLogicTimer;
+
+		double mfGameLogicIterations;
+		double mfGameLogicTime;
+		double mfRenderingLogicTime;
+
+		tFloatVec mvMaxGameLogic;
+		tFloatVec mvMaxRenderLogic;
+
+		float mfMaxGameLogic;
+		float mfMaxRenderLogic;					   
 		
 		iTimer *mpFrameTimer;
 		
 		bool mbLimitFPS;
+		double mfFPSLimit;
+		double mfLastFrameRender;
+		iTimer *mpFrameLimitTimer;					   
 
 		tScriptVarMap m_mapLocalVars;
 		tScriptVarMap m_mapGlobalVars;

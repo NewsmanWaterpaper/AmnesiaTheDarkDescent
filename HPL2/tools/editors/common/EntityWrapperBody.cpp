@@ -41,6 +41,7 @@ cEntityWrapperTypeBody::cEntityWrapperTypeBody() : iEntityWrapperTypeAggregate(e
 	AddFloat(eBodyFloat_BuoyancyDensityMul, "BuoyancyDensityMul", 1);
 
 	AddBool(eBodyBool_BlockSound, "BlocksSound", false);
+	AddBool(eBodyBool_BlocksPathfinding, "BlocksPathfinding", false);
 	AddBool(eBodyBool_ContinuousCollision, "ContinuousCollision", true);
 	AddBool(eBodyBool_CanAttachCharacter, "CanAttachCharacter", true);
 	AddBool(eBodyBool_PushedByCharacterGravity, "PushedByCharacterGravity", true);
@@ -174,6 +175,7 @@ cEntityWrapperBody::cEntityWrapperBody(iEntityWrapperData* apData) : iEntityWrap
 	mbVolatile = false;
 	mbUseSurfaceEffects = true;
 	mbHasGravity = true;
+	mbBlocksPathfinding = false;
 }
 
 cEntityWrapperBody::~cEntityWrapperBody()
@@ -235,6 +237,8 @@ bool cEntityWrapperBody::SetProperty(int alPropID, const bool& abX)
 		SetUseSurfaceEffects(abX);	break;
 	case eBodyBool_HasGravity:
 		SetHasGravity(abX);	break;
+	case eBodyBool_BlocksPathfinding:
+		SetBlocksPathfinding(abX);  break;
 	default:
 		return iEntityWrapper::SetProperty(alPropID, abX);
 	}
@@ -300,6 +304,8 @@ bool cEntityWrapperBody::GetProperty(int alPropID, bool& abX)
 		abX = UsesSurfaceEffects();	break;
 	case eBodyBool_HasGravity:
 		abX = HasGravity();	break;
+	case eBodyBool_BlocksPathfinding:
+		abX = HasBlocksPathfinding(); break;
 	default:
 		return iEntityWrapper::GetProperty(alPropID, abX);
 	}

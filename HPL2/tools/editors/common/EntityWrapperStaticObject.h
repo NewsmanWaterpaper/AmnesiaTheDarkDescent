@@ -43,6 +43,7 @@ enum eStaticObjectBool
 {
 	eStaticObjectBool_Collides = StaticObjectPropIdStart,
 	eStaticObjectBool_CastShadows,
+	eStaticObjectBool_IsOccluder,
 
 	eStaticObjectBool_LastEnum,
 };
@@ -77,6 +78,7 @@ public:
 		AddBool(eStaticObjectBool_Collides, "Collides");
 		AddBool(eStaticObjectBool_CastShadows, "CastShadows");
 
+
 		AddInt(eStaticObjectInt_FileIndex, "FileIndex", -1, ePropCopyStep_PreEnt);
 		AddString(eStaticObjectStr_Filename, "Filename", "", ePropCopyStep_PreEnt, false);
 	}
@@ -106,6 +108,9 @@ public:
 	void SetCastShadows(bool abX);
 	bool GetCastShadows() { return mbCastShadows; }
 
+	void SetIsOccluder(bool abX);
+	bool IsOccluder() { return mbIsOccluder; }
+
 	void SetFileIndex(int alIdx) { mlFileIndex = alIdx; }
 	int GetFileIndex() { return mlFileIndex; }
 
@@ -124,6 +129,7 @@ protected:
 
 	bool mbCollides;
 	bool mbCastShadows;
+	bool mbIsOccluder;
 
 	int mlFileIndex;
 };

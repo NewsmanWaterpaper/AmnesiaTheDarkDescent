@@ -47,6 +47,7 @@ public:
 	float mfInLanternLightCount;
 	float mfHuntPauseTimeMul;
 
+	float  mfFleeHealth;
 	float mfDamageMul;
 
 	bool mbTeslaTerror;
@@ -83,6 +84,8 @@ public:
 	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
 	void SetToFlee(bool abX);
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
+	void SetFleeHealth(float abX) { mfFleeHealth = abX; }
+	float GetFleeHealth() { return mfFleeHealth; }
 
 
 	//////////////////////
@@ -177,6 +180,8 @@ private:
 	int mlMindFuckSoundId;
 
 	float mfDamageMul;
+
+	float mfFleeHealth;
 
 	
 	bool mbThreatenOnAlert;

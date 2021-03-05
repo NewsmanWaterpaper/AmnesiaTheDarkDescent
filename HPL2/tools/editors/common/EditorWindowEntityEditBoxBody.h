@@ -82,6 +82,7 @@ protected:
 	cWidgetCheckBox* mpCheckBoxCollideCharacter;
 	cWidgetCheckBox* mpCheckBoxCollideNonCharacter;
 	cWidgetCheckBox* mpCheckBoxVolatile;
+	cWidgetCheckBox* mpCheckBoxBlocksPathfinding;
 	cEditorInputBool* mpInpUseSurfaceEffects;
 	cEditorInputBool* mpInpHasGravity;
 

@@ -151,6 +151,7 @@ public:
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
 
+
 	float mfRunSpeedMul;
 	float mfForwardSpeed;
 	float mfBackwardSpeed;
@@ -491,6 +492,10 @@ public:
 
 	float GetActivationDistance() { return mfActivationDistance;}
 
+	float GetRegenHealthSpeed() { return mfRegenHealthSpeed; }
+	void SetRegenHealthSpeed(float afX) {mfRegenHealthSpeed = afX; }
+	float GetFleeHealth() { return mfFleeHealth; }
+
 	const tString& GetHitSound(eLuxWeaponHitType aType){ return msHitSound[aType];}	
 	const tString& GetHitPS(eLuxWeaponHitType aType){ return msHitPS[aType];}
 
@@ -507,6 +512,21 @@ public:
 	void SetHallucinationEndDist(float afX){ mfHallucinationEndDist = afX;}
 
 	float GetInLanternLightCount(){ return mfInLanternLightCount;}
+
+	//Distance
+	cVector3f GetPlayerFeetPos();
+
+	float Dist2D(const cVector3f& avPos);
+	float DistToChar(iCharacterBody* apBody);
+	float DistToChar2D(iCharacterBody* apBody);
+	float AbsHeightDistToChar(iCharacterBody* apBody);
+	cVector3f GetDirection2D(const cVector3f& avPos);
+
+	float DistToPlayer();
+	float DistToPlayer2D();
+	float DistToPlayer2D(const cVector3f& avPos);
+	float AbsHeightDistToPlayer();
+	cVector3f GetDirection2DToPlayer();
 
 	//////////////////////
 	//Callbacks
@@ -595,19 +615,7 @@ protected:
 
 	float GetPathNodeReachedCheckVolumeScaleFactor() { return mfPathNodeReachedCheckVolumeScaleFactor; }
 	
-	cVector3f GetPlayerFeetPos();
-
-	float Dist2D(const cVector3f &avPos);
-	float DistToChar(iCharacterBody *apBody);
-	float DistToChar2D(iCharacterBody *apBody);
-	float AbsHeightDistToChar(iCharacterBody *apBody);
-	cVector3f GetDirection2D(const cVector3f &avPos);
-    
-	float DistToPlayer();
-	float DistToPlayer2D();
-	float DistToPlayer2D(const cVector3f& avPos);
-	float AbsHeightDistToPlayer();
-	cVector3f GetDirection2DToPlayer();
+	
 	
 	//gets the cos of angle between player->enemy and player move dir. 1=directly towards, -1=directly away
 	float GetPlayerMovementTowardEnemyAmount();
@@ -637,6 +645,7 @@ protected:
 	bool mbHallucination;
 	float mfHallucinationEndDist;
 	float mfRunSpeedMul;
+	float mfFleeHealth;
 
 	float mfHealth;
 	bool mbCausesSanityDecrease;

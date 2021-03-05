@@ -37,6 +37,7 @@ enum ePrimitiveBool
 {
 	ePrimitiveBool_CastShadows = PrimitivePropIdStart,
 	ePrimitiveBool_Collides,
+	ePrimitiveBool_IsOccluder,
 
 	ePrimitiveBool_LastEnum,
 };
@@ -81,6 +82,9 @@ public:
 	void SetCollides(bool abX);
 	bool GetCollides() { return mbCollides; }
 
+	void SetIsOccluder(bool abX);
+	bool IsOccluder() { return mbIsOccluder; }
+
 	bool IsAffectedByDecal(bool abAffectsStaticObject, bool abAffectsPrimitive, bool abAffectsEntity);
 
 protected:
@@ -91,6 +95,7 @@ protected:
 	tString msMaterial;
 	bool mbCastShadows;
 	bool mbCollides;
+	bool mbIsOccluder;
 };
 
 //------------------------------------------------------------------------

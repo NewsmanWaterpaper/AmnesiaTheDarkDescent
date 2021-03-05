@@ -127,6 +127,9 @@ bool cEntityWrapperStaticObject::GetProperty(int alPropID, bool& abX)
 	case eStaticObjectBool_CastShadows:
 		abX = GetCastShadows();
 		break;
+	case eStaticObjectBool_IsOccluder:
+		abX = IsOccluder();
+		break;
 	default:
 		return false;
 	}
@@ -181,9 +184,12 @@ bool cEntityWrapperStaticObject::SetProperty(int alPropID, const bool& abX)
 	case eStaticObjectBool_CastShadows:
 		SetCastShadows(abX);
 		break;
+	case eStaticObjectBool_IsOccluder:
+		SetIsOccluder(abX);
+		break;
 	default:
 		return false;
-	}
+	} 
 
 	return true;
 }
@@ -229,6 +235,14 @@ void cEntityWrapperStaticObject::SetCastShadows(bool abX)
 	mbCastShadows = abX;
 	if(mpEngineEntity)
 		((iEngineEntityMesh*)mpEngineEntity)->SetCastShadows(abX);
+}
+//---------------------------------------------------------------------------
+
+void cEntityWrapperStaticObject::SetIsOccluder(bool abX)
+{
+	mbIsOccluder = abX;
+	if (mpEngineEntity)
+		((iEngineEntityMesh*)mpEngineEntity)->SetIsOccluder(abX);
 }
 
 //---------------------------------------------------------------------------

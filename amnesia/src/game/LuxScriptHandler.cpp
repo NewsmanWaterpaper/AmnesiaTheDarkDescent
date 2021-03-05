@@ -721,6 +721,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEnemySanityDecreaseActive(string &in asName, bool abX)",(void *)SetEnemySanityDecreaseActive);
 	AddFunc("void TeleportEnemyToNode(string &in asEnemyName, string &in asNodeName, bool abChangeY)",(void *)TeleportEnemyToNode);
 	AddFunc("void TeleportEnemyToEntity(string &in asEnemyName, string &in asTargetEntity, string &in asTargetBody, bool abChangeY)",(void *)TeleportEnemyToEntity);
+	AddFunc("float GetEnemyPlayerDistance(string &in asEnemyName)", (void*)GetEnemyPlayerDistance);
+	AddFunc("bool GetPlayerCanSeeEnemy(string &in asEnemyName)", (void*)GetPlayerCanSeeEnemy);
 
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
 	AddFunc("void ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeManPigPatrolSpeed);
@@ -734,6 +736,10 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEnemyHealth(string &in asName, float afHealth)", (void*)SetEnemyHealth);
 	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
 	AddFunc("void SetEnemyRunSpeedMul(string &in asName, float afRunSpeedMul)", (void*)SetEnemyRunSpeedMul);
+	AddFunc("void SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed)", (void*)SetEnemyRegenHealthSpeed);
+	AddFunc("float GetEnemyRegenHealthSpeed(string& asName)", (void*)GetEnemyRegenHealthSpeed);
+	AddFunc("void SetManPigFleeHealth(string& asName, float afFleeHealth)", (void*)SetManPigFleeHealth);
+	AddFunc("float GetManPigFleeHealth(string& asName)", (void*)GetManPigFleeHealth);
 
 	AddFunc("void SetPropHealth(string &in asName, float afHealth)",(void *)SetPropHealth);
 	AddFunc("void AddPropHealth(string &in asName, float afHealth)",(void *)AddPropHealth);
@@ -3300,6 +3306,33 @@ void __stdcall cLuxScriptHandler::TeleportEnemyToEntity(string & asName, string 
 
 	END_SET_PROPERTY
 }
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetEnemyPlayerDistance(string& asEnemyName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
+		return 0;
+	}
+
+	return pEnemy->DistToPlayer();
+}
+
+
+bool __stdcall cLuxScriptHandler::GetPlayerCanSeeEnemy(string& asEnemyName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
+		return false;
+	}
+
+	return pEnemy->GetIsSeenByPlayer();
+}
+
 
 //-----------------------------------------------------------------------
 
@@ -3422,7 +3455,7 @@ string& __stdcall cLuxScriptHandler::GetEnemyStateName(string& asName)
 
 	return pEnemy->GetCurrentEnemyStateName();
 }
-
+//-----------------------------------------------------------------------
 float __stdcall cLuxScriptHandler::GetEnemyHealth(string& asName)
 {
 	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
@@ -3444,7 +3477,7 @@ void __stdcall cLuxScriptHandler::SetEnemyHealth(string& asName, float afHealth)
 
 	END_SET_PROPERTY
 }
-
+//-----------------------------------------------------------------------
 float __stdcall cLuxScriptHandler::GetEnemyRunSpeedMul(string& asName)
 {
 	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
@@ -3465,6 +3498,51 @@ void __stdcall cLuxScriptHandler::SetEnemyRunSpeedMul(string& asName, float afRu
 	pEnemy->SetRunSpeedMul(afRunSpeedMul);
 
 	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetRegenHealthSpeed(afRegenHealthSpeed);
+
+	END_SET_PROPERTY
+}
+
+float __stdcall cLuxScriptHandler::GetEnemyRegenHealthSpeed(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetRegenHealthSpeed();
+}
+
+void __stdcall cLuxScriptHandler::SetManPigFleeHealth(string& asName, float afFleeHealth)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetFleeHealth(afFleeHealth);
+
+	END_SET_PROPERTY
+}
+
+float __stdcall cLuxScriptHandler::GetManPigFleeHealth(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetFleeHealth();
 }
 
 

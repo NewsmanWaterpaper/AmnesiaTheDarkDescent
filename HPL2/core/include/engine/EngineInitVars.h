@@ -37,10 +37,12 @@ namespace hpl {
 		{
 		public:
 			cEngineVars() :
-				mlUpdateRate(60)
+				mlUpdateRate(60),
+				mlMaxFramesPerSec(60)
 			  {}
 
 			  int mlUpdateRate;
+			  int mlMaxFramesPerSec;
 		};
 		cEngineVars mGame;
 

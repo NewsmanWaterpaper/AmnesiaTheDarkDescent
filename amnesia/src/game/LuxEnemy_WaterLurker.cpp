@@ -88,6 +88,8 @@ void cLuxEnemyLoader_WaterLurker::LoadInstanceVariables(iLuxEnemy *apEnemy, cRes
 
 	float fHeight = apInstanceVars->GetVarFloat("PlayerDetectionHeight", 0);
 	if(fHeight >0) pWaterLurker->mfPlayerDetectionHeight = fHeight;
+
+	pWaterLurker->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1);
 }
 
 //-----------------------------------------------------------------------
@@ -388,10 +390,11 @@ bool cLuxEnemy_WaterLurker::StateEventImplement(int alState, eLuxEnemyStateEvent
 				ChangeSoundState(eLuxEnemySoundState_Hunt);
 
 				SetMoveSpeed(eLuxEnemyMoveSpeed_Run);
+				mfForwardSpeed *= mfRunSpeedMul;
 				SendMessage(eLuxEnemyMessage_TimeOut, 0.1f, true);
 				SendMessage(eLuxEnemyMessage_TimeOut_2, 0.1f, true);
 				gpBase->mpMusicHandler->AddEnemy(eLuxEnemyMusic_Attack,this);
-				mbCausesSanityDecrease = true;
+				mbCausesSanityDecrease = false;
 			}
 			
 		///////////////////////
@@ -650,6 +653,7 @@ void cLuxEnemy_WaterLurker::PatrolEndOfPath()
 kBeginSerialize(cLuxEnemy_WaterLurker_SaveData, iLuxEnemy_SaveData)
 
 kSerializeVar(mfPlayerDetectionHeight, eSerializeType_Float32)
+kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
 
 kEndSerialize()
 
@@ -672,6 +676,7 @@ void cLuxEnemy_WaterLurker::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	//////////////////
 	//Set variables
 	kCopyToVar(pData,mfPlayerDetectionHeight);
+	kCopyToVar(pData, mfRunSpeedMul);
 }
 
 //-----------------------------------------------------------------------
@@ -686,6 +691,7 @@ void cLuxEnemy_WaterLurker::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	//////////////////
 	//Set variables
 	kCopyFromVar(pData,mfPlayerDetectionHeight);
+	kCopyFromVar(pData, mfRunSpeedMul);
 	
 	////////////////////////
 	// Handle changed enums

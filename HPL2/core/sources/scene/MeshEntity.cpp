@@ -1610,9 +1610,10 @@ namespace hpl {
 				cSoundEntity* pSound = mpWorld->CreateSoundEntity(msName + "_AnimEvent", apEvent->msValue, true);
 				if(pSound)
 				{
+					pSound->SetIsSaved(false);		   
 					if (mpBoneStateRoot != NULL)
 					{
-						pSound->SetIsSaved(false);
+						
 						cNode3DIterator nodeIt = mpBoneStateRoot->GetChildIterator();
 						if (nodeIt.HasNext())
 						{

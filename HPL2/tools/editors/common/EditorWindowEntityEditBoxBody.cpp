@@ -176,6 +176,10 @@ void cEditorWindowEntityEditBoxBody::AddPropertySetBody(cWidgetTab* apParentTab)
 	mpCheckBoxBlocksSound = mpSet->CreateWidgetCheckBox(vPos, 0, _W("Blocks sound"), apParentTab);
 	mpCheckBoxBlocksSound->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(InputCallback));
 
+	vPos.y += fAddNear;
+
+	mpCheckBoxBlocksPathfinding = mpSet->CreateWidgetCheckBox(vPos, 0, _W("Blocks pathfinding"), apParentTab);
+	mpCheckBoxBlocksPathfinding->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(InputCallback));
 
 	vPos.y += fAddNear;
 
@@ -252,6 +256,7 @@ void cEditorWindowEntityEditBoxBody::OnUpdate(float afTimeStep)
 	mpInpBuoyancyDensityMul->SetValue(mpEntity->GetBuoyancyDensityMul(),false);
 
 	if(mpCheckBoxBlocksSound) mpCheckBoxBlocksSound->SetChecked(mpEntity->BlocksSound(), false);
+	if(mpCheckBoxBlocksPathfinding) mpCheckBoxBlocksPathfinding->SetChecked(mpEntity->HasBlocksPathfinding(), false);
 	if(mpCheckBoxContinuousCollision) mpCheckBoxContinuousCollision->SetChecked(mpEntity->HasContinuousCollision(), false);
 	if(mpCheckBoxCanAttachCharacter) mpCheckBoxCanAttachCharacter->SetChecked(mpEntity->CanAttachCharacter(), false);
 	if(mpCheckBoxPushedByCharacterGravity) mpCheckBoxPushedByCharacterGravity->SetChecked(mpEntity->IsPushedByCharacterGravity(), false);
@@ -314,6 +319,12 @@ bool cEditorWindowEntityEditBoxBody::InputCallback(iWidget* apWidget, const cGui
 	else if(apWidget == mpCheckBoxBlocksSound)
 	{
 		pAction = mpEntity->CreateSetPropertyActionBool(eBodyBool_BlockSound, mpCheckBoxBlocksSound->IsChecked());
+	}
+	///////////////////////////////////////////
+	// Block Pathfinding
+	else if (apWidget == mpCheckBoxBlocksPathfinding)
+	{
+		pAction = mpEntity->CreateSetPropertyActionBool(eBodyBool_BlocksPathfinding, mpCheckBoxBlocksPathfinding->IsChecked());
 	}
 	///////////////////////////////////////////
 	// Continuous collision

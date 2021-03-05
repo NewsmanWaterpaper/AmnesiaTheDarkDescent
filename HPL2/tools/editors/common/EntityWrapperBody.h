@@ -66,6 +66,7 @@ enum eBodyBool
 	eBodyBool_Volatile,
 	eBodyBool_UseSurfaceEffects,
 	eBodyBool_HasGravity,
+	eBodyBool_BlocksPathfinding,
 
 	eBodyBool_LastEnum
 };
@@ -146,6 +147,7 @@ public:
 	void SetVolatile(bool abX) { mbVolatile = abX; }
 	void SetUseSurfaceEffects(bool abX) { mbUseSurfaceEffects = abX; }
 	void SetHasGravity(bool abX) { mbHasGravity = abX; }
+	void SetBlocksPathfinding(bool abX) { mbBlocksPathfinding = abX; }
 
 
 	bool BlocksSound() { return mbBlocksSound; }
@@ -157,6 +159,7 @@ public:
 	bool IsVolatile() { return mbVolatile; }
 	bool UsesSurfaceEffects() { return mbUseSurfaceEffects; }
 	bool HasGravity() { return mbHasGravity; }
+	bool HasBlocksPathfinding() { return mbBlocksPathfinding; }
 
 
 
@@ -209,6 +212,7 @@ protected:
 	bool mbVolatile;
 	bool mbUseSurfaceEffects;
 	bool mbHasGravity;
+	bool mbBlocksPathfinding;
 
 
 	tJointWrapperVec mvParentJoints;

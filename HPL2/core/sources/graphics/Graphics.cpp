@@ -137,8 +137,8 @@ namespace hpl {
 
 		////////////////////////////////////////////////
 		//Setup the graphic directories:
-		apResources->AddResourceDir(_W("core/shaders"),false);
-		apResources->AddResourceDir(_W("core/textures"),false);
+		apResources->AddResourceDir(_W("The Streets Of London/core/shaders"),false);
+		apResources->AddResourceDir(_W("The Streets Of London/core/textures"),false);
 		apResources->AddResourceDir(_W("core/models"),false);
 		
 		////////////////////////////////////////////////

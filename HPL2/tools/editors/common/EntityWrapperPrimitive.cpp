@@ -36,6 +36,7 @@ iEntityWrapperTypePrimitive::iEntityWrapperTypePrimitive(const tString& asElemen
 	AddString(ePrimitiveStr_Material, "Material", "", ePropCopyStep_PreEnt);
 	AddBool(ePrimitiveBool_CastShadows, "CastShadows", false);
 	AddBool(ePrimitiveBool_Collides, "Collides");
+	AddBool(ePrimitiveBool_IsOccluder, "IsOccluder");
 }
 
 //------------------------------------------------------------------------
@@ -50,6 +51,7 @@ iEntityWrapperPrimitive::iEntityWrapperPrimitive(iEntityWrapperData* apData) : i
 {
 	mbCastShadows = false;
 	mbCollides = true;
+	mbIsOccluder = true;
 }
 
 //------------------------------------------------------------------------
@@ -72,6 +74,9 @@ bool iEntityWrapperPrimitive::GetProperty(int alPropID, bool& abX)
 		break;
 	case ePrimitiveBool_Collides:
 		abX = GetCollides();
+		break;
+	case ePrimitiveBool_IsOccluder:
+		abX = IsOccluder();
 		break;
 	default:
 		return false;
@@ -110,6 +115,9 @@ bool iEntityWrapperPrimitive::SetProperty(int alPropID, const bool& abX)
 		break;
 	case ePrimitiveBool_Collides:
 		SetCollides(abX);
+		break;
+	case ePrimitiveBool_IsOccluder:
+		SetIsOccluder(abX);
 		break;
 	default:
 		return false;
@@ -185,6 +193,12 @@ void iEntityWrapperPrimitive::SetCollides(bool abX)
 bool iEntityWrapperPrimitive::IsAffectedByDecal(bool abAffectsStaticObject, bool abAffectsPrimitive, bool abAffectsEntity)
 {
 	return abAffectsPrimitive && IsVisible() && IsCulledByClipPlanes()==false;
+}
+//------------------------------------------------------------------------
+
+void iEntityWrapperPrimitive::SetIsOccluder(bool abX)
+{
+	mbIsOccluder = abX;
 }
 
 //------------------------------------------------------------------------

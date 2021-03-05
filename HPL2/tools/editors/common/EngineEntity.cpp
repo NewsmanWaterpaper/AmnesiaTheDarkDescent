@@ -238,6 +238,12 @@ void iEngineEntityMesh::SetCastShadows(bool abX)
 
 //-----------------------------------------------------------------------
 
+void iEngineEntityMesh::SetIsOccluder(bool abX)
+{
+	((cMeshEntity*)mpEntity)->SetIsOccluder(abX);
+}
+//-----------------------------------------------------------------------
+
 void iEngineEntityMesh::SetCoverage(float afX)
 {
 	((cMeshEntity*)mpEntity)->SetCoverageAmount(afX);

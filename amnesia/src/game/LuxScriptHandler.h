@@ -448,6 +448,8 @@ private:
 	static void __stdcall SetEnemySanityDecreaseActive(string& asName, bool abX);
 	static void __stdcall TeleportEnemyToNode(string & asEnemyName, string & asNodeName, bool abChangeY);
 	static void __stdcall TeleportEnemyToEntity(string & asName, string & asTargetEntity, string & asTargetBody, bool abChangeY);
+	static float __stdcall GetEnemyPlayerDistance(string& asEnemyName);
+	static bool __stdcall GetPlayerCanSeeEnemy(string& asEnemyName);
 
 	/**
 	 * Pose can be "Biped" or "Quadruped"
@@ -466,6 +468,10 @@ private:
 	static void __stdcall SetEnemyHealth(string& asName, float afHealth);
 	static float __stdcall GetEnemyRunSpeedMul(string& asName);
 	static void __stdcall SetEnemyRunSpeedMul(string& asName, float afRunSpeedMul);
+	static void __stdcall SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed);
+	static float __stdcall GetEnemyRegenHealthSpeed(string& asName);
+	static void __stdcall SetManPigFleeHealth(string& asName, float afFleeHealth);
+	static float __stdcall GetManPigFleeHealth(string& asName);
 
 	static void __stdcall SetPropHealth(string& asName, float afHealth);
 	static void __stdcall AddPropHealth(string& asName, float afHealth);

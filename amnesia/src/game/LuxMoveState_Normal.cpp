@@ -601,7 +601,7 @@ void cLuxMoveState_Normal::UpdateHeadBob(float afTimeStep)
 	
 	/////////////////////
 	// Check if moving
-	bool bMoving = pCharBody->IsOnGround() && pCharBody->GetMovedLastUpdate();
+	bool bMoving = pCharBody->IsOnGround() && pCharBody->GetMovedLastUpdate() && fPlayerSpeed > 0.0001f;
 
 	//If not moving fade size to 0 too.
 	if(bMoving==false)

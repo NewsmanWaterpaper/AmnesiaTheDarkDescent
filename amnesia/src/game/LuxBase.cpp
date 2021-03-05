@@ -96,6 +96,14 @@
 #include "LuxCommentaryIcon.h"
 #include "LuxAchievementHandler.h"
 
+#ifdef WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#endif
+#include <time.h>
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -420,33 +428,9 @@ bool cLuxBase::Init(const tString &asCommandline)
 
 	Log("Version %d.%d \n",kCurrentVersion_Main, kCurrentVersion_Minor);
 
-	#ifdef COPY_PROTECTION_ENABLED
-	/////////////////////////////
-	// Copy Protection check
-	eSerialInputReturnState serialState = AskForSerial();
-	while(serialState!=eSerialInputReturnState_Validated)
-	{
-		if(serialState==eSerialInputReturnState_WrongKey)
-		{
-			cPlatform::CreateMessageBox(_W("Error!"),_W("Invalid Serial!\n"));
-		}
-		else
-		{
-			msErrorMessage = _W("Serial key needed to run game!\n");
-			return false;
-		}
-
-		serialState = AskForSerial();
-	}
 	
-	//calculate the CRC for the serial key.
-	int lCRCKey = 1337;
-	cCRC serialCRC(lCRCKey);
-	for(size_t i=0; i<gsSerialKey.size(); ++i)
-		serialCRC.PutByte(gsSerialKey[i]);	
-	Log(" - s%X-%X", (int)serialCRC.Done(), lCRCKey);
 
-	#endif
+	
 	Log("\n");
 	
 	/////////////////////////////
@@ -522,6 +506,38 @@ void cLuxBase::Exit()
 }
 
 //-----------------------------------------------------------------------
+#ifdef WIN32
+int GenerateDump(EXCEPTION_POINTERS* pExceptionPointers)
+{
+	BOOL bMiniDumpSuccessful;
+	CHAR szFileName[MAX_PATH];
+	CHAR* szAppName = "AmnesiaStreets";
+	CHAR* szVersion = "v1.0";
+	DWORD dwBufferSize = MAX_PATH;
+	HANDLE hDumpFile;
+	SYSTEMTIME stLocalTime;
+	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
+
+	GetLocalTime(&stLocalTime);
+
+	sprintf(szFileName, "%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
+		szVersion,
+		stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
+		stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond,
+		GetCurrentProcessId(), GetCurrentThreadId());
+	hDumpFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+
+	ExpParam.ThreadId = GetCurrentThreadId();
+	ExpParam.ExceptionPointers = pExceptionPointers;
+	ExpParam.ClientPointers = TRUE;
+
+	bMiniDumpSuccessful = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
+		hDumpFile, MiniDumpWithIndirectlyReferencedMemory, &ExpParam, NULL, NULL);
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif // WIN32
 
 void cLuxBase::Run()
 {
@@ -534,6 +550,8 @@ void cLuxBase::Reset()
 }
 
 //-----------------------------------------------------------------------
+
+
 
 void cLuxBase::RunModuleMessage(eLuxUpdateableMessage aMessage, void * apData)
 {
@@ -1134,6 +1152,8 @@ bool cLuxBase::InitEngine()
 	vars.mGraphics.mlDisplay = mpConfigHandler->mlDisplay;
 	vars.mGraphics.mbFullscreen =  mpConfigHandler->mbFullscreen;
 	vars.mGraphics.msWindowCaption = msGameName + " Loading...";
+
+	
 
 	vars.mSound.mlSoundDeviceID = mpConfigHandler->mlSoundDevID;
 	vars.mSound.mlMaxChannels = mpConfigHandler->mlMaxSoundChannels;

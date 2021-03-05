@@ -175,6 +175,7 @@ cLuxEnemy_ManPig::cLuxEnemy_ManPig(const tString &asName, int alID, cLuxMap *apM
 
 	mCurrentMoveType = eLuxEnemyMoveType_Normal;
 
+	mfFleeHealth = 50.0f;
 	mfDamageMul = 1.0f;
 	mfRunSpeedMul = 1.0f;
 
@@ -761,7 +762,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 			/////////////////////////
 			// Flee
-			if(mbFleeFromPlayer && mbThreatenOnAlert==false)
+			if(mbFleeFromPlayer && mbThreatenOnAlert==false || mfHealth <= mfFleeHealth)
 			{
 				ChangeState(eLuxEnemyState_Flee);
 			}
@@ -906,7 +907,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 				{
 					//////////////
 					//Flee
-					if(mbFleeFromPlayer)
+					if(mbFleeFromPlayer || mfHealth <= mfFleeHealth)
 					{
 						//If close enough or running quicly towards enemy
 						if(mfAlertRunTowardsCount>mfAlertRunTowardsToHuntLimit || fDistToPlayer < mfAlertToInstantHuntDistance*2)
@@ -986,7 +987,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		//////////////
 		//Start Hunt
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
-			if(mbFleeFromPlayer)
+			if(mbFleeFromPlayer || mfHealth <= mfFleeHealth)
 			{
 				ChangeState(eLuxEnemyState_Flee);
 			}
@@ -1442,6 +1443,10 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 				iLuxEntity *pDoorEnt = mpMap->GetEntityByID(mlStuckDoorID);
 				mvTempPos = pDoorEnt->GetAttachEntity()->GetWorldPosition();
 				ChangeState(eLuxEnemyState_BreakDoor);
+			}
+			else if(mfHealth <= mfFleeHealth)
+			{
+				ChangeState(eLuxEnemyState_Alert);
 			}
 		
 		//------------------------------
@@ -2678,6 +2683,7 @@ kSerializeVar(mfLanternSensitivity, eSerializeType_Float32)
 kSerializeVar(mIdleBehavior, eSerializeType_Int32)
 kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kSerializeVar(mfDamageMul, eSerializeType_Float32)
+kSerializeVar(mfFleeHealth, eSerializeType_Float32)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
 kSerializeVar(mfInLanternLightCount, eSerializeType_Float32)
 kSerializeVar(mbAllowZeroWaitTime, eSerializeType_Bool)
@@ -2719,6 +2725,7 @@ void cLuxEnemy_ManPig::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mPatrolMoveSpeed);
 	kCopyToVar(pData,mfRunSpeedMul);
 	kCopyToVar(pData,mfDamageMul);
+	kCopyToVar(pData, mfFleeHealth);
 	kCopyToVar(pData,mfInLanternLightCount);
 	kCopyToVar(pData,mbAllowZeroWaitTime);
 	kCopyToVar(pData,mfHuntPauseTimeMul);
@@ -2749,12 +2756,13 @@ void cLuxEnemy_ManPig::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mbThreatenOnAlert);
 	kCopyFromVar(pData,mbFleeFromPlayer);
 	kCopyFromVar(pData,mbAutoDisableAfterFlee);
-	kCopyToVar(pData, mbPlayActivateSound);
+	kCopyFromVar(pData, mbPlayActivateSound);
 	kCopyFromVar(pData,mfLanternSensitivity);
 	mIdleBehavior  = (eLuxIdleBehavior)pData->mIdleBehavior;
 	mPatrolMoveSpeed  = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;
 	kCopyFromVar(pData,mfRunSpeedMul);
 	kCopyFromVar(pData,mfDamageMul);
+	kCopyFromVar(pData,mfFleeHealth);
 	kCopyFromVar(pData,mfInLanternLightCount);
 	kCopyFromVar(pData,mbAllowZeroWaitTime);
 	kCopyFromVar(pData,mfHuntPauseTimeMul);
