@@ -86,7 +86,7 @@ namespace hpl {
 		cVector2l vSize = mpLowLevelGraphics->GetScreenSizeInt();
 		
 		mpAccumTexture = mpGraphics->CreateTexture("ImageTrailTexture", eTextureType_Rect, eTextureUsage_RenderTarget);	
-		mpAccumTexture->CreateFromRawData(cVector3l(vSize.x, vSize.y,1), ePixelFormat_RGB, NULL);
+		mpAccumTexture->CreateFromRawData(cVector3l(vSize.x, vSize.y,1), ePixelFormat_RGBA, NULL);
 
 		mpAccumBuffer = mpGraphics->CreateFrameBuffer("ImageTrailBuffer");
 		mpAccumBuffer->SetTexture2D(0, mpAccumTexture);

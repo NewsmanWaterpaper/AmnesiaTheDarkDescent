@@ -23,6 +23,7 @@
 #include "LuxPlayer.h"
 #include "LuxInteractConnections.h"
 #include "LuxEffectRenderer.h"
+#include "LuxDebugHandler.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -231,6 +232,11 @@ iLuxProp::iLuxProp(const tString &asName, int alID, cLuxMap *apMap, eLuxPropType
 	mfFadeInSpeed =0;
  
 	m_mtxLastBodyMoveMatrix = cMatrixf::Identity;
+
+	mpParentBone = NULL;
+
+	msParentBoneName = "";
+	msParentEntityName = "";
 }
 
 //-----------------------------------------------------------------------
@@ -377,9 +383,75 @@ void iLuxProp::SetupAfterLoad(cWorld *apWorld)
 }
 
 //-----------------------------------------------------------------------
+void iLuxProp::SetParentBone(cBoneState* apParentBone, const cMatrixf& apParentBoneOffsetMatrix, tString asParentName, tString asParentBoneName)
+{
+	mpParentBone = apParentBone;
+	mpParentBoneOffsetMatrix = apParentBoneOffsetMatrix;
 
+	msParentEntityName = asParentName;
+	msParentBoneName = asParentBoneName;
+
+	if (mvBodies.size() > 0)
+	{
+		iPhysicsBody* pBody = mvBodies[0];
+
+		mfBodyMassBackup = pBody->GetMass();
+		mbBodyCollideBackup = pBody->GetCollide();
+		mbBodyCollideCharacterBackup = pBody->GetCollideCharacter();
+		mbBodyActiveBackup = pBody->IsActive();
+		mBodyMatrixBackup = pBody->GetLocalMatrix();
+
+		pBody->SetMass(0);
+		pBody->SetCollide(false);
+		pBody->SetCollideCharacter(false);
+		pBody->SetActive(false);
+		pBody->SetMatrix(cMath::MatrixMul(mpParentBone->GetWorldMatrix(), mpParentBoneOffsetMatrix));
+	}
+}
+
+//-----------------------------------------------------------------------
+
+void iLuxProp::DetachFromParentBone()
+{
+	if (mpParentBone != NULL && mvBodies.size() > 0)
+	{
+		mpParentBone = NULL;
+
+		iPhysicsBody* pBody = mvBodies[0];
+		pBody->SetMass(mfBodyMassBackup);
+		pBody->SetCollide(mbBodyCollideBackup);
+		pBody->SetCollideCharacter(mbBodyCollideCharacterBackup);
+		pBody->SetActive(mbBodyActiveBackup);
+		//pBody->SetMatrix(mBodyMatrixBackup);
+	}
+
+	msParentBoneName = "";
+	msParentEntityName = "";
+}
+
+//-----------------------------------------------------------------------
+
+void iLuxProp::UpdateParentBone(float afTimeStep)
+{
+	if (mpParentBone && mvBodies.size() > 0)
+	{
+		//this->GetMeshEntity()->SetWorldMatrix(cMath::MatrixMul(mpParentBone->GetWorldMatrix(),mpParentBoneOffsetMatrix));
+		iPhysicsBody* pBody = mvBodies[0];
+
+		if (gpBase->mpDebugHandler->GetPositionAttachedProps())
+		{
+			pBody->SetMatrix(cMath::MatrixMul(mpParentBone->GetWorldMatrix(), gpBase->mpDebugHandler->GetParentBoneOffsetMatrix()));
+		}
+		else
+		{
+			pBody->SetMatrix(cMath::MatrixMul(mpParentBone->GetWorldMatrix(), mpParentBoneOffsetMatrix));
+		}
+	}
+}
+//-----------------------------------------------------------------------
 void iLuxProp::OnUpdate(float afTimeStep)
 {
+	UpdateParentBone(afTimeStep);
 	///////////////////////
 	// Prop update
 	UpdateMoving(afTimeStep);
@@ -1728,6 +1800,16 @@ kSerializeVar(mvMoveAngularNoGoalDir, eSerializeType_Vector3f)
 kSerializeVar(mlCurrentNonLoopAnimIndex, eSerializeType_Int32)
 kSerializeVar(msAnimCallback, eSerializeType_String)
 
+kSerializeVar(msParentEntityName, eSerializeType_String)
+kSerializeVar(msParentBoneName, eSerializeType_String)
+kSerializeVar(mpParentBoneOffsetMatrix, eSerializeType_Matrixf)
+
+kSerializeVar(mfBodyMassBackup, eSerializeType_Float32)
+kSerializeVar(mbBodyCollideBackup, eSerializeType_Bool)
+kSerializeVar(mbBodyCollideCharacterBackup, eSerializeType_Bool)
+kSerializeVar(mbBodyActiveBackup, eSerializeType_Bool)
+kSerializeVar(mBodyMatrixBackup, eSerializeType_Matrixf)
+
 kSerializeClassContainer(mvAttachedProps, cLuxProp_AttachedProp, eSerializeType_Class)
 
 kSerializeClassContainer(mvConnectedProps, cLuxPropConnectedProp, eSerializeType_Class)
@@ -1845,6 +1927,16 @@ void iLuxProp::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 
 	kCopyToVar(pData, mlCurrentNonLoopAnimIndex);
 	kCopyToVar(pData, msAnimCallback);
+
+	kCopyToVar(pData, mpParentBoneOffsetMatrix);
+	kCopyToVar(pData, msParentEntityName);
+	kCopyToVar(pData, msParentBoneName);
+
+	kCopyToVar(pData, mfBodyMassBackup);
+	kCopyToVar(pData, mbBodyCollideBackup);
+	kCopyToVar(pData, mbBodyCollideCharacterBackup);
+	kCopyToVar(pData, mbBodyActiveBackup);
+	kCopyToVar(pData, mBodyMatrixBackup);
 
 	///////////////////////
 	//Attached props
@@ -1984,6 +2076,18 @@ void iLuxProp::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mlCurrentNonLoopAnimIndex);
 	kCopyFromVar(pData, msAnimCallback);
 
+	kCopyFromVar(pData, mpParentBoneOffsetMatrix);
+	kCopyFromVar(pData, msParentEntityName);
+	kCopyFromVar(pData, msParentBoneName);
+
+	kCopyFromVar(pData, mfBodyMassBackup);
+	kCopyFromVar(pData, mbBodyCollideBackup);
+	kCopyFromVar(pData, mbBodyCollideCharacterBackup);
+	kCopyFromVar(pData, mbBodyActiveBackup);
+	kCopyFromVar(pData, mBodyMatrixBackup);
+
+	if (mfBodyMassBackup == 0 || mfBodyMassBackup < 0 || (mfBodyMassBackup == mfBodyMassBackup) == false) mfBodyMassBackup = 1;
+
 	
 	///////////////////////
 	//Connections
@@ -2106,6 +2210,23 @@ void iLuxProp::SetupSaveData(iLuxEntity_SaveData *apSaveData)
 		iLuxInteractConnection *pConn = pSaveConn->CreateConnection(mpMap);
 
 		if(pConn) mvInteractConnections.push_back(pConn);
+	}
+
+	///////////////////
+	// Bone attachment
+	if (msParentBoneName != "" && msParentEntityName != "")
+	{
+		iLuxEntity* pParentEntity = mpMap->GetEntityByName(msParentEntityName);
+
+		if (pParentEntity)
+		{
+			cMeshEntity* pParentMeshEntity = pParentEntity->GetMeshEntity();
+
+			if (pParentMeshEntity)
+			{
+				mpParentBone = pParentMeshEntity->GetBoneStateFromName(msParentBoneName);
+			}
+		}
 	}
 }
 

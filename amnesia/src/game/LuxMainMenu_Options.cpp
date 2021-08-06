@@ -732,8 +732,8 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 
 		vPosInGroup.y += mpChBColorGrading->GetSize().y + fInputSep;
 
-		mpChBBlackAndWhite = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, kTranslate("OptionsMenu", "BlackAndWhite"), pGroup);
-		SetUpInput(NULL, mpChBBlackAndWhite, false, kTranslate("OptionsMenu", "BlackAndWhiteTip"));
+		//mpChBBlackAndWhite = mpGuiSet->CreateWidgetCheckBox(vPosInGroup, 0, kTranslate("OptionsMenu", "BlackAndWhite"), pGroup);
+		//SetUpInput(NULL, mpChBBlackAndWhite, false, kTranslate("OptionsMenu", "BlackAndWhiteTip"));
 	}
 
 	vPos.y += pGroup->GetSize().y + 10;
@@ -870,13 +870,13 @@ void cLuxMainMenu_Options::AddAdvancedGfxOptions(cWidgetDummy* apDummy)
 		mpChBSepia->SetFocusNavigation(eUIArrow_Left, mpChBBloom);
 		mpChBInsanity->SetFocusNavigation(eUIArrow_Left, mpChBSepia);
         mpChBColorGrading->SetFocusNavigation(eUIArrow_Left, mpChBSepia);
-		mpChBBlackAndWhite->SetFocusNavigation(eUIArrow_Left, mpChBColorGrading);
+		//mpChBBlackAndWhite->SetFocusNavigation(eUIArrow_Left, mpChBColorGrading);
 
 		mpChBBloom->SetFocusNavigation(eUIArrow_Down, mpChBImageTrail);
 		mpChBSepia->SetFocusNavigation(eUIArrow_Down, mpChBRadialBlur);
 		mpChBInsanity->SetFocusNavigation(eUIArrow_Down, mpChBRadialBlur);
         mpChBColorGrading->SetFocusNavigation(eUIArrow_Down, mpChBRadialBlur);
-		mpChBBlackAndWhite->SetFocusNavigation(eUIArrow_Down, mpChBSSAO);
+		//mpChBBlackAndWhite->SetFocusNavigation(eUIArrow_Down, mpChBSSAO);
 
 		mpChBImageTrail->SetFocusNavigation(eUIArrow_Up, mpChBBloom);
 		mpChBRadialBlur->SetFocusNavigation(eUIArrow_Up, mpChBSepia);
@@ -1305,7 +1305,7 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 			// Sepia
 			mpChBSepia->SetChecked(aObj.GetVarBool("SepiaActive"), false); 
 			// Black and White
-			mpChBBlackAndWhite->SetChecked(aObj.GetVarBool("BlackAndWhiteActive"), false);
+			//mpChBBlackAndWhite->SetChecked(aObj.GetVarBool("BlackAndWhiteActive"), false);
 			// RadialBlur
 			mpChBRadialBlur->SetChecked(aObj.GetVarBool("RadialBlurActive"), false); 
 			//Insanity
@@ -1514,7 +1514,7 @@ void cLuxMainMenu_Options::ApplyChanges()
 			// Sepia
 			pMapHdlr->GetPostEffect_Sepia()->SetDisabled(mpChBSepia->IsChecked()==false);
 			// Black and White
-			pMapHdlr->GetPostEffect_BlackAndWhite()->SetDisabled(mpChBBlackAndWhite->IsChecked()==false);
+			//pMapHdlr->GetPostEffect_BlackAndWhite()->SetDisabled(mpChBBlackAndWhite->IsChecked()==false);
 			// RadialBlur
 			pMapHdlr->GetPostEffect_RadialBlur()->SetDisabled(mpChBRadialBlur->IsChecked()==false);
 			//Insanity
@@ -1815,7 +1815,7 @@ void cLuxMainMenu_Options::DumpInitialValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("BloomActive", pMapHdlr->GetPostEffect_Bloom()->IsDisabled()==false);
 		aObj.AddVarBool("ImageTrailActive", pMapHdlr->GetPostEffect_ImageTrail()->IsDisabled()==false);
 		aObj.AddVarBool("SepiaActive", pMapHdlr->GetPostEffect_Sepia()->IsDisabled()==false);
-		aObj.AddVarBool("BlackAndWhiteActive", pMapHdlr->GetPostEffect_BlackAndWhite()->IsDisabled()==false);
+		//aObj.AddVarBool("BlackAndWhiteActive", pMapHdlr->GetPostEffect_BlackAndWhite()->IsDisabled()==false);
 		aObj.AddVarBool("RadialBlurActive", pMapHdlr->GetPostEffect_RadialBlur()->IsDisabled()==false);
 		aObj.AddVarBool("InsanityActive", pPostEffects->GetInsanity()->IsDisabled()==false);
         aObj.AddVarBool("ColorGradingActive", pMapHdlr->GetPostEffect_ColorGrading()->IsDisabled()==false);
@@ -1910,7 +1910,7 @@ void cLuxMainMenu_Options::DumpCurrentValues(cResourceVarsObject &aObj)
 		aObj.AddVarBool("BloomActive", mpChBBloom->IsChecked());
 		aObj.AddVarBool("ImageTrailActive", mpChBImageTrail->IsChecked());
 		aObj.AddVarBool("SepiaActive", mpChBSepia->IsChecked());
-		aObj.AddVarBool("BlackAndWhiteActive", mpChBBlackAndWhite->IsChecked());
+		//aObj.AddVarBool("BlackAndWhiteActive", mpChBBlackAndWhite->IsChecked());
 		aObj.AddVarBool("RadialBlurActive", mpChBRadialBlur->IsChecked());
 		aObj.AddVarBool("InsanityActive", mpChBInsanity->IsChecked());
         aObj.AddVarBool("ColorGradingActive", mpChBColorGrading->IsChecked());

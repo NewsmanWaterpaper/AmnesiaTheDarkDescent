@@ -192,24 +192,24 @@ private:
 	float mfAmountGoal;
 	float mfFadeSpeed;
 };
-
-class cLuxEffect_BlackAndWhite : public iLuxEffect
-{
-	friend class cLuxEffectHandler_SaveData;
-public:
-	cLuxEffect_BlackAndWhite();
-
-	void FadeTo(float afAmount, float afSpeed);
-
-	void Update(float afTimeStep);
-	void OnDraw(float afFrameTime) {}
-	void Reset();
-
-private:
-	float mfAmount;
-	float mfAmountGoal;
-	float mfFadeSpeed;
-};
+//
+//class cLuxEffect_BlackAndWhite : public iLuxEffect
+//{
+//	friend class cLuxEffectHandler_SaveData;
+//public:
+//	cLuxEffect_BlackAndWhite();
+//
+//	void FadeTo(float afAmount, float afSpeed);
+//
+//	void Update(float afTimeStep);
+//	void OnDraw(float afFrameTime) {}
+//	void Reset();
+//
+//private:
+//	float mfAmount;
+//	float mfAmountGoal;
+//	float mfFadeSpeed;
+//};
 
 class cLuxEffect_ColorGrading : public iLuxEffect
 {
@@ -482,7 +482,7 @@ public:
 	cLuxEffect_ImageTrail *GetImageTrail(){ return mpImageTrail;}
 	cLuxEffect_ShakeScreen *GetScreenShake(){ return mpScreenShake;}
 	cLuxEffect_SepiaColor *GetSepiaColor(){ return mpSepiaColor;}
-	cLuxEffect_BlackAndWhite* GetBlackAndWhiteAmount() { return mpBlackAndWhite; }
+	//cLuxEffect_BlackAndWhite* GetBlackAndWhiteAmount() { return mpBlackAndWhite; }
     cLuxEffect_ColorGrading *GetColorGrading(){ return mpColorGrading;}
 	cLuxEffect_RadialBlur *GetRadialBlur(){ return mpRadialBlur;}
 	cLuxEffect_EmotionFlash *GetEmotionFlash(){ return mpEmotionFlash;}
@@ -497,7 +497,7 @@ private:
 	cLuxEffect_ImageTrail *mpImageTrail;
 	cLuxEffect_ShakeScreen *mpScreenShake;
 	cLuxEffect_SepiaColor *mpSepiaColor;
-	cLuxEffect_BlackAndWhite* mpBlackAndWhite;
+	//cLuxEffect_BlackAndWhite* mpBlackAndWhite;
     cLuxEffect_ColorGrading *mpColorGrading;
 	cLuxEffect_RadialBlur *mpRadialBlur;
 	cLuxEffect_EmotionFlash *mpEmotionFlash;

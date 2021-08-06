@@ -328,12 +328,12 @@ void cLuxEffectHandler_SaveData::FromEffectHandler(cLuxEffectHandler *apEffects)
 
 	//////////////////////
 	//  Black and White
-	cLuxEffect_BlackAndWhite* pBlackAndWhite = apEffects->GetBlackAndWhiteAmount();
+	/*cLuxEffect_BlackAndWhite* pBlackAndWhite = apEffects->GetBlackAndWhiteAmount();
 
 	mbBlackAndWhite_Active = pBlackAndWhite->mbActive;
 	mfBlackAndWhite_Amount = pBlackAndWhite->mfAmount;
 	mfBlackAndWhite_AmountGoal = pBlackAndWhite->mfAmountGoal;
-	mfBlackAndWhite_FadeSpeed = pBlackAndWhite->mfFadeSpeed;
+	mfBlackAndWhite_FadeSpeed = pBlackAndWhite->mfFadeSpeed;*/
 
 	//////////////////////
 	// Radial blur
@@ -402,13 +402,13 @@ void cLuxEffectHandler_SaveData::ToEffectHandler(cLuxMap *apMap, cLuxEffectHandl
 	pSepiaColor->mfFadeSpeed = mfSepiaColor_FadeSpeed;
 
 	///Black and White
-	cLuxEffect_BlackAndWhite* pBlackAndWhite = apEffects-> GetBlackAndWhiteAmount();
+	/*cLuxEffect_BlackAndWhite* pBlackAndWhite = apEffects-> GetBlackAndWhiteAmount();
 
 	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(mbSepiaColor_Active);
 	pBlackAndWhite->mbActive = mbBlackAndWhite_Active;
 	pBlackAndWhite->mfAmount = mfBlackAndWhite_Amount;
 	pBlackAndWhite->mfAmountGoal = mfBlackAndWhite_AmountGoal;
-	pBlackAndWhite->mfFadeSpeed = mfBlackAndWhite_FadeSpeed;
+	pBlackAndWhite->mfFadeSpeed = mfBlackAndWhite_FadeSpeed;*/
 
 	//////////////////////
 	// Radial blur
@@ -477,11 +477,6 @@ kSerializeVar(mbSepiaColor_Active, eSerializeType_Bool)
 kSerializeVar(mfSepiaColor_Amount, eSerializeType_Float32)
 kSerializeVar(mfSepiaColor_AmountGoal, eSerializeType_Float32)
 kSerializeVar(mfSepiaColor_FadeSpeed, eSerializeType_Float32)
-
-kSerializeVar(mbBlackAndWhite_Active, eSerializeType_Bool)
-kSerializeVar(mfBlackAndWhite_Amount, eSerializeType_Float32)
-kSerializeVar(mfBlackAndWhite_AmountGoal, eSerializeType_Float32)
-kSerializeVar(mfBlackAndWhite_FadeSpeed, eSerializeType_Float32)
 
 kSerializeVar(mbRadialBlur_Active, eSerializeType_Bool)
 kSerializeVar(mfRadialBlur_Size, eSerializeType_Float32)
@@ -1066,6 +1061,8 @@ void cLuxPlayer_SaveData::FromPlayer(cLuxPlayer *apPlayer)
 
 	mvHeadSpinSpeed = apPlayer->mvHeadSpinSpeed;
 
+	alLantern = apPlayer->GetHelperLantern()->GetLantern();
+
 	mbLanternOn = apPlayer->GetHelperLantern()->IsActive();
 	mbLanternDisabled = apPlayer->GetHelperLantern()->GetDisabled();
 
@@ -1241,6 +1238,8 @@ void cLuxPlayer_SaveData::ToPlayer(cLuxMap *apMap,cLuxPlayer *apPlayer)
 	apPlayer->mlTinderboxes = mlTinderboxes;
 
 	apPlayer->mvHeadSpinSpeed = mvHeadSpinSpeed;
+
+	apPlayer->GetHelperLantern()->SetLantern(alLantern);
 
 	apPlayer->GetHelperLantern()->SetActive(mbLanternOn, false, false);
 	apPlayer->GetHelperLantern()->SetDisabled(mbLanternDisabled);
@@ -1472,6 +1471,8 @@ kSerializeVar(mvHeadSpinSpeed, eSerializeType_Vector2f)
 kSerializeVar(mbNoFallDamage, eSerializeType_Bool)
 
 kSerializeVar(mbScriptShowFocusIconAndCrossHair, eSerializeType_Bool)
+
+kSerializeVar(alLantern, eSerializeType_Int32)
 
 kSerializeVar(mbLanternOn, eSerializeType_Bool)
 kSerializeVar(mbLanternDisabled, eSerializeType_Bool)

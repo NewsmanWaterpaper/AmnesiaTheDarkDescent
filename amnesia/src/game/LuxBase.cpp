@@ -92,6 +92,7 @@
 #include "LuxEnemy_Grunt.h"
 #include "LuxEnemy_WaterLurker.h"
 #include "LuxEnemy_ManPig.h"
+#include "LuxEnemy_Child.h"
 
 #include "LuxCommentaryIcon.h"
 #include "LuxAchievementHandler.h"
@@ -1392,6 +1393,7 @@ bool cLuxBase::InitGame()
 	mpEngine->GetResources()->AddEntityLoader(hplNew(cLuxEnemyLoader_Grunt, ("Enemy_Grunt")));
 	mpEngine->GetResources()->AddEntityLoader(hplNew(cLuxEnemyLoader_WaterLurker, ("Enemy_WaterLurker")));
 	mpEngine->GetResources()->AddEntityLoader(hplNew(cLuxEnemyLoader_ManPig, ("Enemy_ManPig")));
+	mpEngine->GetResources()->AddEntityLoader(hplNew(cLuxEnemyLoader_Child, ("Enemy_Child")));
 
 #ifndef LUX_DEMO_VERSION
 	mpEngine->GetResources()->AddEntityLoader(hplNew(cLuxCommentaryIconLoader, ("CommentaryIcon")));

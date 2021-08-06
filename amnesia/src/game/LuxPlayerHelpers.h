@@ -403,6 +403,9 @@ public:
 	void SetDisabled(bool abX);
 	bool GetDisabled(){ return mbDisabled;}
 
+	void SetLantern(int alL);
+	int GetLantern() { return alLantern; }
+
 	iLight* GetLight(){ return mpLight;}
 
 private:
@@ -419,6 +422,7 @@ private:
 	float mfFadeLightOilAmount;
 	
 	bool mbDisabled;
+	int alLantern;
 	bool mbActive;
 	float mfAlpha;
 	cLightPoint *mpLight;

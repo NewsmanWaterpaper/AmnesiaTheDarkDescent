@@ -145,6 +145,17 @@ void cLuxEnemy_Grunt::UpdateEnemySpecific(float afTimeStep)
 
 }
 
+void cLuxEnemy_Grunt::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
+{
+	if (mPatrolMoveSpeed == aSpeedType) return;
+
+	mPatrolMoveSpeed = aSpeedType;
+
+	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
+	mpMover->UpdateMoveAnimation(0.001f);
+}
+
+
 //-----------------------------------------------------------------------
 
 bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage)
@@ -310,6 +321,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			}
 		
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
+			mpMover->UseMoveStateAnimations();
 			PatrolEndOfPath();
 
 		kLuxOnMessage(eLuxEnemyMessage_SoundHeard)
@@ -591,7 +603,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			//////////////////////////
 			//Short attack
 			float fDistToPlayer = DistToPlayer();
-			if(CanSeePlayer() && fDistToPlayer < mfNormalAttackDistance)
+			if(fDistToPlayer < mfNormalAttackDistance)
 			{
 				ChangeState(eLuxEnemyState_AttackMeleeShort);
 			}
@@ -608,7 +620,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			//////////////////////////
 			//Launch attack
 			float fDist = DistToPlayer();
-			if(CanSeePlayer() && fDist > mfNormalAttackDistance && fDist < mfNormalAttackDistance*2 && mpMover->GetStuckCounter()<0.5f)
+			if(fDist > mfNormalAttackDistance && fDist < mfNormalAttackDistance*2 && mpMover->GetStuckCounter()<0.5f)
 			{
 				ChangeState(eLuxEnemyState_AttackMeleeLong);
 			}
@@ -943,7 +955,7 @@ bool cLuxEnemy_Grunt::PlayerIsDetected()
 	}
 	else
 	{
-		return (DistToPlayer() < mpCharBody->GetSize().x && PlayerInFOV());
+		return (DistToPlayer() < mpCharBody->GetSize().x && PlayerInFOV() || (mfInLanternLightCount>=1 && mbBlind == false));
 	}
 }
 

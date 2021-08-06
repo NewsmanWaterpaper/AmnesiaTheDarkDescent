@@ -65,6 +65,10 @@ namespace hpl {
 		void SetParent(cNode3D* apNode){ mpParentNode = apNode;}
 		bool HasParent(){ return mpParentNode!=NULL;}
 
+		iEntity3D* GetParentEntity() { return mpParent; }
+		void SetParentEntity(iEntity3D* apEntity) { mpParent = apEntity; }
+		bool HasParentEntity() { return mpParent != NULL; }
+
 		bool IsActive(){ return mbIsActive; }
 		void SetActive(bool abActive){ mbIsActive = abActive; }
 

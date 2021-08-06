@@ -252,6 +252,7 @@ public:
 	void FadeFOVMulTo(float afX, float afSpeed);
 	void FadeAspectMulTo(float afX, float afSpeed);
 	void FadeRollTo(float afX, float afSpeedMul, float afMaxSpeed);
+	void FadePitchTo(float afX, float afSpeedMul, float afMaxSpeed);
 	void FadeLeanRollTo(float afX, float afSpeedMul, float afMaxSpeed);
 	void SetRoll(float afX);
 
@@ -382,6 +383,11 @@ private:
 	float mfRollGoal;
 	float mfRollSpeedMul;
 	float mfRollMaxSpeed;
+
+	bool mbFadingPitch;
+	float mfPitchGoal;
+	float mfPitchSpeedMul;
+	float mfPitchMaxSpeed;
 
 	float mfLeanRoll;
 	float mfLeanRollGoal;

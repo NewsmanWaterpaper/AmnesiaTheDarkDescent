@@ -715,7 +715,7 @@ void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume,
 		/////////////////////////
 		//Calculate volume
 		float fDistance = cMath::Vector3Dist(pBv->GetWorldCenter(), avPos);
-		if(fDistance < 2.0f) continue; //Skip sounds that are too close!
+		//if(fDistance < 2.0f) continue; //Skip sounds that are too close!
 
 		float fHearVolume = 1.0f - cMath::Clamp( (fDistance - afMinDist)/(afMaxDist - afMinDist), 0.0f ,1.0f);
 		fHearVolume *= afVolume;
@@ -724,6 +724,7 @@ void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume,
 		//Send message
 		pEnemy->SetHeardSound(asSoundName);
 		pEnemy->SendMessage(eLuxEnemyMessage_SoundHeard, 0, false, avPos, fHearVolume,0);
+
 	}
 }
 

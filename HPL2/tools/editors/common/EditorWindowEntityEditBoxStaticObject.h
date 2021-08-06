@@ -55,6 +55,7 @@ protected:
 	cEditorInputFile* mpInpMeshFile;
 	cEditorInputBool* mpInpCastShadows;
 	cEditorInputBool* mpInpCollides;
+	cEditorInputBool* mpInpIsOccluder;
 };
 
 //----------------------------------------------------------------------

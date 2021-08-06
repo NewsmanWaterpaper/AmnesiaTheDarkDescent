@@ -69,6 +69,15 @@ public:
 	bool GetScriptDebugOn(){ return mbScriptDebugOn;}
 	bool GetDisableFlashBacks(){ return mbDisableFlashBacks;}
 	bool GetAllowQuickSave(){ return mbAllowQuickSave;}
+	bool GetPositionAttachedProps() { return mbPositionAttachedProps; }
+
+
+	cMatrixf GetParentBoneOffsetMatrix()
+	{
+		cMatrixf mtxTransform = cMath::MatrixRotate(cMath::Vector3ToRad(cVector3f(mfPropOffsetRotX, mfPropOffsetRotY, mfPropOffsetRotZ)), eEulerRotationOrder_XYZ);
+		mtxTransform.SetTranslation(cVector3f(mfPropOffsetPosX, mfPropOffsetPosY, mfPropOffsetPosZ));
+		return mtxTransform;
+	}
 
 	void SetFastForward(bool abX);
 	bool GetFastForward(){ return mbFastForward;}
@@ -172,6 +181,8 @@ private:
 	bool mbInspectionMode;
 	bool mbDrawPhysics;
 
+	bool mbPositionAttachedProps;
+
 	bool mbAllowQuickSave;
     
 	bool mbWindowActive;
@@ -193,6 +204,13 @@ private:
 
 	tLuxDebugMessageList mlstMessages;
 	int mlTempCount;
+
+	float mfPropOffsetRotX;
+	float mfPropOffsetRotY;
+	float mfPropOffsetRotZ;
+	float mfPropOffsetPosX;
+	float mfPropOffsetPosY;
+	float mfPropOffsetPosZ;
 };
 
 //----------------------------------------------

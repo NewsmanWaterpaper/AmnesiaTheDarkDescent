@@ -77,6 +77,7 @@ public:
 
 		AddBool(eStaticObjectBool_Collides, "Collides");
 		AddBool(eStaticObjectBool_CastShadows, "CastShadows");
+		AddBool(eStaticObjectBool_IsOccluder, "IsOccluder");
 
 
 		AddInt(eStaticObjectInt_FileIndex, "FileIndex", -1, ePropCopyStep_PreEnt);

@@ -194,12 +194,12 @@ cLuxMapHandler::cLuxMapHandler() : iLuxUpdateable("LuxMapHandler")
 	mpPostEffect_Sepia->SetActive(false);
 
 	//Black and White
-	cPostEffectParams_ColorConvTex blackandwhiteParams;
+	/*cPostEffectParams_ColorConvTex blackandwhiteParams;
 	blackandwhiteParams.msTextureFile = "colorconv_bw.tga";
 	blackandwhiteParams.mfFadeAlpha = 0.0f;
 	mpPostEffect_BlackAndWhite = pGraphics->CreatePostEffect(&blackandwhiteParams);
 	pPostEffectComp->AddPostEffect(mpPostEffect_BlackAndWhite, 4);
-	mpPostEffect_BlackAndWhite->SetActive(false);
+	mpPostEffect_BlackAndWhite->SetActive(false);*/
     
     //Color correction
     cPostEffectParams_ColorGrading colorGradingParams;
@@ -430,7 +430,7 @@ cLuxMap* cLuxMapHandler::LoadMap(const tString& asFileName, bool abLoadEntities)
 {
     const tString & mapname = FileToMapName(asFileName);
 
-    gpBase->mpEffectHandler->GetColorGrading()->InitializeLUT(mapname + "_colorgrading.png");
+    gpBase->mpEffectHandler->GetColorGrading()->InitializeLUT("colorgrading_base.png");
     
     cLuxMap *pMap = hplNew( cLuxMap, ( mapname ));
 	
@@ -574,7 +574,7 @@ void cLuxMapHandler::LoadMainConfig()
 	mpPostEffect_Sepia->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectSepia", true)==false);
 	mpPostEffect_RadialBlur->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectRadialBlur", true)==false);
     mpPostEffect_ColorGrading->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectColorGrading", true)==false);
-	mpPostEffect_BlackAndWhite->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectBlackAndWhite", true)==false);
+	///mpPostEffect_BlackAndWhite->SetDisabled(gpBase->mpMainConfig->GetBool("Graphics", "PostEffectBlackAndWhite", true)==false);
 
 	cRenderSettings *pRenderSettings = mpViewport->GetRenderSettings();
 	pRenderSettings->mbUseEdgeSmooth = gpBase->mpConfigHandler->mbEdgeSmooth; //This is saved in config handler!
@@ -587,7 +587,7 @@ void cLuxMapHandler::SaveMainConfig()
 	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectSepia", mpPostEffect_Sepia->IsDisabled()==false);
 	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectRadialBlur", mpPostEffect_RadialBlur->IsDisabled()==false);
     gpBase->mpMainConfig->SetBool("Graphics", "PostEffectColorGrading", mpPostEffect_ColorGrading->IsDisabled()==false);
-	gpBase->mpMainConfig->SetBool("Graphics", "PostEffectBlackAndWhite", mpPostEffect_BlackAndWhite->IsDisabled() == false);
+	//gpBase->mpMainConfig->SetBool("Graphics", "PostEffectBlackAndWhite", mpPostEffect_BlackAndWhite->IsDisabled() == false);
 }
 
 //-----------------------------------------------------------------------

@@ -86,6 +86,8 @@ void cEditorWindowEntityEditBoxStaticObject::Create()
 	mpInpCastShadows->SetPosition(vPos);
 	vPos.y += mpInpCastShadows->GetSize().y+5;
 	mpInpCollides->SetPosition(vPos);
+	vPos.y += mpInpCastShadows->GetSize().y+5;
+	mpInpIsOccluder->SetPosition(vPos);
 }
 
 //----------------------------------------------------------------------------
@@ -100,6 +102,7 @@ void cEditorWindowEntityEditBoxStaticObject::AddPropertySetStaticObject(cWidgetT
 {
 	mpInpCastShadows = CreateInputBool(0, _W("Cast shadows"), "", apParentTab);
 	mpInpCollides = CreateInputBool(0, _W("Collides"), "", apParentTab);
+	mpInpIsOccluder = CreateInputBool(0, _W("IsOccluder"), "", apParentTab);
 }
 
 //----------------------------------------------------------------------------
@@ -141,6 +144,7 @@ void cEditorWindowEntityEditBoxStaticObject::OnUpdate(float afTimeStep)
 	mpInpMeshFile->GetInputWidget()->SetToolTip(mpEditor->GetPathRelToWD(mpInpMeshFile->GetFullPath()));
 	mpInpCastShadows->SetValue(mpEntity->GetCastShadows(), false);
 	mpInpCollides->SetValue(mpEntity->GetCollides(), false);
+	mpInpIsOccluder->SetValue(mpEntity->IsOccluder(), false);
 }
 
 //----------------------------------------------------------------------------

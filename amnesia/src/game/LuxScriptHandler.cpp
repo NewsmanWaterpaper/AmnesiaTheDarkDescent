@@ -22,6 +22,7 @@
 #include "LuxMap.h"
 #include "LuxPlayer.h"
 #include "LuxPlayerHelpers.h"
+#include "LuxPlayerHands.h"
 #include "LuxMapHandler.h"
 #include "LuxInputHandler.h"
 #include "LuxInventory.h"
@@ -511,7 +512,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void FadeOut(float afTime)",(void *)FadeOut);
 	AddFunc("void FadeImageTrailTo(float afAmount, float afSpeed)",(void *)FadeImageTrailTo);
 	AddFunc("void FadeSepiaColorTo(float afAmount, float afSpeed)",(void *)FadeSepiaColorTo);
-	AddFunc("void FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)", (void *)FadeBlackAndWhiteAmountTo);
+	//AddFunc("void FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)", (void *)FadeBlackAndWhiteAmountTo);
 	AddFunc("void FadeRadialBlurTo(float afSize, float afSpeed)",(void *)FadeRadialBlurTo);
 	AddFunc("void SetRadialBlurStartDist(float afStartDist)",(void *)SetRadialBlurStartDist);
 
@@ -545,6 +546,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetPlayerActive(bool abActive)",(void *)SetPlayerActive);
 	AddFunc("void ChangePlayerStateToNormal()",(void *)ChangePlayerStateToNormal);
 	AddFunc("void SetPlayerCrouching(bool abCrouch)",(void *)SetPlayerCrouching);
+	AddFunc("bool GetPlayerCrouching()", (void *)GetPlayerCrouching);
 	AddFunc("void AddPlayerBodyForce(float afX, float afY, float afZ, bool abUseLocalCoords)",(void *)AddPlayerBodyForce);
 	AddFunc("void ShowPlayerCrossHairIcons(bool abX)",(void *)ShowPlayerCrossHairIcons);
 	
@@ -576,6 +578,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void GivePlayerDamage(float afAmount, string &in asType, bool abSpinHead, bool abLethal)",(void *)GivePlayerDamage);
 	AddFunc("void FadePlayerFOVMulTo(float afX, float afSpeed)",(void *)FadePlayerFOVMulTo);
 	AddFunc("void FadePlayerAspectMulTo(float afX, float afSpeed)",(void *)FadePlayerAspectMulTo);
+	AddFunc("void FadePlayerPitchTo(float afX, float afSpeedMul, float afMaxSpeed)", (void*)FadePlayerPitchTo);
 	AddFunc("void FadePlayerRollTo(float afX, float afSpeedMul, float afMaxSpeed)",(void *)FadePlayerRollTo);
 	AddFunc("void MovePlayerHeadPos(float afX, float afY, float afZ, float afSpeed, float afSlowDownDist)",(void *)MovePlayerHeadPos);
 
@@ -598,6 +601,9 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",(void *)SetMessage);
 	AddFunc("void SetDeathHint(string &in asTextCategory, string &in asTextEntry)",(void *)SetDeathHint);
 	AddFunc("void DisableDeathStartSound()",(void *)DisableDeathStartSound);
+
+	AddFunc("void SetLantern(int alLantern)", (void*)SetLantern);
+	AddFunc("int GetLantern()", (void*)GetLantern);
 
 	AddFunc("void AddNote(string &in asNameAndTextEntry, string &in asImage)",(void *)AddNote);
 	AddFunc("void AddDiary(string &in asNameAndTextEntry, string &in asImage)",(void *)AddDiary);
@@ -634,7 +640,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void CreateParticleSystemAtEntity(string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS)",(void *)CreateParticleSystemAtEntity);
 	AddFunc("void CreateParticleSystemAtEntityExt(	string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS, float afR, float afG, float afB, float afA, bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd)", (void *)CreateParticleSystemAtEntityExt);
-	AddFunc("void DestroyParticleSystem(string &in asName)",(void *)DestroyParticleSystem); 
+	AddFunc("void DestroyParticleSystem(string &in asName)",(void *)DestroyParticleSystem);
+	AddFunc("void DestroyParticleSystemInstantly(string &in asName)", (void*)DestroyParticleSystemInstantly);
 	AddFunc("void SetParticleSystemActive(string &in asName, bool abActive)", (void*)SetParticleSystemActive);
 	
 	AddFunc("void PlaySoundAtEntity(string &in asSoundName, string &in asSoundFile, string &in asEntity, float afFadeSpeed, bool abSaveSound)",(void *)PlaySoundAtEntity);
@@ -657,6 +664,23 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("float GetEntityPosX(string &in asName)",(void *)GetEntityPosX);
 	AddFunc("float GetEntityPosY(string &in asName)",(void *)GetEntityPosY);
 	AddFunc("float GetEntityPosZ(string &in asName)",(void *)GetEntityPosZ);
+	AddFunc("float GetEntityRotationX(string &in asName, int body)", (void*)GetEntityRotationX);
+	AddFunc("float GetEntityRotationY(string &in asName, int body)", (void*)GetEntityRotationY);
+	AddFunc("float GetEntityRotationZ(string &in asName, int body)", (void*)GetEntityRotationZ);
+	AddFunc("void SetEntityRotation(string &in asName, float afrX, float afrY, float afrZ, int body)", (void*)SetEntityRotation);
+	AddFunc("void SetEntityRotationAndPosition(string &in asName, float afrX, float afrY, float afrZ, float afpX, float afpY, float afpZ, int body)", (void*)SetEntityRotationAndPosition);
+	
+	AddFunc("float GetBonePosX(string &in asEntity, string &in asBone)", (void*)GetBonePosX);
+	AddFunc("float GetBonePosY(string &in asEntity, string &in asBone)", (void*)GetBonePosY);
+	AddFunc("float GetBonePosZ(string &in asEntity, string &in asBone)", (void*)GetBonePosZ);
+
+	AddFunc("float GetBoneRotX(string &in asEntity, string &in asBone)", (void*)GetBoneRotX);
+	AddFunc("float GetBoneRotY(string &in asEntity, string &in asBone)", (void*)GetBoneRotY);
+	AddFunc("float GetBoneRotZ(string &in asEntity, string &in asBone)", (void*)GetBoneRotZ);
+
+	AddFunc("void AttachPropToBone(string &in asChildEntityName, string &in asParentEntityName, string &in asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)", (void*)AttachPropToBone);
+	AddFunc("void DetachPropFromBone(string &in asChildEntityName)", (void*)DetachPropFromBone);
+
 	AddFunc("void SetEntityCustomFocusCrossHair(string &in asName, string &in asCrossHair)",(void *)SetEntityCustomFocusCrossHair);
 	AddFunc("void CreateEntityAtArea(string &in asEntityName, string &in asEntityFile, string &in asAreaName, bool abFullGameSave)",(void *)CreateEntityAtArea);
 	AddFunc("void ReplaceEntity(string &in asName, string &in asBodyName, string &in asNewEntityName, string &in asNewEntityFile, bool abFullGameSave)",(void *)ReplaceEntity);
@@ -714,6 +738,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void FadeEnemyToSmoke(string &in asName, bool abPlaySound)",(void *)FadeEnemyToSmoke);
 	AddFunc("void SetEnemyDisableTriggers(string &in asName, bool abX)",(void *)SetEnemyDisableTriggers);
 	AddFunc("void ShowEnemyPlayerPosition(string &in asName)",(void *)ShowEnemyPlayerPosition);
+	AddFunc("void ForceEnemyWaitState(string &in asName)", (void*)ForceEnemyWaitState);
 	AddFunc("void AlertEnemyOfPlayerPresence(string &in asName)",(void *)AlertEnemyOfPlayerPresence);
 	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation)",(void *)AddEnemyPatrolNode);
 	AddFunc("void PlayEnemyAnimation(string &in asEnemyName, string &in asAnimName, bool abLoop, float afFadeTime)", (void*)PlayEnemyAnimation);
@@ -725,13 +750,15 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("bool GetPlayerCanSeeEnemy(string &in asEnemyName)", (void*)GetPlayerCanSeeEnemy);
 
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
-	AddFunc("void ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeManPigPatrolSpeed);
+	AddFunc("void ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeEnemyPatrolSpeed);
 	AddFunc("void SetManPigToFlee(string& asName, bool abX)", (void*)SetManPigToFlee);
+	AddFunc("void SetManPigToThreatenOnAlert(string& asName, bool abX)", (void*)SetManPigToThreatenOnAlert);
 	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigFadeDisabled);
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
+	AddFunc("void SetEnemyBlind(string&in asName, bool abX)", (void*)SetEnemyBlind);
 	AddFunc("float GetEnemyHealth(string& asName)", (void*) GetEnemyHealth);
 	AddFunc("void SetEnemyHealth(string &in asName, float afHealth)", (void*)SetEnemyHealth);
 	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
@@ -746,6 +773,11 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("float GetPropHealth(string &in asName)",(void *)GetPropHealth);
 	AddFunc("void ResetProp(string &in asName)",(void *)ResetProp);
 	AddFunc("void PlayPropAnimation(string &in asProp, string &in asAnimation, float afFadeTime, bool abLoop, string &in asCallback)",(void *)PlayPropAnimation);
+	AddFunc("void StopPropAnimation(string &in asProp)", (void*)StopPropAnimation);
+	AddFunc("void PlayCurrentAnimation(string &in asProp, float afFadeTime, bool abLoop)", (void *)PlayCurrentAnimation);
+	AddFunc("void PauseCurrentAnimation(string &in asProp, float afFadeTime)", (void *)PauseCurrentAnimation);
+	AddFunc("void SetPropAnimationSpeed(string &in asProp, float afSpeed)", (void *)SetPropAnimationSpeed);
+	AddFunc("void SetPropAnimationPosition(string &in asProp, float afPos)", (void *)SetPropAnimationPosition);
 	
 	AddFunc("void SetMoveObjectState(string &in asName, float afState)",(void *)SetMoveObjectState);
 	AddFunc("void SetMoveObjectStateExt(string &in asName, float afState, float afAcc, float afMaxSpeed, float afSlowdownDist, bool abResetSpeed)",(void *)SetMoveObjectStateExt);
@@ -1240,10 +1272,10 @@ void __stdcall cLuxScriptHandler::FadeSepiaColorTo(float afAmount, float afSpeed
 
 //-----------------------------------------------------------------------
 
-void __stdcall cLuxScriptHandler::FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)
-{
-	gpBase->mpEffectHandler->GetBlackAndWhiteAmount()->FadeTo(afAmount, afSpeed);
-}
+//void __stdcall cLuxScriptHandler::FadeBlackAndWhiteAmountTo(float afAmount, float afSpeed)
+//{
+//	gpBase->mpEffectHandler->GetBlackAndWhiteAmount()->FadeTo(afAmount, afSpeed);
+//}
 
 
 //-----------------------------------------------------------------------
@@ -1488,7 +1520,13 @@ void __stdcall cLuxScriptHandler::SetPlayerCrouching(bool abCrouch)
 	cLuxMoveState_Normal *pState = static_cast<cLuxMoveState_Normal*>(gpBase->mpPlayer->GetMoveStateData(eLuxMoveState_Normal));
 	pState->SetCrouch(abCrouch);
 }
+//-----------------------------------------------------------------------
+bool __stdcall cLuxScriptHandler::GetPlayerCrouching()
+{
+	cLuxMoveState_Normal* pMoveNormal = static_cast<cLuxMoveState_Normal*>(gpBase->mpPlayer->GetCurrentMoveStateData());
 
+	return pMoveNormal->IsCrouching();
+}
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::AddPlayerBodyForce(float afX, float afY, float afZ, bool abUseLocalCoords)
@@ -1689,6 +1727,11 @@ void __stdcall cLuxScriptHandler::FadePlayerAspectMulTo(float afX, float afSpeed
 	gpBase->mpPlayer->FadeAspectMulTo(afX, afSpeed);
 }
 
+void __stdcall cLuxScriptHandler::FadePlayerPitchTo(float afX, float afSpeedMul, float afMaxSpeed)
+{
+	gpBase->mpPlayer->FadePitchTo(cMath::ToRad(afX), afSpeedMul, cMath::ToRad(afMaxSpeed));
+}
+
 void __stdcall cLuxScriptHandler::FadePlayerRollTo(float afX, float afSpeedMul, float afMaxSpeed)
 {
 	gpBase->mpPlayer->FadeRollTo(cMath::ToRad(afX), afSpeedMul, cMath::ToRad(afMaxSpeed));
@@ -1829,6 +1872,20 @@ void __stdcall cLuxScriptHandler::SetDeathHint(string &asTextCategory, string &a
 void __stdcall cLuxScriptHandler::DisableDeathStartSound()
 {
 	gpBase->mpPlayer->GetHelperDeath()->DisableStartSound();
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetLantern(int alLantern)
+{
+	gpBase->mpPlayer->GetHelperLantern()->SetLantern(alLantern);
+}
+
+//-----------------------------------------------------------------------
+
+int __stdcall cLuxScriptHandler::GetLantern()
+{
+	return gpBase->mpPlayer->GetHelperLantern()->GetLantern();
 }
 
 //-----------------------------------------------------------------------
@@ -2149,6 +2206,27 @@ void __stdcall cLuxScriptHandler::SetParticleSystemActive(string& asName, bool b
 	BEGIN_ITERATE_PARTICLESYSTEM()
 		pParticleSystem->SetActive(bActive);
 	END_ITERATE_PARTICLESYSTEM
+}
+
+void __stdcall cLuxScriptHandler::DestroyParticleSystemInstantly(string& asName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return;
+
+	bool bFound = false;
+
+	cParticleSystemIterator it = pMap->GetWorld()->GetParticleSystemIterator();
+	while (it.HasNext())
+	{
+		cParticleSystem* pPS = it.Next();
+		if (pPS->GetName() == asName)
+		{
+			pPS->KillInstantly();
+
+			bFound = true;
+		}
+	}
+	if (bFound == false) Error("Could not find particle system '%s'\n", asName.c_str());
 }
 
 //-----------------------------------------------------------------------
@@ -2516,7 +2594,295 @@ void __stdcall cLuxScriptHandler::SetEntityCustomFocusCrossHair(string& asName, 
 
 	END_SET_PROPERTY
 }
+//-----------------------------------------------------------------------
+float __stdcall cLuxScriptHandler::GetEntityRotationX(string& asName, int body) {
+	iLuxEntity* pEntity = GetEntity(asName, eLuxEntityType_LastEnum, -1);
 
+	if (pEntity == NULL) return 0;
+
+	if (pEntity->GetBodyNum() == 0)
+	{
+		Error("Could not get rotation of entity '%s' because it has no physics body!\n", asName.c_str());
+		return 0;
+	}
+
+	if (pEntity->GetBody(body) == NULL)
+	{
+		Error("'%s' does not have the body requested!\n", asName.c_str());
+		return 0;
+	}
+
+	cVector3f fRot = cMath::MatrixToEulerAngles(pEntity->GetBody(body)->GetLocalMatrix(), eEulerRotationOrder_XYZ);
+
+	return fRot.x;
+
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetEntityRotationY(string& asName, int body) {
+	iLuxEntity* pEntity = GetEntity(asName, eLuxEntityType_LastEnum, -1);
+
+	if (pEntity == NULL) return 0;
+
+	if (pEntity->GetBodyNum() == 0)
+	{
+		Error("Could not get rotation of entity '%s' because it has no physics body!\n", asName.c_str());
+		return 0;
+	}
+
+	if (pEntity->GetBody(body) == NULL)
+	{
+		Error("'%s' does not have the body requested!\n", asName.c_str());
+		return 0;
+	}
+
+	cVector3f fRot = cMath::MatrixToEulerAngles(pEntity->GetBody(body)->GetLocalMatrix(), eEulerRotationOrder_XYZ);
+
+	return fRot.y;
+
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetEntityRotationZ(string& asName, int body) {
+	iLuxEntity* pEntity = GetEntity(asName, eLuxEntityType_LastEnum, -1);
+
+	if (pEntity == NULL) return 0;
+
+	if (pEntity->GetBodyNum() == 0)
+	{
+		Error("Could not get rotation of entity '%s' because it has no physics body!\n", asName.c_str());
+		return 0;
+	}
+
+	if (pEntity->GetBody(body) == NULL)
+	{
+		Error("'%s' does not have the body requested!\n", asName.c_str());
+		return 0;
+	}
+
+	cVector3f fRot = cMath::MatrixToEulerAngles(pEntity->GetBody(body)->GetLocalMatrix(), eEulerRotationOrder_XYZ);
+
+	return fRot.z;
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetEntityRotation(string& asName, float afrX, float afrY, float afrZ, int body)
+{
+	cVector3f mvRot = cVector3f(afrX, afrY, afrZ);
+
+	iLuxEntity* pEntity = GetEntity(asName, eLuxEntityType_LastEnum, -1);
+
+	if (pEntity == NULL) return;
+
+	if (pEntity->GetBodyNum() == 0)
+	{
+		Error("Could not set rotation of entity '%s' because it has no physics body!\n", asName.c_str());
+		return;
+	}
+
+	if (pEntity->GetBody(body) == NULL)
+	{
+		Error("'%s' does not have the body requested!\n", asName.c_str());
+		return;
+	}
+
+	cMatrixf pMatrix = pEntity->GetBody(body)->GetWorldMatrix();
+
+	cMatrixf mtxTrans2 = cMath::MatrixRotate(mvRot, eEulerRotationOrder_XYZ);
+	mtxTrans2.SetTranslation(pMatrix.GetTranslation());
+	cMatrixf mtxTrans = mtxTrans2;
+
+	pEntity->GetBody(body)->SetMatrix(mtxTrans);
+}
+
+void __stdcall cLuxScriptHandler::SetEntityRotationAndPosition(string& asName, float afrX, float afrY, float afrZ, float afpX, float afpY, float afpZ, int body)
+{
+	cVector3f mvRot = cVector3f(afrX, afrY, afrZ);
+	cVector3f mvPos = cVector3f(afpX, afpY, afrZ);
+
+	iLuxEntity* pEntity = GetEntity(asName, eLuxEntityType_LastEnum, -1);
+
+	if (pEntity == NULL) return;
+
+	if (pEntity->GetBodyNum() == 0)
+	{
+		Error("Could not set rotation of entity '%s' because it has no physics body!\n", asName.c_str());
+		return;
+	}
+
+	if (pEntity->GetBody(body) == NULL)
+	{
+		Error("'%s' does not have the body requested!\n", asName.c_str());
+		return;
+	}
+
+	cMatrixf pMatrix = pEntity->GetBody(body)->GetWorldMatrix();
+
+	cMatrixf mtxTrans2 = cMath::MatrixRotate(mvRot, eEulerRotationOrder_XYZ);
+	mtxTrans2.SetTranslation(mvPos);
+	cMatrixf mtxTrans = mtxTrans2;
+
+	pEntity->GetBody(body)->SetMatrix(mtxTrans);
+}
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBonePosX(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);;
+	if (bone == NULL)
+	{
+		Error("Could not get position of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+
+	return bone->GetWorldPosition().x;
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBonePosY(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);;
+	if (bone == NULL)
+	{
+		Error("Could not get position of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+
+	return bone->GetWorldPosition().y;
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBonePosZ(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);
+	if (bone == NULL)
+	{
+		Error("Could not get position of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+
+	return bone->GetWorldPosition().z;
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBoneRotX(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);
+	if (bone == NULL)
+	{
+		Error("Could not get rotation of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+	cVector3f fRot = cMath::MatrixToEulerAngles(bone->GetWorldMatrix().GetRotation(), eEulerRotationOrder_XYZ);
+	return fRot.x;
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBoneRotY(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);
+	if (bone == NULL)
+	{
+		Error("Could not get rotation of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+	cVector3f fRot = cMath::MatrixToEulerAngles(bone->GetWorldMatrix().GetRotation(), eEulerRotationOrder_XYZ);
+	return fRot.y;
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetBoneRotZ(string& asEntity, string& asBoneName)
+{
+	iLuxEntity* pEntity = GetEntity(asEntity, eLuxEntityType_LastEnum, -1);
+	if (pEntity == NULL) { return 0; }
+	cBoneState* bone = pEntity->GetMeshEntity()->GetBoneStateFromName(asBoneName);
+	if (bone == NULL)
+	{
+		Error("Could not get rotation of bone '%s' because it doesn't exist!\n", asBoneName.c_str());
+		return 0;
+	}
+	cVector3f fRot = cMath::MatrixToEulerAngles(bone->GetWorldMatrix().GetRotation(), eEulerRotationOrder_XYZ);
+	return fRot.z;
+}
+//----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::DetachPropFromBone(string& asChildEntityName)
+{
+	iLuxProp* pChildProp = ToProp(GetEntity(asChildEntityName, eLuxEntityType_Prop, -1));
+	if (pChildProp == NULL)
+	{
+		Error("Could not find child prop '%s'\n", asChildEntityName.c_str());
+		return;
+	}
+
+	pChildProp->DetachFromParentBone();
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::AttachPropToBone(string& asChildEntityName, string& asParentEntityName, string& asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)
+{
+	iLuxProp* pChildProp = ToProp(GetEntity(asChildEntityName, eLuxEntityType_Prop, -1));
+	if (pChildProp == NULL)
+	{
+		Error("Could not find child prop '%s'\n", asChildEntityName.c_str());
+		return;
+	}
+
+	iLuxEntity* pParentEntity = GetEntity(asParentEntityName, eLuxEntityType_LastEnum, -1);
+
+	if (pParentEntity == NULL)
+	{
+		Error("Could not find parent entity '%s'\n", asParentEntityName.c_str());
+		return;
+	}
+
+	cMeshEntity* pChildMeshEntity = pChildProp->GetMeshEntity();
+
+	if (pChildMeshEntity == NULL)
+	{
+		Error("Child entity '%s' does not have a mesh entity\n", asChildEntityName.c_str());
+		return;
+	}
+
+	cMeshEntity* pParentMeshEntity = pParentEntity->GetMeshEntity();
+
+	if (pParentMeshEntity == NULL)
+	{
+		Error("Parent entity '%s' does not have a mesh entity\n", asParentEntityName.c_str());
+		return;
+	}
+
+	cBoneState* pParentBone = pParentMeshEntity->GetBoneStateFromName(asParentBoneName);
+
+	if (pParentBone == NULL)
+	{
+		Error("Did not find bone '%s' in parent entity '%s'\n", asParentBoneName.c_str(), asParentEntityName.c_str());
+		return;
+	}
+
+	cMatrixf mtxTransform = cMath::MatrixRotate(cMath::Vector3ToRad(cVector3f(fRotX, fRotY, fRotZ)), eEulerRotationOrder_XYZ);
+	mtxTransform.SetTranslation(cVector3f(fPosX, fPosY, fPosZ));
+
+	pChildProp->SetParentBone(pParentBone, mtxTransform, asParentEntityName, asParentBoneName);
+}
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::CreateEntityAtArea(string& asEntityName, string& asEntityFile, string& asAreaName, bool abFullGameSave)
@@ -3166,6 +3532,19 @@ void __stdcall cLuxScriptHandler::ShowEnemyPlayerPosition(string& asName)
 	
 	END_SET_PROPERTY
 }
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::ForceEnemyWaitState(string& asName)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->ChangeState(eLuxEnemyState_Wait);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::AlertEnemyOfPlayerPresence(string& asName)
 {
@@ -3241,10 +3620,21 @@ void __stdcall cLuxScriptHandler::PlayEnemyAnimation(string& asName, string& asA
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
 		iLuxEnemy* pEnemy = ToEnemy(pEntity);
-	pEnemy->PlayAnim(asAnimName, abLoop, afFadeTime);
+		pEnemy->PlayAnim(asAnimName, abLoop, afFadeTime);
 
 	END_SET_PROPERTY
 }
+
+void __stdcall cLuxScriptHandler::SetEnemyBlind(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+		pEnemy->SetBlind(abX);
+
+	END_SET_PROPERTY
+}
+
 
 void __stdcall cLuxScriptHandler::SetEnemySanityDecreaseActive(string& asName, bool abX)
 {
@@ -3358,7 +3748,7 @@ void __stdcall cLuxScriptHandler::ChangeManPigPose(string& asName, string& asPos
 }
 //-----------------------------------------------------------------------
 
-void __stdcall cLuxScriptHandler::ChangeManPigPatrolSpeed(string& asName, string& asSpeedType)
+void __stdcall cLuxScriptHandler::ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType)
 {
 	eLuxEnemyMoveSpeed speed = eLuxEnemyMoveSpeed_LastEnum;
 	if (asSpeedType == "Run")			speed = eLuxEnemyMoveSpeed_Run;
@@ -3372,8 +3762,8 @@ void __stdcall cLuxScriptHandler::ChangeManPigPatrolSpeed(string& asName, string
 
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
-		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
-	if (!pEnemy) continue;
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	if (!pEnemy) continue; 
 	pEnemy->SetPatrolSpeed(speed);
 
 	END_SET_PROPERTY
@@ -3386,6 +3776,17 @@ void __stdcall cLuxScriptHandler::SetManPigToFlee(string& asName, bool abX)
 		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
 	if (!pEnemy) continue;
 	pEnemy->SetToFlee(abX);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetManPigToThreatenOnAlert(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->ThreatenOnAlertEnabled(abX);
 
 	END_SET_PROPERTY
 }
@@ -3619,6 +4020,68 @@ void __stdcall cLuxScriptHandler::PlayPropAnimation(string& asProp, string& asAn
 
 		iLuxProp *pProp = ToProp(pEntity);
 		pProp->PlayAnimation(asAnimation, afFadeTime, abLoop, asCallback);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::StopPropAnimation(string& asProp)
+{
+	tString asName = asProp;
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, -1)
+
+		iLuxProp* pProp = ToProp(pEntity);
+	pProp->StopAnimation();
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::PlayCurrentAnimation(string& asProp, float afFadeTime, bool abLoop)
+{
+	tString asName = asProp;
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, -1)
+
+		iLuxProp* pProp = ToProp(pEntity);
+	pProp->PlayCurrentAnimation(afFadeTime, abLoop);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::PauseCurrentAnimation(string& asProp, float afFadeTime)
+{
+	tString asName = asProp;
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, -1)
+
+		iLuxProp* pProp = ToProp(pEntity);
+	pProp->PauseCurrentAnimation(afFadeTime);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetPropAnimationSpeed(string& asProp, float afSpeed)
+{
+	tString asName = asProp;
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, -1)
+
+		iLuxProp* pProp = ToProp(pEntity);
+	pProp->SetAnimationSpeed(afSpeed);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetPropAnimationPosition(string& asProp, float afPos)
+{
+	tString asName = asProp;
+	BEGIN_SET_PROPERTY(eLuxEntityType_Prop, -1)
+
+		iLuxProp* pProp = ToProp(pEntity);
+	pProp->SetAnimationPosition(afPos);
 
 	END_SET_PROPERTY
 }

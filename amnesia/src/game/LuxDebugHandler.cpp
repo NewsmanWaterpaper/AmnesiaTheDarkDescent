@@ -127,6 +127,13 @@ void cLuxDebugHandler::LoadUserConfig()
 
 	mbAllowQuickSave = gpBase->mpUserConfig->GetBool("Debug", "AllowQuickSave", false);
 
+	mbPositionAttachedProps = false;
+	mfPropOffsetPosX = 0;
+	mfPropOffsetPosY = 0;
+	mfPropOffsetPosZ = 0;
+	mfPropOffsetRotX = 0;
+	mfPropOffsetRotY = 0;
+	mfPropOffsetRotZ = 0;
 
 	if(gpBase->mbPTestActivated)
 	{
@@ -140,6 +147,7 @@ void cLuxDebugHandler::LoadUserConfig()
 			mbScriptDebugOn = false;
 			mbInspectionMode = false;
 			mbDisableFlashBacks = false;
+			mbPositionAttachedProps = false;
 		#endif
 	}
 
@@ -998,6 +1006,54 @@ void cLuxDebugHandler::CreateGuiWindow()
 		pCheckBox->AddCallback(eGuiMessage_CheckChange,this, kGuiCallback(ChangeDebugText));
 		vGroupPos.y += 22;
 
+		//Prop positions
+		pCheckBox = mpGuiSet->CreateWidgetCheckBox(vGroupPos, vSize, _W("Position attached props"), pGroup);
+		pCheckBox->SetChecked(mbPositionAttachedProps);
+		pCheckBox->SetUserValue(18);
+		pCheckBox->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(ChangeDebugText));
+		vGroupPos.y += 22;
+
+		cWidgetTextBox* pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos, cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 0.1f, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetPosX);
+		pTextBox->SetUserValue(19);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos + cVector2f(75, 0), cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 0.1f, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetPosY);
+		pTextBox->SetUserValue(20);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos + cVector2f(150, 0), cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 0.1f, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetPosZ);
+		pTextBox->SetUserValue(21);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		vGroupPos.y += 30;
+
+		pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos, cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 5, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetRotX);
+		pTextBox->SetUserValue(22);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos + cVector2f(75, 0), cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 5, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetRotY);
+		pTextBox->SetUserValue(23);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		pTextBox = mpGuiSet->CreateWidgetTextBox(vGroupPos + cVector2f(150, 0), cVector2f(70, 25), _W(""), pGroup, eWidgetTextBoxInputType_Numeric, 5, true);
+		pTextBox->SetDecimals(4);
+		pTextBox->SetNumericValue(mfPropOffsetRotZ);
+		pTextBox->SetUserValue(24);
+		pTextBox->AddCallback(eGuiMessage_TextChange, this, kGuiCallback(ChangeDebugText));
+
+		vGroupPos.y += 30;
+
+
 		//Show sounds playing
 		pCheckBox = mpGuiSet->CreateWidgetCheckBox(vGroupPos,vSize,_W("Show sounds playing"),pGroup);
 		pCheckBox->SetChecked(mbShowSoundPlaying);
@@ -1579,6 +1635,32 @@ bool cLuxDebugHandler::ChangeDebugText(iWidget* apWidget, const cGuiMessageData&
 	else if(lNum == 14)  gpBase->mpPlayer->SetFreeCamSpeed( cMath::Max((float)aData.mlVal/ 100.0f, 0.001f) );
 
 	else if(lNum == 17)  SetFastForward(bActive);
+	else if (lNum == 18) mbPositionAttachedProps = bActive;
+	else if (lNum == 19)
+	{
+		mfPropOffsetPosX = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+	else if (lNum == 20)
+	{
+		mfPropOffsetPosY = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+	else if (lNum == 21)
+	{
+		mfPropOffsetPosZ = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+	else if (lNum == 22)
+	{
+		mfPropOffsetRotX = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+	else if (lNum == 23)
+	{
+		mfPropOffsetRotY = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+	else if (lNum == 24)
+	{
+		mfPropOffsetRotZ = ((cWidgetTextBox*)apWidget)->GetNumericValue();
+	}
+
 	
 
 	return true;

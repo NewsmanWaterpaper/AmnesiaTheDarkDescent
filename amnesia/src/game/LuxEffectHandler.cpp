@@ -56,8 +56,8 @@ cLuxEffectHandler::cLuxEffectHandler() : iLuxUpdateable("LuxEffectHandler")
 	mpSepiaColor = hplNew( cLuxEffect_SepiaColor, () );
 	mvEffects.push_back(mpSepiaColor);
 
-	mpBlackAndWhite = hplNew(cLuxEffect_BlackAndWhite, ());
-	mvEffects.push_back(mpBlackAndWhite);
+	//mpBlackAndWhite = hplNew(cLuxEffect_BlackAndWhite, ());
+	//mvEffects.push_back(mpBlackAndWhite);
 
     
     mpColorGrading = hplNew( cLuxEffect_ColorGrading, () );
@@ -661,58 +661,58 @@ void cLuxEffect_SepiaColor::Reset()
 
 //-----------------------------------------------------------------------
 
-cLuxEffect_BlackAndWhite::cLuxEffect_BlackAndWhite()
-{
-	mfAmount = 0;
-	mfAmountGoal = 0;
-}
-
-void cLuxEffect_BlackAndWhite::FadeTo(float afAmount, float afSpeed)
-{
-	mfAmountGoal = afAmount;
-	mfFadeSpeed = afSpeed;
-	SetActive(true);
-	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(true);
-}
-
-void cLuxEffect_BlackAndWhite::Update(float afTimeStep)
-{
-	if (mfAmountGoal < mfAmount)
-	{
-		mfAmount -= mfFadeSpeed * afTimeStep;
-		if (mfAmount <= mfAmountGoal)
-		{
-			mfAmount = mfAmountGoal;
-			SetActive(false);
-		}
-	}
-	else
-	{
-		mfAmount += mfFadeSpeed * afTimeStep;
-		if (mfAmount >= mfAmountGoal)
-		{
-			mfAmount = mfAmountGoal;
-			SetActive(false);
-		}
-	}
-
-	cPostEffectParams_ColorConvTex blackandwhiteParams;
-	blackandwhiteParams.mfFadeAlpha = mfAmount;
-	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetParams(&blackandwhiteParams);
-
-	if (mfAmount <= 0)
-	{
-		gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
-	}
-}
-
-void cLuxEffect_BlackAndWhite::Reset()
-{
-	mfAmount = 0;
-	mfAmountGoal = 0;
-	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->Reset();
-	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
-}
+//cLuxEffect_BlackAndWhite::cLuxEffect_BlackAndWhite()
+//{
+//	mfAmount = 0;
+//	mfAmountGoal = 0;
+//}
+//
+//void cLuxEffect_BlackAndWhite::FadeTo(float afAmount, float afSpeed)
+//{
+//	mfAmountGoal = afAmount;
+//	mfFadeSpeed = afSpeed;
+//	SetActive(true);
+//	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(true);
+//}
+//
+//void cLuxEffect_BlackAndWhite::Update(float afTimeStep)
+//{
+//	if (mfAmountGoal < mfAmount)
+//	{
+//		mfAmount -= mfFadeSpeed * afTimeStep;
+//		if (mfAmount <= mfAmountGoal)
+//		{
+//			mfAmount = mfAmountGoal;
+//			SetActive(false);
+//		}
+//	}
+//	else
+//	{
+//		mfAmount += mfFadeSpeed * afTimeStep;
+//		if (mfAmount >= mfAmountGoal)
+//		{
+//			mfAmount = mfAmountGoal;
+//			SetActive(false);
+//		}
+//	}
+//
+//	cPostEffectParams_ColorConvTex blackandwhiteParams;
+//	blackandwhiteParams.mfFadeAlpha = mfAmount;
+//	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetParams(&blackandwhiteParams);
+//
+//	if (mfAmount <= 0)
+//	{
+//		gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
+//	}
+//}
+//
+//void cLuxEffect_BlackAndWhite::Reset()
+//{
+//	mfAmount = 0;
+//	mfAmountGoal = 0;
+//	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->Reset();
+//	gpBase->mpMapHandler->GetPostEffect_BlackAndWhite()->SetActive(false);
+//}
 
 //-----------------------------------------------------------------------
 
@@ -1716,7 +1716,7 @@ void cLuxEffectHandler::OnMapLeave(cLuxMap *apMap)
 	//////////////////
 	// Reset some effects on map leave
 	mpSepiaColor->FadeTo(0, 1);
-	mpBlackAndWhite->FadeTo(0, 1);
+	//mpBlackAndWhite->FadeTo(0, 1);
 	mpRadialBlur->FadeTo(0, 1);
 	if(mpPlayCommentary->IsActive()) mpPlayCommentary->Stop();
 }

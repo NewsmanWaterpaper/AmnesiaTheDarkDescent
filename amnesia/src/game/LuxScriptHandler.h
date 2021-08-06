@@ -196,6 +196,7 @@ private:
 	static void __stdcall SetPlayerActive(bool abActive);
 	static void __stdcall ChangePlayerStateToNormal();
 	static void __stdcall SetPlayerCrouching(bool abCrouch);
+	static bool __stdcall GetPlayerCrouching();
 	static void __stdcall AddPlayerBodyForce(float afX, float afY, float afZ, bool abUseLocalCoords);
 	static void __stdcall ShowPlayerCrossHairIcons(bool abX);
 	
@@ -232,6 +233,7 @@ private:
 	static void __stdcall FadePlayerFOVMulTo(float afX, float afSpeed);
 	static void __stdcall FadePlayerAspectMulTo(float afX, float afSpeed);
 	static void __stdcall FadePlayerRollTo(float afX, float afSpeedMul, float afMaxSpeed);
+	static void __stdcall FadePlayerPitchTo(float afX, float afSpeedMul, float afMaxSpeed);
 	static void __stdcall MovePlayerHeadPos(float afX, float afY, float afZ, float afSpeed, float afSlowDownDist);
 	static void __stdcall StartPlayerLookAt(string& asEntityName, float afSpeedMul, float afMaxSpeed, string &asAtTargetCallback);
 	static void __stdcall StopPlayerLookAt();
@@ -244,6 +246,8 @@ private:
 	static void __stdcall TeleportPlayer(string &asStartPosName);
 	static void __stdcall SetLanternActive(bool abX, bool abUseEffects);
 	static bool __stdcall GetLanternActive();
+	static void __stdcall SetLantern(int alLantern);
+	static int __stdcall GetLantern();
 	static void __stdcall SetLanternDisabled(bool abX);
 	static void __stdcall SetPlayerFallDamageDisabled(bool abX);
 	/**
@@ -321,6 +325,7 @@ private:
 	static void __stdcall CreateParticleSystemAtEntityExt(	string& asPSName, string& asPSFile, string& asEntity, bool abSavePS, float afR, float afG, float afB, float afA,
 															bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd);
 	static void __stdcall DestroyParticleSystem(string& asName);
+	static void __stdcall DestroyParticleSystemInstantly(string& asName);
 
 	static void __stdcall SetParticleSystemActive(string& asName, bool abActive);
 	//asEntity can be "Player". If abSaveSound = true the sound is never attached to the entity! Also note that saving should on be used on looping sounds!
@@ -352,6 +357,27 @@ private:
 	static float __stdcall GetEntityPosX(string& asName);
 	static float __stdcall GetEntityPosY(string& asName);
 	static float __stdcall GetEntityPosZ(string& asName);
+
+	static float __stdcall GetEntityRotationX(string& asName, int body);
+	static float __stdcall GetEntityRotationY(string& asName, int body);
+	static float __stdcall GetEntityRotationZ(string& asName, int body);
+
+	static float __stdcall GetBonePosX(string& asEntity, string& asBoneName);
+	static float __stdcall GetBonePosY(string& asEntity, string& asBoneName);
+	static float __stdcall GetBonePosZ(string& asEntity, string& asBoneName);
+
+	static float __stdcall GetBoneRotX(string& asEntity, string& asBoneName);
+	static float __stdcall GetBoneRotY(string& asEntity, string& asBoneName);
+	static float __stdcall GetBoneRotZ(string& asEntity, string& asBoneName);
+
+	static void __stdcall AttachPropToBone(string& asChildEntityName, string& asParentEntityName, string& asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ);
+	static void __stdcall DetachPropFromBone(string& asChildEntityName);
+
+	static void __stdcall SetEntityRotation(string& asName, float afX, float afY, float afZ, int body);
+	static void __stdcall SetEntityRotationAndPosition(string& asName, float afrX, float afrY, float afrZ, float afpX, float afpY, float afpZ, int body);
+
+
+
 	/**
 	* CrossHair can be: Default (uses default), Grab, Push, Ignite, Pick, LevelDoor, Ladder
 	 */
@@ -441,6 +467,7 @@ private:
 	static void __stdcall FadeEnemyToSmoke(string& asName, bool abPlaySound);
 	static void __stdcall ShowEnemyPlayerPosition(string& asName);
 	static void __stdcall AlertEnemyOfPlayerPresence(string& asName);
+	static void __stdcall ForceEnemyWaitState(string& asName);
 	static void __stdcall SetEnemyDisableTriggers(string& asName, bool abX);
 	static void __stdcall AddEnemyPatrolNode(string& asName, string& asNodeName, float afWaitTime, string& asAnimation);
 	static void __stdcall ClearEnemyPatrolNodes(string& asEnemyName);
@@ -455,14 +482,16 @@ private:
 	 * Pose can be "Biped" or "Quadruped"
 	 */
 	static void __stdcall ChangeManPigPose(string& asName, string& asPoseType);
-	static void __stdcall ChangeManPigPatrolSpeed(string& asName, string& asSpeedType);
+	static void __stdcall ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType);
 	static void __stdcall SetManPigToFlee(string& asName, bool abX);
-	
+	static void __stdcall SetManPigToThreatenOnAlert(string& asName, bool abX);
+
 	static void __stdcall SetTeslaPigFadeDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigSoundDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigEasyEscapeDisabled(string& asName, bool abX);
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
+	static void __stdcall SetEnemyBlind(string& asName, bool abX);
 	static string& __stdcall GetEnemyStateName(string& asName);
 	static float __stdcall GetEnemyHealth(string& asName);
 	static void __stdcall SetEnemyHealth(string& asName, float afHealth);
@@ -481,6 +510,11 @@ private:
 	 * Callback syntax: MyFunc(string &in asProp)
 	 */
 	static void __stdcall PlayPropAnimation(string& asProp, string& asAnimation, float afFadeTime, bool abLoop, string &asCallback);
+	static void __stdcall StopPropAnimation(string& asProp);
+	static void __stdcall PlayCurrentAnimation(string& asProp, float afFadeTime, bool abLoop);
+	static void __stdcall PauseCurrentAnimation(string& asProp, float afFadeTime);
+	static void __stdcall SetPropAnimationSpeed(string& asProp, float afSpeed);
+	static void __stdcall SetPropAnimationPosition(string& asProp, float afPos);
 
 	
 	/**

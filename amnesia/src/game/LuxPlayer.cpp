@@ -298,6 +298,12 @@ void cLuxPlayer::Reset()
 	mfRollSpeedMul=0;
 	mfRollMaxSpeed=0;
 
+	mbFadingPitch = false;
+	mfPitchGoal = 0;
+	mfPitchSpeedMul = 0;
+	mfPitchMaxSpeed = 0;
+
+
 	mfLeanRoll=0;
 	mfLeanRollGoal=0;
 	mfLeanRollSpeedMul=0;
@@ -504,6 +510,11 @@ void cLuxPlayer::OnMapLeave(cLuxMap *apMap)
 	mfFOVMul = 1.0f;
 	mfRollGoal=0;
 	mfRoll=0;
+
+	mbFadingPitch = false;
+	mfPitchGoal = 0;
+	mfPitchSpeedMul = 0;
+	mfPitchMaxSpeed = 0;
 
 	mfLeanRoll=0;
 	mfLeanRollGoal=0;
@@ -1020,6 +1031,23 @@ void cLuxPlayer::FadeRollTo(float afX, float afSpeedMul, float afMaxSpeed)
 	mfRollGoal = afX;
 	mfRollSpeedMul = afSpeedMul;
 	mfRollMaxSpeed = afMaxSpeed;
+}
+
+void cLuxPlayer::FadePitchTo(float afX, float afSpeedMul, float afMaxSpeed)
+{
+	float fPitchLimitMin = mpCamera->GetPitchMinLimit();
+	float fPitchLimitMax = mpCamera->GetPitchMaxLimit();
+
+	if (fPitchLimitMin != 0 || fPitchLimitMax != 0)
+	{
+		if (afX > fPitchLimitMax) afX = fPitchLimitMax;
+		if (afX < fPitchLimitMin) afX = fPitchLimitMin;
+	}
+
+	mfPitchGoal = afX;
+	mfPitchSpeedMul = afSpeedMul;
+	mfPitchMaxSpeed = afMaxSpeed;
+	mbFadingPitch = true;
 }
 
 void cLuxPlayer::FadeLeanRollTo(float afX, float afSpeedMul, float afMaxSpeed)

@@ -28,6 +28,8 @@
 
 class iLuxEnemy;
 class cLuxEnemy_ManPig;
+class cLuxEnemy_Child;
+class cLuxEnemy_Grunt;
 
 //----------------------------------------------
 
@@ -48,6 +50,8 @@ class cLuxEnemyMover
 friend class cLuxEnemyMover_SaveData;
 friend class iLuxEnemy;
 friend class cLuxEnemy_ManPig;
+friend class cLuxEnemy_Child;
+friend class cLuxEnemy_Grunt;
 public:	
 	cLuxEnemyMover(iLuxEnemy *apEnemy, iCharacterBody *apCharBody);
 	virtual ~cLuxEnemyMover();

@@ -125,7 +125,7 @@ public:
 	iPostEffect *GetPostEffect_Bloom(){ return mpPostEffect_Bloom;}
 	iPostEffect *GetPostEffect_ImageTrail(){ return mpPostEffect_ImageTrail;}
 	iPostEffect *GetPostEffect_Sepia(){ return mpPostEffect_Sepia;}
-	iPostEffect* GetPostEffect_BlackAndWhite() { return mpPostEffect_BlackAndWhite; }
+	//iPostEffect* GetPostEffect_BlackAndWhite() { return mpPostEffect_BlackAndWhite; }
 	iPostEffect *GetPostEffect_RadialBlur(){ return mpPostEffect_RadialBlur;}
     iPostEffect *GetPostEffect_ColorGrading() { return mpPostEffect_ColorGrading; }
 
@@ -172,7 +172,7 @@ private:
 	iPostEffect *mpPostEffect_Bloom;
 	iPostEffect *mpPostEffect_ImageTrail;
 	iPostEffect *mpPostEffect_Sepia;
-	iPostEffect* mpPostEffect_BlackAndWhite;
+	//iPostEffect* mpPostEffect_BlackAndWhite;
 	iPostEffect *mpPostEffect_RadialBlur;
     iPostEffect *mpPostEffect_ToneMapping;
     iPostEffect *mpPostEffect_ColorGrading;

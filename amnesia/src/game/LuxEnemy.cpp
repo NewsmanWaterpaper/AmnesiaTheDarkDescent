@@ -367,6 +367,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbAutoReverseAtPathEnd = apInstanceVars->GetVarBool("AutoReverseAtPathEnd", false);
 		pEnemy->mbHallucination =  apInstanceVars->GetVarBool("Hallucination", false);
 		pEnemy->mfHallucinationEndDist = apInstanceVars->GetVarFloat("HallucinationEndDist", false);
+		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
@@ -517,6 +518,7 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 	mbSkipVisibilityRangeHandicaps = false;
 
 	mCurrentPose = eLuxEnemyPoseType_Biped;
+	mPatrolMoveSpeed = eLuxEnemyMoveSpeed_Walk;
 
 	for(int i=0; i<eLuxEnemyPoseType_LastEnum; ++i)
 	for(int j=0; j<eLuxEnemyMoveType_LastEnum; ++j)
@@ -1538,6 +1540,13 @@ void iLuxEnemy::UpdateCanSeePlayer(float afTimeStep)
 	{
 		mbCanSeePlayer = false;
 	}
+
+	if (mbBlind)
+	{
+		mvLastKnownPlayerPos = gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition();
+		mbCanSeePlayer = false;
+		return;
+	}
 		
 
 	////////////////////////////////
@@ -1964,6 +1973,19 @@ void iLuxEnemy::SetMoveSpeed(eLuxEnemyMoveSpeed aType)
 	mfForwardDeacc = mfDefaultForwardDeacc[mCurrentPose][aType];
 
 }
+
+void iLuxEnemy::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
+{
+	if (mPatrolMoveSpeed == aSpeedType) return;
+
+	mPatrolMoveSpeed = aSpeedType;
+
+	SetMoveSpeed(mPatrolMoveSpeed);
+	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
+	mpMover->UpdateMoveAnimation(0.001f);
+}
+
+
 
 //-----------------------------------------------------------------------
 
@@ -2521,6 +2543,7 @@ kSerializeVar(mbStuckAtDoor, eSerializeType_Bool)
 kSerializeVar(mlStuckDoorID, eSerializeType_Int32)
 
 kSerializeVar(mfForwardSpeed, eSerializeType_Float32)
+kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
 kSerializeVar(mfBackwardSpeed, eSerializeType_Float32)
 kSerializeVar(mfForwardAcc, eSerializeType_Float32)
@@ -2624,6 +2647,8 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mfHealth);
 	kCopyToVar(pData, mbCausesSanityDecrease);
 
+	kCopyToVar(pData, mbBlind); 
+
 	kCopyToVar(pData, mbHallucination);
 	
 	pData->mlCurrentState = mCurrentState;
@@ -2642,6 +2667,7 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mbStuckAtDoor);
 	kCopyToVar(pData, mlStuckDoorID);
 
+	kCopyToVar(pData, mPatrolMoveSpeed);
 	kCopyToVar(pData, mfRunSpeedMul);
 	kCopyToVar(pData, mfForwardSpeed);
 	kCopyToVar(pData, mfBackwardSpeed);
@@ -2786,6 +2812,8 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mfHealth);
 	kCopyFromVar(pData, mbCausesSanityDecrease);
 
+	kCopyFromVar(pData, mbBlind);
+
 	kCopyFromVar(pData, mbHallucination);
 
 	
@@ -2805,6 +2833,7 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mbStuckAtDoor);
 	kCopyFromVar(pData, mlStuckDoorID);
 
+	mPatrolMoveSpeed = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;
 	kCopyFromVar(pData, mfRunSpeedMul);
 	kCopyFromVar(pData, mfForwardSpeed);
 	kCopyFromVar(pData, mfBackwardSpeed);

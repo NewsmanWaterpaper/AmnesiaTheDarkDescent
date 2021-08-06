@@ -93,6 +93,13 @@ public:
 	const tString& GetAnimIdle(){ return msHandsAnim_Idle; }
 	const tString& GetAnimDraw(){ return msHandsAnim_Draw; }
 	const tString& GetAnimHolster(){ return msHandsAnim_Holster;}
+
+	tString GetLanternOnSound() { return msLanternOnSound; }
+	tString GetLanternOffSound() { return msLanternOffSound; }
+	tString GetLanternOutOfOilSound() { return msLanternOutOfOilSound; }
+
+	float GetOilSpeed() { return msLowerOilSpeed; }
+	float msLowerOilSpeed;
 	
 protected:
 	virtual void LoadImplementedVars(cXmlElement *apVarsElem)=0;
@@ -117,6 +124,14 @@ protected:
 	tString msHandsAnim_Idle;
 	tString msHandsAnim_Draw;
 	tString msHandsAnim_Holster;
+
+	/////////////////////////
+	// Sounds
+	tString msLanternOnSound;
+	tString msLanternOffSound;
+	tString msLanternOutOfOilSound;
+
+	
 
 	/////////////////////////
 	// Variables

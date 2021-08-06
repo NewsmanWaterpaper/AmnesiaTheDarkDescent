@@ -42,7 +42,7 @@ public:
 	bool mbAllowZeroWaitTime;
 	
 	int mIdleBehavior;
-	int mPatrolMoveSpeed;
+	//int mPatrolMoveSpeed;
 
 	float mfInLanternLightCount;
 	float mfHuntPauseTimeMul;
@@ -83,6 +83,7 @@ public:
 	void ChangeMoveType(eLuxEnemyMoveType aMoveType);
 	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
 	void SetToFlee(bool abX);
+	void ThreatenOnAlertEnabled(bool abX);
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
 	void SetFleeHealth(float abX) { mfFleeHealth = abX; }
 	float GetFleeHealth() { return mfFleeHealth; }
@@ -211,7 +212,7 @@ private:
 	bool mbTeslaEasyEscapeDisabled; //Allows for chase sequences with the tesla
 
 	eLuxIdleBehavior mIdleBehavior;
-	eLuxEnemyMoveSpeed mPatrolMoveSpeed;
+	//eLuxEnemyMoveSpeed mPatrolMoveSpeed;
 	bool mbAllowZeroWaitTime;
 
 	float mfCheckFlashLightShining;

@@ -151,6 +151,11 @@ void iLuxHandObject::LoadSettings(cXmlElement *apVarsElem)
 	//Bone that object attaches to
 	msAttachBoneName =	apVarsElem->GetAttributeString("AttachBoneName", "attachpoint");
 	
+	msLanternOffSound = apVarsElem->GetAttributeString("LanternOffSound", "ui_lantern_off");
+	msLanternOnSound = apVarsElem->GetAttributeString("LanternOnSound", "ui_lantern_on");
+	msLanternOutOfOilSound = apVarsElem->GetAttributeString("LanternNoOilSound", "ui_lantern_off");
+
+	msLowerOilSpeed = apVarsElem->GetAttributeFloat("LowerOilSpeed", 0);
 
 	/////////////////////////////
 	//Load implemented vars

@@ -132,6 +132,8 @@ public:
 	float mfHealth;
 	bool mbCausesSanityDecrease;
 
+	bool mbBlind;
+
 	bool mbHallucination;
 	float mfHallucinationEndDist;
 	
@@ -151,7 +153,7 @@ public:
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
 
-
+	int mPatrolMoveSpeed;
 	float mfRunSpeedMul;
 	float mfForwardSpeed;
 	float mfBackwardSpeed;
@@ -404,6 +406,7 @@ public:
 	void GiveDamage(float afAmount, int alStrength);
 	void ShowPlayerPosition();
 	void AlertOfPlayerPresence();
+	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
 
 	void ChangeState(eLuxEnemyState aState);
 
@@ -462,6 +465,8 @@ public:
 	//////////////////////
 	//Properties
 	eLuxEnemyType GetEnemyType(){ return mEnemyType;}
+
+	void SetBlind(bool abX) { mbBlind = abX; }
 
 	void SetDisabled(bool abX);
 	bool IsDisabled(){ return mbDisabled;}
@@ -651,6 +656,8 @@ protected:
 	bool mbCausesSanityDecrease;
 	bool mbCausesSanityDecreaseAsDefault;
 
+	bool mbBlind;
+
 	eLuxEnemyState mCurrentState;
 	eLuxEnemyState mNextState;
 	eLuxEnemyState mPreviousState;
@@ -728,6 +735,7 @@ protected:
 	cSurfaceData* mpWaterSurfaceData;
 
 	eLuxEnemyPoseType mCurrentPose;
+	eLuxEnemyMoveSpeed mPatrolMoveSpeed;
 	
 	//////////////
 	//Data
@@ -793,6 +801,8 @@ protected:
 	float mfWaterStepSpeedWalk;
 	float mfWaterStepSpeedRun;
 	float mfWaterStepSpeedMisc;
+	
+	
 
 	tString msHitPS[eLuxWeaponHitType_LastEnum];
 	tString msHitSound[eLuxWeaponHitType_LastEnum];
@@ -839,6 +849,7 @@ protected:
 	
 private:
 	eLuxEnemyType mEnemyType;
+	
 };
 
 //----------------------------------------------

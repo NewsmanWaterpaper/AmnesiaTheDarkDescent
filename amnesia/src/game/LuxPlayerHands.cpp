@@ -20,6 +20,7 @@
 #include "LuxPlayerHands.h"
 
 #include "LuxPlayer.h"
+#include "LuxPlayerHelpers.h"
 #include "LuxMapHandler.h"
 #include "LuxMap.h"
 
@@ -430,6 +431,7 @@ void cLuxPlayerHands::SetState(eLuxHandsState aState)
 { 
 	mHandState = aState; 
 }
+
 
 
 //-----------------------------------------------------------------------

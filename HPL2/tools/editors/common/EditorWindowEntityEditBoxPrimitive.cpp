@@ -117,6 +117,8 @@ void cEditorWindowEntityEditBoxPrimitive::AddPrimitivePropertySet(cWidgetTab* ap
 	vPos.y += mpInpCollides->GetSize().y+10;
 
 	mpInpCastShadows = CreateInputBool(vPos, _W("Cast Shadows"), "", apParentTab);
+
+	mpInpIsOccluder = CreateInputBool(vPos, _W("IsOccluder"), "", apParentTab);
 }
 
 //----------------------------------------------------------------------------
@@ -175,6 +177,7 @@ void cEditorWindowEntityEditBoxPrimitive::OnUpdate(float afTimeStep)
 	mpInpMaterial->SetValue(cString::To16Char(mpEntity->GetMaterial()),false);
 	mpInpCollides->SetValue(mpEntity->GetCollides(), false);
 	mpInpCastShadows->SetValue(mpEntity->GetCastShadows(), false);
+	mpInpIsOccluder->SetValue(mpEntity->IsOccluder(), false);
 
 	switch(mpEntity->GetPrimitiveType())
 	{
