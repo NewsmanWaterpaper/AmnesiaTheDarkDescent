@@ -32,8 +32,9 @@ class cLuxProp_Item_SaveData : public iLuxProp_SaveData
 public:
 	tString msVal;
 	tString msExtraVal;
-	int mlSpawnContainerID;
+	int mlSpawnContainerID; 
 	float mfAmount;
+	int mfLantern;
 	tString msSubItemTypeName;
 };
 
@@ -74,6 +75,7 @@ public:
 	const tString& GetSubItemTypeName(){ return msSubItemTypeName;}
 
 	float GetAmount(){ return mfAmount;}
+	int GetLanternNumber() { return mfLantern; }
 
 	int GetSpawnContainerID() { return mlSpawnContainerID;}
 	void SetSpawnContainerID(int alX) { mlSpawnContainerID = alX;}
@@ -109,6 +111,7 @@ private:
 	tString msSubItemTypeName;
 
 	float mfAmount;
+	int mfLantern;
 };
 
 //----------------------------------------------

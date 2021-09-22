@@ -37,6 +37,10 @@ public:
 	cVector3f mvSize;
 	cMatrixf m_mtxTransform;
 
+	cVector3f mvRelativeOffset;
+	tString msPropName;
+	int mlBodyId;
+
 	////////////////
 	//Methods
 	iLuxEntity* CreateEntity(cLuxMap *apMap);
@@ -68,6 +72,8 @@ public:
 
 	//////////////////////
 	//Properties
+	void AttachToBody(const tString& asPropName, int alBodyId);
+	void DetachBody();
 	eLuxAreaType GetAreaType(){ return mAreaType;}
 
 	iPhysicsBody* GetBody() { return mpBody;}
@@ -95,6 +101,11 @@ protected:
 	iPhysicsBody *mpBody;
 	cVector3f mvSize;
 	cMatrixf m_mtxTransform;
+
+	iPhysicsBody* mpParentBody;
+	cVector3f mvRelativeOffset;
+	tString msPropName;
+	int mlBodyId;
 };
 
 //----------------------------------------------

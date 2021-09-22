@@ -144,6 +144,11 @@ protected:
 	cEditorInputEnum* mpInpBoxBlendFunc;
 	cEditorInputVec3* mpInpBoxSize;
 
+	cEditorInputNumber* mpInpPriority;
+
+	cEditorInputNumber* mpInpFalloff;
+	cEditorInputNumber* mpInpBrightness;
+
 	///////////////////////////////////
 	// Spot Light specific
 	cEditorInputNumber* mpInpSpotFOV;

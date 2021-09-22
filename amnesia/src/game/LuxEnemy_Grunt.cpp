@@ -24,6 +24,7 @@
 
 #include "LuxMap.h"
 #include "LuxMapHelper.h"
+#include "LuxMapHandler.h"
 #include "LuxMusicHandler.h"
 #include "LuxDebugHandler.h"
 #include "LuxGlobalDataHandler.h"
@@ -107,7 +108,7 @@ cLuxEnemy_Grunt::cLuxEnemy_Grunt(const tString &asName, int alID, cLuxMap *apMap
 	mfWaitTime =0;
 	mfAlertRunTowardsCount = 0;
 	mfRunSpeedMul = 1.0f;
-
+	mbPathReversed = false;
 	mbAlignEntityWithGroundRay = true;
 }
 
@@ -323,6 +324,14 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
 			mpMover->UseMoveStateAnimations();
 			PatrolEndOfPath();
+			FinishPatrolEndOfPath(true);
+
+			tString sCallback = msOverCallback;
+
+			if (PatrolRemoveCallback) msOverCallback = "";
+
+			if (sCallback != "")
+				gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
 
 		kLuxOnMessage(eLuxEnemyMessage_SoundHeard)
 			if(apMessage->mfCustomValue > mfHearVolume)
@@ -1011,6 +1020,43 @@ void cLuxEnemy_Grunt::PatrolUpdateGoal()
 			ChangeState(eLuxEnemyState_Wait);
 	}*/
 }
+void cLuxEnemy_Grunt::FinishPatrolEndOfPath(bool callPatrolUpdateNow)
+{
+	cLuxEnemyPatrolNode* pNode = GetCurrentPatrolNode();
+
+	if (!mbPathReversed && IsAtLastPatrolNode()
+		|| mbPathReversed && IsAtFirstPatrolNode())
+	{
+
+		if (mbAutoReverseAtPathEnd)
+		{
+			mbPathReversed = !mbPathReversed;
+		}
+	}
+
+	if (mbPathReversed)
+	{
+		DecCurrentPatrolNode(true);
+	}
+	else
+	{
+		IncCurrentPatrolNode(true);
+	}
+
+	if (mfWaitTime == 0 && mbAllowZeroWaitTime)
+	{
+		if (callPatrolUpdateNow)
+		{
+			PatrolUpdateGoal();
+		}
+	}
+	else
+	{
+
+		ChangeState(eLuxEnemyState_Wait);
+	}
+}
+//-----------------------------------------------------------------------
 
 //-----------------------------------------------------------------------
 
@@ -1031,6 +1077,9 @@ void cLuxEnemy_Grunt::PatrolEndOfPath()
 	//Log("Current node: %d/%d\n", mlCurrentPatrolNode, mvPatrolNodes.size());
 
 	cLuxEnemyPatrolNode *pNode = GetCurrentPatrolNode();
+
+	
+
 	if(pNode)
 		mfWaitTime = pNode->mfWaitTime;
 	else
@@ -1038,7 +1087,7 @@ void cLuxEnemy_Grunt::PatrolEndOfPath()
 
 	ChangeState(eLuxEnemyState_Wait);
 
-	IncCurrentPatrolNode(true);
+	//IncCurrentPatrolNode(true);
 }
 
 //-----------------------------------------------------------------------

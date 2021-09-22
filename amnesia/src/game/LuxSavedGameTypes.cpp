@@ -36,7 +36,7 @@
 #include "LuxInsanityHandler.h"
 #include "LuxLoadScreenHandler.h"
 #include "LuxMoveState_Normal.h"
-
+#include "LuxHandObject_LightSource.h"
 
 //////////////////////////////////////////////////////////////////////////
 // LOAD SCREEN HANDLER
@@ -812,6 +812,7 @@ void cLuxInventory_Item_SaveData::FromItem(cLuxInventory_Item *apItem)
 	msImageFile = apItem->GetImageName();
 
 	mfAmount = apItem->GetAmount();
+	mfLantern = apItem->GetLanternNumber();
 	mlCount = apItem->GetCount();
 	msGameNameEntry = apItem->GetGameNameEntry();
 	msGameDescEntry = apItem->GetGameDescEntry();
@@ -1066,6 +1067,15 @@ void cLuxPlayer_SaveData::FromPlayer(cLuxPlayer *apPlayer)
 	mbLanternOn = apPlayer->GetHelperLantern()->IsActive();
 	mbLanternDisabled = apPlayer->GetHelperLantern()->GetDisabled();
 
+	iLuxHandObject* object = apPlayer->GetHands()->GetHandObject("lantern" + cString::ToString(gpBase->mpPlayer->GetHelperLantern()->GetLantern()));
+
+	if (object)
+	{
+		cLuxHandObject_LightSource* lantern = (cLuxHandObject_LightSource*)object;
+		mbLanternFlickering = lantern->GetFlickering();
+		mfLanternFlickeringSpeed = lantern->GetFlickeringSpeed();
+	}
+
 	msDeathHintCat = apPlayer->GetHelperDeath()->GetHintCat();
 	msDeathHintEntry = apPlayer->GetHelperDeath()->GetHintEntry();
 
@@ -1243,6 +1253,15 @@ void cLuxPlayer_SaveData::ToPlayer(cLuxMap *apMap,cLuxPlayer *apPlayer)
 
 	apPlayer->GetHelperLantern()->SetActive(mbLanternOn, false, false);
 	apPlayer->GetHelperLantern()->SetDisabled(mbLanternDisabled);
+
+	iLuxHandObject* object = apPlayer->GetHands()->GetHandObject("lantern"+ cString::ToString(gpBase->mpPlayer->GetHelperLantern()->GetLantern()));
+
+	if (object)
+	{
+		cLuxHandObject_LightSource* lantern = (cLuxHandObject_LightSource*)object;
+		lantern->SetFlickering(mbLanternFlickering);
+		lantern->SetFlickeringSpeed(mfLanternFlickeringSpeed);
+	}
 
 	apPlayer->GetHelperDeath()->SetHint(msDeathHintCat, msDeathHintEntry);
 

@@ -85,6 +85,7 @@ private:
 	// State stuff
 	void PatrolUpdateGoal();
 	void PatrolEndOfPath();
+	void FinishPatrolEndOfPath(bool callPatrolUpdateNow);
 	
 	//////////////
 	//Data
@@ -113,6 +114,7 @@ private:
 	float mfAlertRunTowardsCount;
 	//eLuxEnemyMoveSpeed mPatrolMoveSpeed;
 	bool mbAllowZeroWaitTime;
+	bool mbPathReversed;
 	
 };
 

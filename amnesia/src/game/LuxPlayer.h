@@ -160,6 +160,9 @@ public:
 	float GetLampOil(){ return mfLampOil; }
 
 	float GetTerror(){ return mfTerror; }
+
+	int GetHealthLevel();
+	int GetHealthLevelForHealth(float afHealth);
 	
 	void SetTerror(float afX){ mfTerror=afX; }
 	void AddTerrorEnemy(iLuxEnemy *apEnemy);
@@ -185,6 +188,14 @@ public:
 	int GetCoins(){ return mlCoins;}
 	void SetCoins(int alX){ mlCoins = alX;}
 	void AddCoins(int alX);
+
+	int GetLaudanum() { return mlLaudanum; }
+	void SetLaudanum(int alX) { mlLaudanum = alX; }
+	void AddLaudanum(int alX) { mlLaudanum += alX; }
+
+	int GetOilPotion() { return mlOilPotion; }
+	void SetOilPotion(int alX) { mlOilPotion = alX; }
+	void AddOilPotion(int alX) { mlOilPotion += alX; }
 
 	int GetTinderboxes(){ return mlTinderboxes;}
 	void SetTinderboxes(int alX){ mlTinderboxes = alX; }
@@ -329,7 +340,11 @@ private:
 	float mfLampOil;
 	float mfTerror;
 	int mlCoins;
-	int mlTinderboxes;
+	int mlTinderboxes; 
+	int mlLaudanum;
+	int mlOilPotion;
+
+	int miNumberOfHealthLevels;
 
 	bool mbPressedMove;
 	bool mbPressingRun;

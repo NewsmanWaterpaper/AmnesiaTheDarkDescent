@@ -592,6 +592,7 @@ void cLuxMap::AddEntity(iLuxEntity *apEntity)
 	{
 		iLuxEnemy *pEnemy = static_cast<iLuxEnemy*>(apEntity);
 		mlstEnemies.push_back(pEnemy);
+		
 	}
 	else if(apEntity->GetEntityType() == eLuxEntityType_Area)
 	{
@@ -665,6 +666,12 @@ cLuxEnemyIterator cLuxMap::GetEnemyIterator()
 {
 	return cLuxEnemyIterator(&mlstEnemies);
 }
+//-----------------------------------------------------------------------
+
+cLuxEnemyManpigIterator cLuxMap::GetEnemyManpigIterator()
+{
+	return cLuxEnemyManpigIterator(&mlstManpigs);
+}
 
 //-----------------------------------------------------------------------
 
@@ -703,7 +710,7 @@ void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume,
 	{
 		iLuxEnemy *pEnemy = it.Next();
 		if(pEnemy->IsActive()==false) continue;
-
+		if(pEnemy->GetDeaf()) continue;
 		/////////////////////////
 		//Check intersection
 		cBoundingVolume *pBv = pEnemy->GetCharacterBody()->GetCurrentBody()->GetBoundingVolume();
@@ -715,7 +722,7 @@ void cLuxMap::BroadcastEnemySoundMessage(const cVector3f& avPos, float afVolume,
 		/////////////////////////
 		//Calculate volume
 		float fDistance = cMath::Vector3Dist(pBv->GetWorldCenter(), avPos);
-		//if(fDistance < 2.0f) continue; //Skip sounds that are too close!
+		if(fDistance < 2.0f) continue; //Skip sounds that are too close!
 
 		float fHearVolume = 1.0f - cMath::Clamp( (fDistance - afMinDist)/(afMaxDist - afMinDist), 0.0f ,1.0f);
 		fHearVolume *= afVolume;

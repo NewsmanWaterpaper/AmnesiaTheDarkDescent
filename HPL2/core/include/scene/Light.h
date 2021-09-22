@@ -179,7 +179,15 @@ namespace hpl {
 		//Properties
 		const cColor& GetDiffuseColor(){ return mDiffuseColor; }
 		void SetDiffuseColor(cColor aColor);
+
+		float GetBrightness() { return mfBrightness; }
+		float GetFalloff() { return mfFalloff; }
+
+		void SetBrightness(float afBrightness) { mfBrightness = afBrightness; }
+		void SetFalloff(float afFalloff) { mfFalloff = afFalloff; }
 		
+		cColor GetColor();
+
 		const cColor&  GetDefaultDiffuseColor(){ return mDefaultDiffuseColor;}
 		void SetDefaultDiffuseColor(const cColor& aColor) { mDefaultDiffuseColor = aColor; }
 		
@@ -254,6 +262,9 @@ namespace hpl {
 		cColor mSpecularColor;
 		float mfSourceRadius;
 		float mfRadius;
+
+		float mfBrightness;
+		float mfFalloff;
 
 		bool mbCastShadows;
 		tObjectVariabilityFlag mlShadowCastersAffected;

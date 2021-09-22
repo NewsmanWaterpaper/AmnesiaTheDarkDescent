@@ -118,6 +118,7 @@ public:
 	bool EntityExists(iLuxEntity *apEntity);
 	cLuxEntityIterator GetEntityIterator();
 	cLuxEnemyIterator GetEnemyIterator();
+	cLuxEnemyManpigIterator GetEnemyManpigIterator();
 
 	void BroadcastEnemyMessage(eLuxEnemyMessage aType, bool abHasPosition, const cVector3f& avPos, float afRadius,
 								float afTime=0, bool abLocalScope=false, const cVector3f& avX=0,float afX=0, int alX=0);
@@ -240,6 +241,7 @@ private:
 	tLuxEntityIDMap m_mapEntitiesByID;
 	tLuxEntityList mlstEntities;
 	tLuxEnemyList mlstEnemies;
+	tLuxEnemyManpigList mlstManpigs;
 	tLuxEntityList mlstToBeDestroyedEntities;
 	iLuxEntity *mpLatestAddedEntity;
 	tLuxArea_StickyList mlstStickyAreas;

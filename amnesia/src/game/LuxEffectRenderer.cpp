@@ -70,7 +70,7 @@ cLuxEffectRenderer::cLuxEffectRenderer() : iLuxUpdateable("LuxEffectRenderer")
 	programVars.Add("UseUv");
 	programVars.Add("UseNormals");
 	mpFlashProgram = pGraphics->CreateGpuProgramFromShaders("GameOutline","deferred_base_vtx.glsl", "game_object_flash_frag.glsl",&programVars);
-	mpFlashProgram->GetVariableAsId("afColorMul",kVar_afColorMul);
+	mpFlashProgram->GetVariableAsId("avColorMul",kVar_afColorMul);
 	programVars.Clear();
 
 	/////////////////////////////
@@ -188,9 +188,9 @@ void cLuxEffectRenderer::RenderTrans(cRendererCallbackFunctions* apFunctions)
 
 //-----------------------------------------------------------------------
 
-void cLuxEffectRenderer::AddOutlineObject(iRenderable *apObject)
+void cLuxEffectRenderer::AddOutlineObject(iRenderable *apObject, cColor acColor)
 {
-	mvOutlineObjects.push_back(apObject);
+	mvOutlineObjects.push_back(cOutlineObject(apObject, acColor));
 }
 
 void cLuxEffectRenderer::ClearOutlineObjects()
@@ -200,14 +200,14 @@ void cLuxEffectRenderer::ClearOutlineObjects()
 
 //-----------------------------------------------------------------------
 
-void cLuxEffectRenderer::AddFlashObject(iRenderable *apObject, float afAlpha)
+void cLuxEffectRenderer::AddFlashObject(iRenderable* apObject, float afAlpha, cColor acColor)
 {
-	mvFlashObjects.push_back(cGlowObject(apObject, afAlpha) );
+	mvFlashObjects.push_back(cGlowObject(apObject, afAlpha, acColor));
 }
 
-void cLuxEffectRenderer::AddEnemyGlow(iRenderable *apObject, float afAlpha)
+void cLuxEffectRenderer::AddEnemyGlow(iRenderable* apObject, float afAlpha, cColor acColor)
 {
-	mvEnemyGlowObjects.push_back(cGlowObject(apObject, afAlpha) );
+	mvEnemyGlowObjects.push_back(cGlowObject(apObject, afAlpha, acColor));
 }
 
 //-----------------------------------------------------------------------
@@ -246,8 +246,10 @@ void cLuxEffectRenderer::RenderFlashObjects(cRendererCallbackFunctions* apFuncti
 
 		if(pObject->CollidesWithFrustum(pFrustum)==false) continue;
 
-		if(mpFlashProgram)
-			mpFlashProgram->SetFloat(kVar_afColorMul,mvFlashObjects[i].mfAlpha*fGlobalAlpha);
+		if (mpFlashProgram)
+		{
+			mpFlashProgram->SetColor4f(kVar_afColorMul, mvFlashObjects[i].mcColor * mvFlashObjects[i].mfAlpha * fGlobalAlpha);
+		}
 		
 		apFunctions->SetTexture(0, pObject->GetMaterial()->GetTexture(eMaterialTexture_Diffuse));
 	
@@ -322,13 +324,15 @@ void cLuxEffectRenderer::RenderOutline(cRendererCallbackFunctions* apFunctions)
 	// Get entities to be rendered
 	cFrustum *pFrustum = apFunctions->GetFrustum();
 	tRenderableList lstObjects;
+	tColorList lstColors;
 	for(size_t i=0; i<mvOutlineObjects.size(); ++i)
 	{
-		iRenderable *pObject = mvOutlineObjects[i];
+		iRenderable* pObject = mvOutlineObjects[i].mpObject;
 
 		if(pObject->CollidesWithFrustum(pFrustum))
 		{
 			lstObjects.push_back(pObject);
+			lstColors.push_back(mvOutlineObjects[i].mcColor);
 		}
 	}
 
@@ -411,7 +415,8 @@ void cLuxEffectRenderer::RenderOutline(cRendererCallbackFunctions* apFunctions)
 	apFunctions->SetTextureRange(NULL, 0);
 
 	//Iterate objects and render them
-	for(tRenderableListIt it = lstObjects.begin(); it != lstObjects.end(); ++it)
+	tColorListIt cIt = lstColors.begin();
+	for(tRenderableListIt it = lstObjects.begin(); it != lstObjects.end() && cIt != lstColors.end(); ++it, ++cIt)
 	{
 		iRenderable *pObject = *it;
 		cMaterial *pMat = pObject->GetMaterial();
@@ -422,13 +427,13 @@ void cLuxEffectRenderer::RenderOutline(cRendererCallbackFunctions* apFunctions)
 		{
 			apFunctions->SetTexture(0, pMat->GetTexture(eMaterialTexture_Alpha));
 			apFunctions->SetProgram(mpOutlineColorProgram[1]);
-			mpOutlineColorProgram[1]->SetColor3f(mpOutlineColorProgram[1]->GetVariableId("gvColor"), cColor(0,0,0.5f,0));
+			mpOutlineColorProgram[1]->SetColor3f(mpOutlineColorProgram[1]->GetVariableId("gvColor"), *cIt);
 		}
 		else
 		{
 			apFunctions->SetTexture(0, NULL);
 			apFunctions->SetProgram(mpOutlineColorProgram[0]);
-			mpOutlineColorProgram[0]->SetColor3f(mpOutlineColorProgram[0]->GetVariableId("gvColor"), cColor(0,0,0.5f,0));
+			mpOutlineColorProgram[0]->SetColor3f(mpOutlineColorProgram[0]->GetVariableId("gvColor"), *cIt);
 		}
 		
 		cVector3f vLocalSize = pBV->GetLocalMax() - pBV->GetLocalMin();

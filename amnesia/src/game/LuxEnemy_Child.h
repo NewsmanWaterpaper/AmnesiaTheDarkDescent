@@ -78,6 +78,7 @@ private:
 
 	void OnDisableTriggers();
 	bool CheckEnemyAutoRemoval(float afDistance);
+	void FinishPatrolEndOfPath(bool callPatrolUpdateNow);
 	void PatrolUpdateGoal();
 
 	float GetDamageMul(float afAmount, int alStrength);
@@ -86,6 +87,7 @@ private:
 	// Variables
 	//eLuxEnemyMoveSpeed mPatrolMoveSpeed;
 	eLuxEnemyMoveType mCurrentMoveType;
+	bool mbPathReversed;
 	float mfWaitTime;
 	bool mbAllowZeroWaitTime;
 };

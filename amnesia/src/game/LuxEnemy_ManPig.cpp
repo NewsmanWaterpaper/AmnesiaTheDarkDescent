@@ -24,6 +24,7 @@
 
 #include "LuxMap.h"
 #include "LuxMapHelper.h"
+#include "LuxMapHandler.h"
 #include "LuxMusicHandler.h"
 #include "LuxDebugHandler.h"
 #include "LuxGlobalDataHandler.h"
@@ -126,6 +127,7 @@ void cLuxEnemyLoader_ManPig::LoadInstanceVariables(iLuxEnemy *apEnemy, cResource
 	pManPig->mbAllowZeroWaitTime = apInstanceVars->GetVarBool("AllowZeroNodeWaitTimes", false);
 	pManPig->mfDamageMul = apInstanceVars->GetVarFloat("DamageMul", 1.0f);
 	pManPig->mbPlayActivateSound = apInstanceVars->GetVarBool("PlayActivateSound", true);
+	pManPig->mbCallForHelp = apInstanceVars->GetVarBool("CanCallForHelp", true);
 	pManPig->mfLanternSensitivity = apInstanceVars->GetVarFloat("LanternSensitivity", 1.0f);
 	pManPig->mfHuntPauseTimeMul = apInstanceVars->GetVarFloat("HuntPauseTimeMul", 1.0f);
 }
@@ -172,6 +174,8 @@ cLuxEnemy_ManPig::cLuxEnemy_ManPig(const tString &asName, int alID, cLuxMap *apM
 	mbThreatenOnAlert = false;
 	mbFleeFromPlayer = false;
 	mIdleBehavior = eLuxIdleBehavior_None;
+	mbPathReversed = false;
+	mbCanTrackTeleport = true;
 
 	mCurrentMoveType = eLuxEnemyMoveType_Normal;
 
@@ -365,6 +369,14 @@ void cLuxEnemy_ManPig::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
 }
 //-----------------------------------------------------------------------
 
+void cLuxEnemy_ManPig::SetBehaviorType(eLuxIdleBehavior aBehaviorType)
+{
+	if (mIdleBehavior== aBehaviorType) return;
+
+	mIdleBehavior = aBehaviorType;
+}
+//-----------------------------------------------------------------------
+
 void cLuxEnemy_ManPig::ChangeMoveType(eLuxEnemyMoveType aMoveType)
 {
 	if(mCurrentMoveType == aMoveType) return;
@@ -540,10 +552,22 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 			}
 			else
 			{
-				if(GetPatrolNodeNum()>0 || mIdleBehavior!=eLuxIdleBehavior_None)
+				if(GetPatrolNodeNum()>0)
 				{
 					FadeOutCurrentAnim(0.2f);
-					ChangeState(eLuxEnemyState_Patrol);	
+					if (mIdleBehavior == eLuxIdleBehavior_None||mPreviousState == eLuxEnemyState_Track|| mPreviousState == eLuxEnemyState_Stalk)
+					{
+						ChangeState(eLuxEnemyState_Patrol);
+					}
+					else if (mIdleBehavior == eLuxIdleBehavior_Stalk)
+					{
+						ChangeState(eLuxEnemyState_Stalk);
+					}
+					else if (mIdleBehavior == eLuxIdleBehavior_Track)
+					{
+						ChangeState(eLuxEnemyState_Track);
+					}
+					
 				}
 				else
 				{
@@ -600,9 +624,11 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 			/////////////////////////////////////
 			//If at end, check if we want to remove
-			if(IsAtLastPatrolNode() && CheckEnemyAutoRemoval(10))
+			if(IsAtLastPatrolNode() && CheckEnemyAutoRemoval(10)) // CheckEnemyAutoRemoval(10)
 			{
 				//Do nothing...
+				//cLuxEnemyPatrolNode* pNode = GetCurrentPatrolNode();
+				//DecCurrentPatrolNode(true);
 			}
 			////////////////////////////////////
 			// Do stuff for node and go to next.
@@ -644,8 +670,13 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 					mfWaitTime =0;
 					ChangeState(eLuxEnemyState_Wait);
 				}
+				FinishPatrolEndOfPath(true);
 
-				IncCurrentPatrolNode(true);
+				tString sCallback = msOverCallback;
+				if (PatrolRemoveCallback) msOverCallback = "";
+
+				if (sCallback != "")
+					gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
 			}
 
 		//////////////////////////
@@ -1099,7 +1130,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		//Wait a few secs
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
 			//cAINode * pNode = GetSearchForPlayerNode();
-			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 4, 12,false, false, true, NULL);
+			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30,false, false, true, NULL, 1); //GetFeetPosition(), 4, 12,false, false, true, NULL);
 			if(pNode)
 				mpPathfinder->MoveTo(pNode->GetPosition());
 			else
@@ -1318,7 +1349,10 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		///////////////////////
 		// Enter
 		kLuxOnEnter
-			SetMoveSpeed(eLuxEnemyMoveSpeed_Walk);
+			
+			SetMoveSpeed(mPatrolMoveSpeed);
+			if (mPatrolMoveSpeed == eLuxEnemyMoveSpeed_Run) mfForwardSpeed *= mfRunSpeedMul;
+
 			SendMessage(eLuxEnemyMessage_TimeOut, 2.5f, true);
 			
 			if(TrackFindNode()==false)
@@ -1540,8 +1574,11 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		// Update path and call for help!
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)
 			
-			mpMap->BroadcastEnemyMessage(eLuxEnemyMessage_HelpMe, true, mpCharBody->GetPosition(), mfActivationDistance*0.5f,
-											0,false, mpCharBody->GetFeetPosition());
+			if(mbCallForHelp)
+			{
+				mpMap->BroadcastEnemyMessage(eLuxEnemyMessage_HelpMe, true, mpCharBody->GetPosition(), mfActivationDistance * 0.5f,
+					0, false, mpCharBody->GetFeetPosition());
+			}
 		
 			mpPathfinder->MoveTo(mvLastKnownPlayerPos);
 			
@@ -1558,7 +1595,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 				
 				gpBase->mpMusicHandler->RemoveEnemy(eLuxEnemyMusic_Attack,this);
 
-				if(mbThreatenOnAlert || mbIsTelsa)
+				if(mbThreatenOnAlert)
 					ChangeState(eLuxEnemyState_Patrol);
 				else
 					ChangeState(eLuxEnemyState_Search);
@@ -1737,7 +1774,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 			
 		
 		kLuxOnMessage(eLuxEnemyMessage_AnimationSpecialEvent)
-			Attack(mNormalAttackSize, mBreakDoorAttackDamage,20.0f);
+			Attack(mNormalAttackSize, mBreakDoorAttackDamage);
 			
 
 		////////////////////////
@@ -2076,7 +2113,48 @@ void cLuxEnemy_ManPig::PatrolUpdateGoal()
 			ChangeState(eLuxEnemyState_Wait);
 	}*/
 }
+//-----------------------------------------------------------------------
 
+void cLuxEnemy_ManPig::FinishPatrolEndOfPath(bool callPatrolUpdateNow)
+{
+	cLuxEnemyPatrolNode* pNode = GetCurrentPatrolNode();
+
+	if (!mbPathReversed && IsAtLastPatrolNode()
+		|| mbPathReversed && IsAtFirstPatrolNode())
+	{
+		if (mbAutoReverseAtPathEnd)
+		{
+			mbPathReversed = !mbPathReversed;
+		}
+	}
+
+	if (pNode)
+		mfWaitTime = pNode->mfWaitTime;
+	else
+		mfWaitTime = 0;
+
+	if(mbPathReversed)
+	{
+		DecCurrentPatrolNode(true);
+	}
+	else
+	{
+		IncCurrentPatrolNode(true);
+	}
+
+	if (mfWaitTime == 0 && mbAllowZeroWaitTime)
+	{
+		if (callPatrolUpdateNow)
+		{
+			PatrolUpdateGoal();
+		}
+	}
+	else
+	{
+		
+		ChangeState(eLuxEnemyState_Wait);
+	}
+}
 //-----------------------------------------------------------------------
 
 bool cLuxEnemy_ManPig::FleeTryToFindSafeNode()
@@ -2203,31 +2281,34 @@ bool cLuxEnemy_ManPig::TrackTeleportBehindPlayer()
 	cVector3f vPlayerBackward = gpBase->mpPlayer->GetCharacterBody()->GetForward()*-1;
 
 	int lNumOfTries=10;
-	for(int i=0; i<lNumOfTries; ++i)
+	if (mbCanTrackTeleport)
 	{
-		/////////////////////////////////////
-		//Find a node to run to
-		cAINode * pNode = mpPathfinder->GetNodeAtPos(GetPlayerFeetPos(),
-														fDistance*0.5f, fDistance, false, true, false, NULL);
-		if(pNode==NULL)
+		for (int i = 0; i < lNumOfTries; ++i)
 		{
-			return false;
-		}
+			/////////////////////////////////////
+			//Find a node to run to
+			cAINode* pNode = mpPathfinder->GetNodeAtPos(GetPlayerFeetPos(),
+				fDistance * 0.5f, fDistance, false, true, false, NULL);
+			if (pNode == NULL)
+			{
+				return false;
+			}
 
-		if(i==lNumOfTries-1)
-		{
-			mpPathfinder->MoveTo(pNode->GetPosition());
-			return true;
-		}
+			if (i == lNumOfTries - 1)
+			{
+				mpPathfinder->MoveTo(pNode->GetPosition());
+				return true;
+			}
 
-		if(IsVisibleToPlayerAtFeetPos(pNode->GetPosition()))
-		{
-			continue;
-		}
-		
-		mpCharBody->SetFeetPosition(pNode->GetPosition());
+			if (IsVisibleToPlayerAtFeetPos(pNode->GetPosition()))
+			{
+				continue;
+			}
 
-		return true; //Take this node!
+			mpCharBody->SetFeetPosition(pNode->GetPosition());
+
+			return true; //Take this node!
+		}
 	}
 
 	return false;
@@ -2710,7 +2791,9 @@ kBeginSerialize(cLuxEnemy_ManPig_SaveData, iLuxEnemy_SaveData)
 kSerializeVar(mbThreatenOnAlert, eSerializeType_Bool)
 kSerializeVar(mbFleeFromPlayer, eSerializeType_Bool)
 kSerializeVar(mbAutoDisableAfterFlee, eSerializeType_Bool)
-kSerializeVar(mbPlayActivateSound, eSerializeType_Bool)
+kSerializeVar(mbPlayActivateSound, eSerializeType_Bool) 
+kSerializeVar(mbCanTrackTeleport, eSerializeType_Bool)
+kSerializeVar(mbCallForHelp, eSerializeType_Bool)
 kSerializeVar(mfLanternSensitivity, eSerializeType_Float32)
 kSerializeVar(mIdleBehavior, eSerializeType_Int32)
 kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
@@ -2753,6 +2836,8 @@ void cLuxEnemy_ManPig::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mbFleeFromPlayer);
 	kCopyToVar(pData,mbAutoDisableAfterFlee);
 	kCopyToVar(pData,mfLanternSensitivity);
+	kCopyToVar(pData, mbCanTrackTeleport);
+	kCopyToVar(pData, mbCallForHelp);
 	kCopyToVar(pData,mIdleBehavior);
 	kCopyToVar(pData,mPatrolMoveSpeed);
 	kCopyToVar(pData,mfRunSpeedMul);
@@ -2790,6 +2875,8 @@ void cLuxEnemy_ManPig::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mbAutoDisableAfterFlee);
 	kCopyFromVar(pData, mbPlayActivateSound);
 	kCopyFromVar(pData,mfLanternSensitivity);
+	kCopyFromVar(pData, mbCanTrackTeleport);
+	kCopyFromVar(pData, mbCallForHelp);
 	mIdleBehavior  = (eLuxIdleBehavior)pData->mIdleBehavior;
 	mPatrolMoveSpeed  = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;
 	kCopyFromVar(pData,mfRunSpeedMul);

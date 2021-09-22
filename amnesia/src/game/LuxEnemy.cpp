@@ -368,6 +368,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbHallucination =  apInstanceVars->GetVarBool("Hallucination", false);
 		pEnemy->mfHallucinationEndDist = apInstanceVars->GetVarFloat("HallucinationEndDist", false);
 		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
+		pEnemy->mbDeaf = apInstanceVars->GetVarBool("Deaf", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
@@ -693,7 +694,7 @@ void iLuxEnemy::OnUpdate(float afTimeStep)
 
 	//////////////////////
 	// Glow
-	UpdateDarknessGlow(afTimeStep);
+	//UpdateDarknessGlow(afTimeStep);
 
 	//////////////////////
 	// Health Regeneration
@@ -1153,8 +1154,17 @@ void iLuxEnemy::ClearPatrolNodes()
 {
 	mvPatrolNodes.clear();
 
+	//msOverCallback = "";
+
 	mlCurrentPatrolNode =0;
 }
+
+void iLuxEnemy::SetEndOfPathCallback(const tString& asCallbackFunc, bool abRemoveWhenCalled)
+{
+	msOverCallback = asCallbackFunc; 
+	PatrolRemoveCallback = abRemoveWhenCalled;
+}
+
 
 //-----------------------------------------------------------------------
 
@@ -1209,9 +1219,9 @@ void iLuxEnemy::DecCurrentPatrolNode(bool abLoopIfAtStart)
 	if (mlCurrentPatrolNode < 0)
 	{
 		if (abLoopIfAtStart)
-			mlCurrentPatrolNode = (int)mvPatrolNodes.size() - 1;
+			mlCurrentPatrolNode = (int)mvPatrolNodes.size()-1;
 		else
-			mlCurrentPatrolNode = 0;
+			mlCurrentPatrolNode =0;
 	}
 }
 
@@ -1835,7 +1845,7 @@ void iLuxEnemy::UpdateDarknessGlow(float afTimeStep)
 
 				for(int i=0; i<mpMeshEntity->GetSubMeshEntityNum(); ++i)
 				{
-					gpBase->mpEffectRenderer->AddEnemyGlow(mpMeshEntity->GetSubMeshEntity(i),fAlpha);
+					gpBase->mpEffectRenderer->AddEnemyGlow(mpMeshEntity->GetSubMeshEntity(i),fAlpha,cColor(0));
 				}
 			}
 		}
@@ -2648,6 +2658,7 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mbCausesSanityDecrease);
 
 	kCopyToVar(pData, mbBlind); 
+	kCopyToVar(pData, mbDeaf);
 
 	kCopyToVar(pData, mbHallucination);
 	
@@ -2813,6 +2824,7 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mbCausesSanityDecrease);
 
 	kCopyFromVar(pData, mbBlind);
+	kCopyFromVar(pData, mbDeaf);
 
 	kCopyFromVar(pData, mbHallucination);
 

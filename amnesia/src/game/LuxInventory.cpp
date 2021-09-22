@@ -200,6 +200,7 @@ cLuxInventory_Item::cLuxInventory_Item(const tString& asName, eLuxItemType aType
 
 	mlCount = 1;
 	mfAmount = 1;
+	mfLantern = 0;
 
 	mpImage = NULL;
 }

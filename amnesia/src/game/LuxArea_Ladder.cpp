@@ -111,6 +111,26 @@ void cLuxArea_Ladder::SetupAfterLoad(cWorld *apWorld)
 
 void cLuxArea_Ladder::OnUpdate(float afTimeStep)
 {
+	if (afTimeStep < gpBase->mpEngine->GetStepSize() * 0.8f) return;
+
+	if (mpParentBody)
+	{
+		mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
+	}
+
+	///////////////////////////
+	// Get data
+	iPhysicsWorld* pPhysicsWorld = mpMap->GetPhysicsWorld();
+	iPhysicsBody* pAreaBody = mpBody;
+
+	cCollideData collideData;
+	collideData.SetMaxSize(1);
+
+	///////////////////////////
+	// Update count
+	mfTimeCount += afTimeStep;
+
+
 }
 
 //-----------------------------------------------------------------------

@@ -368,6 +368,7 @@ void cLuxPlayerHands::SetActiveHandObject(const tString& asName)
 	{
 		iLuxHandObject* pObject = GetHandObject(asName);
 		if(pObject) SetCurrentHandObject(pObject);
+		//gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetDrainsOil();
 	}
 	else
 	{

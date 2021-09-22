@@ -160,6 +160,9 @@ void cEditorWindowEntityEditBoxLight::AddPropertyDiffuseColor(cWidgetTab* apPare
 	mpGroupDiffuse= mpSet->CreateWidgetDummy(0,apParentTab);
 
 	mpInpDiffuse = CreateInputColorFrame(cVector3f(0,0,0.1f), _W("Diffuse color"), "", mpGroupDiffuse);
+
+	mpInpBrightness = CreateInputNumber(cVector3f(0,16,0.1f), _W("Brightness"), "", mpGroupDiffuse);
+	mpInpFalloff = CreateInputNumber(cVector3f(0,48,0.1f), _W("Falloff"), "", mpGroupDiffuse);
 }
 
 //------------------------------------------------------------
@@ -411,6 +414,9 @@ void cEditorWindowEntityEditBoxLight::OnUpdate(float afTimeStep)
 	mpInpFlickerFadeOnMaxLength->SetValue(mpLight->GetFlickerOnFadeMaxLength(), false);
 	mpInpFlickerFadeOffMinLength->SetValue(mpLight->GetFlickerOffFadeMinLength(), false);
 	mpInpFlickerFadeOffMaxLength->SetValue(mpLight->GetFlickerOffFadeMaxLength(), false);
+
+	mpInpBrightness->SetValue(mpLight->GetBrightness(), false);
+	mpInpFalloff->SetValue(mpLight->GetFalloff(), false);
 
 	if(mpInpRadius) mpInpRadius->SetValue(mpLight->GetRadius(), false);
 
@@ -679,7 +685,16 @@ bool cEditorWindowEntityEditBoxLight::WindowSpecificInputCallback(iEditorInput* 
 		else
 			mpInpFalloffMap->SetValue(_W(""), false);
 	}
-
+	// Brightness
+	else if(apInput==mpInpBrightness)
+	{
+		pAction = mpEntity->CreateSetPropertyActionFloat(eLightFloat_Brightness, mpInpBrightness->GetValue());
+	}
+	// Falloff
+	else if(apInput==mpInpFalloff)
+	{
+		pAction = mpEntity->CreateSetPropertyActionFloat(eLightFloat_Falloff, mpInpFalloff->GetValue());
+	}
 	mpEditor->AddAction(pAction);
 
 	return true;

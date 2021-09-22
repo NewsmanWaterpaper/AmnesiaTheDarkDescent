@@ -233,6 +233,12 @@ bool iEntityWrapperLight::GetProperty(int alPropID, float& afX)
 	case eLightFloat_FlickerOffFadeMaxLength:
 		afX = GetFlickerOffFadeMaxLength();
 		break;
+	case eLightFloat_Brightness:
+		afX = GetBrightness();
+		break;
+	case eLightFloat_Falloff:
+		afX = GetFalloff();
+		break;
 	default:
 		return false;
 	}
@@ -362,6 +368,12 @@ bool iEntityWrapperLight::SetProperty(int alPropID, const float& afX)
 		break;
 	case eLightFloat_FlickerOffFadeMaxLength:
 		SetFlickerOffFadeMaxLength(afX);
+		break;
+	case eLightFloat_Brightness:
+		SetBrightness(afX);
+		break;
+	case eLightFloat_Falloff:
+		SetFalloff(afX);
 		break;
 	default:
 		return iEntityWrapper::SetProperty(alPropID, afX);
@@ -586,6 +598,18 @@ void iEntityWrapperLight::SetFlickerOffColor(const cColor& aCol)
 	mbFlickerUpdated = true;
 }
 
+void iEntityWrapperLight::SetBrightness(float afX)
+{
+	mfBrightness = afX;
+
+	((iLight*)mpEngineEntity->GetEntity())->SetBrightness(afX);
+}
+
+void iEntityWrapperLight::SetFalloff(float afX)
+{
+	mfFalloff = afX;
+	((iLight*)mpEngineEntity->GetEntity())->SetFalloff(afX);
+}
 
 void iEntityWrapperLight::SetFlickerOnSound(const tString& asStr)
 {

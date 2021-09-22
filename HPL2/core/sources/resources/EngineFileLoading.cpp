@@ -109,6 +109,7 @@ namespace hpl {
 			pPS->SetMinFadeDistanceEnd(apElement->GetAttributeFloat("MinFadeDistanceEnd"));
 			pPS->SetMaxFadeDistanceStart(apElement->GetAttributeFloat("MaxFadeDistanceStart"));
 			pPS->SetMaxFadeDistanceEnd(apElement->GetAttributeFloat("MaxFadeDistanceEnd"));
+			pPS->SetActive(apElement->GetAttributeBool("Active", true));
 		}
 		
 		kEndWorldEntityLoad(pPS);
@@ -305,6 +306,9 @@ namespace hpl {
 		pLight->SetDefaultDiffuseColor(pLight->GetDiffuseColor());
 		pLight->SetRadius(apElement->GetAttributeFloat("Radius", 1));
 
+		pLight->SetBrightness(apElement->GetAttributeFloat("Brightness", 1));
+		pLight->SetFalloff(apElement->GetAttributeFloat("Falloff", 1));
+
 		pLight->SetShadowMapResolution( ToShadowMapResolution(apElement->GetAttributeString("ShadowResolution", "High")) );
 		
 		bool bShadowsAffectDynamic = apElement->GetAttributeBool("ShadowsAffectDynamic", true);
@@ -313,6 +317,8 @@ namespace hpl {
 		if(bShadowsAffectDynamic)	lFlags |= eObjectVariabilityFlag_Dynamic;
 		if(bShadowsAffectStatic)	lFlags |= eObjectVariabilityFlag_Static;
 		pLight->SetShadowCastersAffected(lFlags);
+
+		pLight->SetActive(apElement->GetAttributeBool("Active", true));
 
 		//////////////////////
 		// Backwards compitabilty:

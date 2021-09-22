@@ -22,8 +22,13 @@
 #include "LuxMap.h"
 #include "LuxPlayer.h"
 #include "LuxPlayerHands.h"
+#include "LuxEnemy.h"
+#include "LuxEnemy_Manpig.h"
 #include "LuxMapHelper.h"
+#include "LuxMapHandler.h"
 #include "LuxHelpFuncs.h"
+#include "LuxDebugHandler.h"
+#include <limits>
 
 //////////////////////////////////////////////////////////////////////////
 // CONSTRUCTORS
@@ -35,6 +40,18 @@ cLuxHandObject_LightSource::cLuxHandObject_LightSource(const tString& asName, cL
 {
 	mfSwayAngle =0;
 	mfSwayVel =0;
+
+	mbFlickering = false;
+	mfFlickeringSpeed = 1.0f;
+	mlFlickeringState = 1;
+
+	mfFlickerAmount = 1;
+	mfFlickerTime = 0;
+	mfFlickerPauseTime = 0;
+
+	mfStrobeDroneTime = 0;
+	mpDroneSound = NULL;
+	mlDroneSoundId = -1;
 }
 
 cLuxHandObject_LightSource::~cLuxHandObject_LightSource()
@@ -71,6 +88,8 @@ void cLuxHandObject_LightSource::LoadImplementedVars(cXmlElement *apVarsElem)
 	mfSwayCameraRollMul = apVarsElem->GetAttributeFloat("SwayCameraRollMul", 0);
 
 	msSkipSwaySubMesh = apVarsElem->GetAttributeString("SkipSwaySubMesh", "");
+
+	mbUseFlicker = apVarsElem->GetAttributeBool("UseFlicker", false);
 }
 
 //-----------------------------------------------------------------------
@@ -129,8 +148,9 @@ void cLuxHandObject_LightSource::ImplementedReset()
 
 void cLuxHandObject_LightSource::Update(float afTimeStep)
 {
-	bool bUpdate = false;
-	bool bUpdateDone = false;
+	bool bUpdate = true;
+	//bool bUpdateDone = false;
+	float fAlpha = 1;
 
 	///////////////////
 	// Sway Physics
@@ -143,19 +163,28 @@ void cLuxHandObject_LightSource::Update(float afTimeStep)
 	// Fade out
 	if(mpHands->GetState() == eLuxHandsState_Holster)
 	{
-		for(size_t i=0; i<mvLights.size(); ++i)
+		/*for(size_t i=0; i<mvLights.size(); ++i)
 		{
 			if(mvDefaultLightFlicker[i])
 			{
 				mvLights[i]->SetFlickerActive(false);
 				mvLights[i]->StopFading();
 			}
-		}
+		}*/
 
 		mpHands->mfHandObjectAlpha -= mfFadeOutSpeed * afTimeStep;
 		if(mpHands->mfHandObjectAlpha < 0.0f) mpHands->mfHandObjectAlpha = 0.0f;
 		
-		bUpdate = true;
+		//bUpdate = true;
+
+		if (mpDroneSound)
+		{
+			cSoundHandler* pSoundHandler = gpBase->mpEngine->GetSound()->GetSoundHandler();
+
+			if (pSoundHandler->IsValid(mpDroneSound, mlDroneSoundId))
+				mpDroneSound->FadeOut(0.5f);
+			mpDroneSound = NULL;
+		}
 	}
 	///////////////////
 	// Fade in
@@ -165,11 +194,19 @@ void cLuxHandObject_LightSource::Update(float afTimeStep)
 		if(mpHands->mfHandObjectAlpha > 1.0f)
 		{
 			mpHands->mfHandObjectAlpha = 1.0f;
-			bUpdateDone = true;
+			//bUpdateDone = true;
 		}
 
-		bUpdate = true;
+		//bUpdate = true;
 	}
+
+	///////////////////
+	// Flickering
+	float fFlicker = UpdateFlickering(afTimeStep);
+
+	///////////////////
+	// Set alpha
+	if (bUpdate) fAlpha = mpHands->mfHandObjectAlpha * fFlicker;
 
 	///////////////////
 	// Calculate fade out color
@@ -186,19 +223,19 @@ void cLuxHandObject_LightSource::Update(float afTimeStep)
 	// Set alpha
 	if(bUpdate)
 	{
-		mpMeshEntity->SetIlluminationAmount(mpHands->mfHandObjectAlpha);
+		mpMeshEntity->SetIlluminationAmount(fAlpha);
 
 		for(size_t i=0; i<mvBillboards.size(); ++i)
 		{
 			cColor col = mvBillboards[i]->GetColor();
-			col.a = mpHands->mfHandObjectAlpha;
+			col.a = fAlpha;
 			mvBillboards[i]->SetColor(col);
 		}
 		
 		for(size_t i=0; i<mvParticleSystems.size(); ++i)
 		{
 			cColor col = mvParticleSystems[i]->GetColor();
-			col.a = mpHands->mfHandObjectAlpha;
+			col.a = fAlpha;
 			mvParticleSystems[i]->SetColor(col);
 		}
 		
@@ -206,22 +243,22 @@ void cLuxHandObject_LightSource::Update(float afTimeStep)
 		{
 			if(mpHands->GetState() == eLuxHandsState_Holster)
 			{
-				mvLights[i]->SetDiffuseColor(mvLightFadeOutColor[i] * mpHands->mfHandObjectAlpha);
+				mvLights[i]->SetDiffuseColor(mvLightFadeOutColor[i] * fAlpha);
 			}
 			else
 			{
-				mvLights[i]->SetDiffuseColor(mvDefaultLightColors[i] * mpHands->mfHandObjectAlpha);
+				mvLights[i]->SetDiffuseColor(mvDefaultLightColors[i] * fAlpha);
 			}
 		}
 	}
 
-	if(bUpdateDone)
+	/*if(bUpdateDone)
 	{
 		for(size_t i=0; i<mvLights.size(); ++i)
 		{
 			if(mvDefaultLightFlicker[i]) mvLights[i]->SetFlickerActive(true);
 		}
-	}
+	}*/
 }
 
 //-----------------------------------------------------------------------
@@ -238,6 +275,19 @@ bool cLuxHandObject_LightSource::AnimationIsOver()
 	return true;
 }
 
+//-----------------------------------------------------------------------
+void cLuxHandObject_LightSource::SetFlickering(bool abX)
+{
+	mbFlickering = abX;
+
+	if (mbFlickering)
+	{
+		mfFlickerAmount = 1;
+		mfFlickerTime = 0.05f;
+		mlFlickeringState = 1;
+		mfFlickerPauseTime = 0;
+	}
+}
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////
@@ -330,4 +380,157 @@ void cLuxHandObject_LightSource::UpdateSwayPhysics(float afTimeStep)
 }
 
 //-----------------------------------------------------------------------
+
+float cLuxHandObject_LightSource::UpdateFlickering(float afTimeStep)
+{
+	//if (mbUseFlicker)
+	//{
+		if (mpHands->GetState() == eLuxHandsState_Holster) return 1.0f;
+
+		////////////////////////////
+		// See if an enemy is in the spotlight.
+		bool bEnemyInSpotLight = false;
+		cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+		cLuxEnemyIterator it = pMap->GetEnemyIterator();
+		while (it.HasNext())
+		{
+			iLuxEnemy* pEnemy = it.Next();
+			if (pEnemy->IsActive() == false) continue;
+			if (pEnemy->GetInLanternLightCount() >0 && pEnemy->GetEnemyType()== eLuxEnemyType_ManPig && mbUseFlicker == true
+				||pEnemy->GetInLanternLightCount() > 0 && pEnemy->GetEnemyType() == eLuxEnemyType_WaterLurker && mbUseFlicker == true)
+			{
+				bEnemyInSpotLight = true;
+				break;
+			}
+		}
+
+		////////////////////////////
+		// Strobe drone
+		cSoundHandler* pSoundHandler = gpBase->mpEngine->GetSound()->GetSoundHandler();
+
+		if (bEnemyInSpotLight) mfStrobeDroneTime = 1.0f;
+		if (mfStrobeDroneTime > 0)
+		{
+			mfStrobeDroneTime -= afTimeStep;
+
+			if (mpDroneSound == NULL || pSoundHandler->IsValid(mpDroneSound, mlDroneSoundId) == false)
+			{
+				mpDroneSound = pSoundHandler->PlayGui("ui_lanterndrone.ogg", true, 1);
+				if (mpDroneSound) {
+					mlDroneSoundId = mpDroneSound->GetId();
+					mpDroneSound->FadeIn(1.0f, 0.5f);
+				}
+			}
+		}
+		else
+		{
+			if (mpDroneSound)
+			{
+				if (pSoundHandler->IsValid(mpDroneSound, mlDroneSoundId))
+					mpDroneSound->FadeOut(0.5f);
+				mpDroneSound = NULL;
+			}
+		}
+
+		////////////////////////////
+		// If In spotlight, do a strobing effect
+		if (bEnemyInSpotLight)
+		{
+			//Make sure within bounds
+			if (mfFlickerTime < 0.01) mfFlickerTime = 0.025f;
+			if (mfFlickerTime > 0.1) mfFlickerTime = 0.1f;
+
+			//Puase
+			if (mfFlickerPauseTime > 0)
+			{
+				mfFlickerPauseTime -= afTimeStep;
+				return mfFlickerAmount;
+			}
+
+			////////////////////////////
+			// Fade in
+			if (mlFlickeringState == 1)
+			{
+				mfFlickerAmount += afTimeStep * (1.0f / mfFlickerTime);
+				if (mfFlickerAmount >= 1)
+				{
+					mfFlickerAmount = 1;
+					mfFlickerTime = cMath::RandRectf(0.1f, 1.0f);
+					mlFlickeringState = 0;
+					gpBase->mpHelpFuncs->PlayGuiSoundData("lantern_flicker_strobe", eSoundEntryType_World);
+				}
+			}
+			////////////////////////////
+			// Fade out
+			else if (mlFlickeringState == 0)
+			{
+				mfFlickerAmount -= afTimeStep * (1.0f / mfFlickerTime);
+				if (mfFlickerAmount <= 0)
+				{
+					if (cMath::RandRectl(0, 5) == 0)
+						mfFlickerPauseTime = cMath::RandRectf(0, 1);
+
+					mfFlickerAmount = 0;
+					mfFlickerTime = cMath::RandRectf(0.025f, 0.2f);
+					mlFlickeringState = 1;
+					gpBase->mpHelpFuncs->PlayGuiSoundData("lantern_flicker_strobe", eSoundEntryType_World);
+				}
+			}
+
+			return mfFlickerAmount;
+		}
+
+		////////////////////////////
+		// Check if active
+		if (mbFlickering == false)
+		{
+			mfFlickerAmount += afTimeStep * 12;
+			if (mfFlickerAmount >= 1) mfFlickerAmount = 1;
+			return mfFlickerAmount;
+		}
+
+		////////////////////////////
+		// Fade in
+		if (mlFlickeringState == 1 && mfFlickerAmount < 1)
+		{
+			mfFlickerAmount += afTimeStep * 35;
+			if (mfFlickerAmount >= 1) mfFlickerAmount = 1;
+		}
+		////////////////////////////
+		// Fade out
+		else if (mlFlickeringState == 0 && mfFlickerAmount > 0)
+		{
+			mfFlickerAmount -= afTimeStep * 35;
+			if (mfFlickerAmount <= 0) mfFlickerAmount = 0;
+		}
+		////////////////////////////
+		// Check of time for state switch
+		else
+		{
+			mfFlickerTime -= afTimeStep * mfFlickeringSpeed;
+			if (mfFlickerTime <= 0)
+			{
+				///////////////////////////
+				// Off -> On
+				if (mlFlickeringState == 1)
+				{
+					mfFlickerTime = cMath::RandRectf(0.0f, 0.15f);
+					mlFlickeringState = 0;
+					gpBase->mpHelpFuncs->PlayGuiSoundData("lantern_flicker", eSoundEntryType_World);
+				}
+				///////////////////////////
+				// On -> Off
+				else
+				{
+					mfFlickerTime = cMath::RandRectf(0.1f, 0.8f);
+					mlFlickeringState = 1;
+					gpBase->mpHelpFuncs->PlayGuiSoundData("lantern_flicker", eSoundEntryType_World);
+				}
+			}
+		}
+
+	//}
+	return mfFlickerAmount;
+}
+//----------------------------------------------------------------------
 

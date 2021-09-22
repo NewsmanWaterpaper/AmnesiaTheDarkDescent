@@ -24,6 +24,7 @@
 
 #include "LuxMap.h"
 #include "LuxMapHelper.h"
+#include "LuxMapHandler.h"
 #include "LuxMusicHandler.h"
 #include "LuxDebugHandler.h"
 #include "LuxGlobalDataHandler.h"
@@ -88,6 +89,7 @@ cLuxEnemy_Child::cLuxEnemy_Child(const tString &asName, int alID, cLuxMap *apMap
 	mCurrentMoveType = eLuxEnemyMoveType_Normal;
 	mfRunSpeedMul = 1.0f;
 	mfWaitTime = 0;
+	mbPathReversed = false;
 
 	for(int i=0; i<eLuxEnemyMoveType_LastEnum; ++i)
 	{
@@ -259,20 +261,30 @@ bool cLuxEnemy_Child::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 		
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)
 			
-			if(GetPatrolNodeNum()>0)
+			if (mPreviousState == eLuxEnemyState_Patrol)
 			{
 				FadeOutCurrentAnim(0.2f);
-				ChangeState(eLuxEnemyState_Patrol);	
+				ChangeState(eLuxEnemyState_Patrol);
 			}
 			else
 			{
-				SendMessage(eLuxEnemyMessage_TimeOut, cMath::RandRectf(0.1f, 0.3f), true);
+				if (GetPatrolNodeNum() > 0)
+				{
+					FadeOutCurrentAnim(0.2f);
+					ChangeState(eLuxEnemyState_Patrol);
+				}
+				else
+				{
+					SendMessage(eLuxEnemyMessage_TimeOut, cMath::RandRectf(0.1f, 0.3f), true);
+				}
 			}
 
+		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
+			PlayAnim("IdleBiped", false, 0.3f);
 		//------------------------------
 
 		kLuxOnMessage(eLuxEnemyMessage_AnimationOver)
-			SendMessage(eLuxEnemyMessage_TimeOut, cMath::RandRectf(0.1f, 0.3f), true);
+			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(0.1f, 0.3f), true);
 	
 		
 	//------------------------------
@@ -340,7 +352,13 @@ bool cLuxEnemy_Child::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 					ChangeState(eLuxEnemyState_Wait);
 				}
 
-				IncCurrentPatrolNode(true);
+				FinishPatrolEndOfPath(true);
+
+				tString sCallback = msOverCallback;
+				if (PatrolRemoveCallback) msOverCallback = "";
+
+				if (sCallback != "")
+					gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
 			}
 
 
@@ -408,6 +426,49 @@ void cLuxEnemy_Child::PatrolUpdateGoal()
 	cLuxEnemyPatrolNode* pPatrolNode = GetCurrentPatrolNode();
 
 	mpPathfinder->MoveTo(pPatrolNode->mpNode->GetPosition());
+}
+//-----------------------------------------------------------------------
+
+void cLuxEnemy_Child::FinishPatrolEndOfPath(bool callPatrolUpdateNow)
+{
+	cLuxEnemyPatrolNode* pNode = GetCurrentPatrolNode();
+
+	if (!mbPathReversed && IsAtLastPatrolNode()
+		|| mbPathReversed && IsAtFirstPatrolNode())
+	{
+
+		if (mbAutoReverseAtPathEnd)
+		{
+			mbPathReversed = !mbPathReversed;
+		}
+	}
+
+	if (pNode)
+		mfWaitTime = pNode->mfWaitTime;
+	else
+		mfWaitTime = 0;
+
+	if (mbPathReversed)
+	{
+		DecCurrentPatrolNode(true);
+	}
+	else
+	{
+		IncCurrentPatrolNode(true);
+	}
+
+	if (mfWaitTime == 0 && mbAllowZeroWaitTime)
+	{
+		if (callPatrolUpdateNow)
+		{
+			PatrolUpdateGoal();
+		}
+	}
+	else
+	{
+
+		ChangeState(eLuxEnemyState_Wait);
+	}
 }
 //-----------------------------------------------------------------------
 bool cLuxEnemy_Child::CheckEnemyAutoRemoval(float afDistance)

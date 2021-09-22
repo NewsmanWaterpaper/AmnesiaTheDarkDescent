@@ -69,6 +69,7 @@ public:
 	tString msImageFile;
 
 	float GetAmount(){ return mfAmount;}
+	int GetLanternNumber() { return mfLantern; }
 	int GetCount(){ return mlCount;}
 	const tString& GetGameNameEntry(){ return msGameNameEntry;}
 	const tString& GetGameDescEntry(){ return msGameDescEntry;}
@@ -93,6 +94,7 @@ private:
 	
 	int mlCount;
 	float mfAmount;
+	int mfLantern;
 	tString msGameNameEntry;
 	tString msGameDescEntry;
 };

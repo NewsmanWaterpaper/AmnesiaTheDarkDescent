@@ -105,6 +105,7 @@ cLuxEnemy_WaterLurker::cLuxEnemy_WaterLurker(const tString &asName, int alID, cL
 	mbUseAnimations = false;
 	mbCausesSanityDecrease = false;
 	mbCausesSanityDecreaseAsDefault = false;
+	mbPathReversed = false;
 }
 
 //-----------------------------------------------------------------------
@@ -641,6 +642,8 @@ void cLuxEnemy_WaterLurker::PatrolEndOfPath()
 {
 	
 }
+
+
 
 //-----------------------------------------------------------------------
 

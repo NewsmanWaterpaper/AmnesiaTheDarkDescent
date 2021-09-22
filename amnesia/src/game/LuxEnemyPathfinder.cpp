@@ -19,6 +19,7 @@
 
 #include "LuxEnemyPathfinder.h"
 
+#include "LuxDebugHandler.h"
 #include "LuxEnemy.h"
 #include "LuxEnemyMover.h"
 #include "LuxMap.h"
@@ -101,6 +102,7 @@ bool cLuxEnemyPathfinder::MoveTo(const cVector3f& avPos)
 	//No path finding just go straight to goal.
 	if(mpAStar==NULL)
 	{
+		gpBase->mpDebugHandler->AddMessage(_W("Could not find AStar!"), false);
 		return false;
 	}
 	
@@ -120,6 +122,7 @@ bool cLuxEnemyPathfinder::MoveTo(const cVector3f& avPos)
 	if(bRet==false)
 	{
 		//Log("Could not find path!\n");
+		gpBase->mpDebugHandler->AddMessage(_W("Could not find path!"), false);
 		//TODO: Debug output
 	}
 

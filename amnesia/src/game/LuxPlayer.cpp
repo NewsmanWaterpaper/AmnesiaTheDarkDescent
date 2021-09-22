@@ -94,6 +94,8 @@ cLuxPlayer::cLuxPlayer() : iLuxUpdateable("LuxPlayer"), iLuxCollideCallbackConta
 
 	mfAutoKillYPos = gpBase->mpGameCfg->GetFloat("Player_General","AutoKillYPos",0);
 
+	miNumberOfHealthLevels = gpBase->mpGameCfg->GetInt("Player_General", "NumberOfHealthLevels", 0);
+
 	//////////////////////////////////
 	// Init body properties
 	mvBodySize = gpBase->mpGameCfg->GetVector3f("Player_Body","Size",0);
@@ -875,6 +877,16 @@ void cLuxPlayer::SetHealth(float afX)
 	{
 		mpDeath->Start();
 	}
+}
+
+int cLuxPlayer::GetHealthLevel()
+{
+	return GetHealthLevelForHealth(mfHealth);
+}
+
+int cLuxPlayer::GetHealthLevelForHealth(float afHealth)
+{
+	return afHealth < 0.001f ? 0 : 1 + (int)(miNumberOfHealthLevels * ((int)(mfHealth - 0.001f))) / 100;
 }
 
 void cLuxPlayer::SetSanity(float afX)

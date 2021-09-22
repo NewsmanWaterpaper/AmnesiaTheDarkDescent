@@ -98,6 +98,7 @@ private:
 	// State stuff
 	void PatrolUpdateGoal();
 	void PatrolEndOfPath();
+	void FinishPatrolEndOfPath(bool callPatrolUpdateNow);
 	
 	//////////////
 	//Data
@@ -105,6 +106,7 @@ private:
 	float mfRunSpeedMul;
 	float mfEatDamage;
 	float mfAfterAttackPauseTime;
+	bool mbPathReversed;
 
 	tString msSplashPS_Walk;
 	tString msSplashPS_Run;

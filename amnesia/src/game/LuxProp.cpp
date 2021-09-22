@@ -176,6 +176,10 @@ void iLuxPropLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTra
 
 		pProp->SetStaticPhysics(apInstanceVars->GetVarBool("StaticPhysics", false));
 
+		pProp->SetGlowColor(apInstanceVars->GetVarColor("GlowColor", cColor(0.5, 0.5, 1.0, 0)));
+		pProp->SetGlowOutlineColor(apInstanceVars->GetVarColor("GlowOutlineColor", cColor(0, 0, 0.5, 0)));
+		pProp->SetGlowEnabled(apInstanceVars->GetVarBool("GlowEnabled", false));
+
 
 		LoadInstanceVariables(pProp, apInstanceVars);
 	}
@@ -232,6 +236,12 @@ iLuxProp::iLuxProp(const tString &asName, int alID, cLuxMap *apMap, eLuxPropType
 	mfFadeInSpeed =0;
  
 	m_mtxLastBodyMoveMatrix = cMatrixf::Identity;
+
+	mfFlashAlpha = 0;
+
+	mcGlowColor = cColor(1, 1, 1, 1);
+	mcGlowOutlineColor = cColor(1, 1, 1, 1);
+	mbGlowEnabled = true;
 
 	mpParentBone = NULL;
 
@@ -475,6 +485,42 @@ void iLuxProp::OnUpdate(float afTimeStep)
 
 	//if(mvLights.size() > 0)
 	//	Log("End Color: %s\n", mvLights[0]->GetDiffuseColor().ToString().c_str());
+}
+
+void iLuxProp::FlashIfNearPlayer(float afTimeStep)
+{
+	if (!mbGlowEnabled || mbInteractionDisabled) return;
+
+	/////////////////////////////////
+	// If near player, flash
+	cCamera* pCam = gpBase->mpPlayer->GetCamera();
+	cVector3f vCameraPos = pCam->GetPosition();
+	cVector3f vBodyPos = mvBodies[0]->GetLocalPosition();
+	vCameraPos.y = 0;
+	vBodyPos.y = 0;
+
+	float fDistSqrt = cMath::Vector3DistSqr(vCameraPos, vBodyPos);
+	if (fDistSqrt < 4.0f * 4.0f)
+	{
+		mfFlashAlpha += afTimeStep;
+		if (mfFlashAlpha > 1)mfFlashAlpha = 1;
+	}
+	else
+	{
+		mfFlashAlpha -= afTimeStep;
+		if (mfFlashAlpha < 0)mfFlashAlpha = 0;
+	}
+
+	if (mfFlashAlpha > 0)
+	{
+		for (int i = 0; i < mpMeshEntity->GetSubMeshEntityNum(); ++i)
+		{
+			cSubMeshEntity* pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
+
+			if (pCam->GetFrustum()->CollideBoundingVolume(pSubEnt->GetBoundingVolume()) != eCollision_Outside)
+				gpBase->mpEffectRenderer->AddFlashObject(pSubEnt, mfFlashAlpha, GetGlowColor());
+		}
+	}
 }
 
 //-----------------------------------------------------------------------
@@ -1797,6 +1843,8 @@ kSerializeVar(mvMoveAngularLocalOffset, eSerializeType_Vector3f)
 kSerializeVar(mbMoveAngularNoGoal, eSerializeType_Bool)
 kSerializeVar(mvMoveAngularNoGoalDir, eSerializeType_Vector3f)
 
+kSerializeVar(mbGlowEnabled, eSerializeType_Bool)
+
 kSerializeVar(mlCurrentNonLoopAnimIndex, eSerializeType_Int32)
 kSerializeVar(msAnimCallback, eSerializeType_String)
 
@@ -1917,6 +1965,8 @@ void iLuxProp::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mfMoveAngularSpeed);
 	kCopyToVar(pData, mfMoveAngularSlowdownDist);
 	kCopyToVar(pData, m_mtxMoveAngularGoal);
+
+	kCopyToVar(pData, mbGlowEnabled);
 	
 	kCopyToVar(pData, mbMoveAngularNoGoal);
 	kCopyToVar(pData, mvMoveAngularNoGoalDir);
@@ -2072,6 +2122,8 @@ void iLuxProp::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mbMoveAngularUseOffset);
 	kCopyFromVar(pData, mvMoveAngularWorldOffset);
 	kCopyFromVar(pData, mvMoveAngularLocalOffset);
+
+	kCopyFromVar(pData, mbGlowEnabled);
 
 	kCopyFromVar(pData, mlCurrentNonLoopAnimIndex);
 	kCopyFromVar(pData, msAnimCallback);

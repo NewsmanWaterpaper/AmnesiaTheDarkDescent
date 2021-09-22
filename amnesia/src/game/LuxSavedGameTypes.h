@@ -274,6 +274,7 @@ public:
 
 	float mfAmount;
 	int mlCount;
+	int mfLantern;
 	tString msGameNameEntry;
 	tString msGameDescEntry;
 };
@@ -400,6 +401,9 @@ public:
 
 	bool mbLanternOn;
 	bool mbLanternDisabled;
+
+	bool mbLanternFlickering;
+	float mfLanternFlickeringSpeed;
 
 	tString msDeathHintCat;
 	tString msDeathHintEntry;

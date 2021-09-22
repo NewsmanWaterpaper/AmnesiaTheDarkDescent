@@ -85,6 +85,8 @@ enum eLightFloat
 	eLightFloat_FlickerOnFadeMaxLength,
 	eLightFloat_FlickerOffFadeMinLength,
 	eLightFloat_FlickerOffFadeMaxLength,
+	eLightFloat_Brightness,
+	eLightFloat_Falloff,
 	
 	eLightFloat_LastEnum,	
 };
@@ -137,6 +139,8 @@ public:
 		AddString(eLightStr_GoboAnimMode, "GoboAnimMode", "None");
 		AddFloat(eLightFloat_GoboAnimFrameTime, "GoboAnimFrameTime");
 		AddColor(eLightCol_Diffuse, "DiffuseColor", cColor(1));
+		AddFloat(eLightFloat_Brightness, "Brightness", 1.0f);
+		AddFloat(eLightFloat_Falloff, "Falloff", 1.0f);
 
 		AddBool(eLightBool_FlickerActive, "FlickerActive", false);
 		AddFloat(eLightFloat_FlickerOnMinLength, "FlickerOnMinLength");
@@ -253,6 +257,8 @@ public:
 	float GetFlickerOffFadeMinLength() { return mfFlickerOffFadeMinLength; }
 	float GetFlickerOffFadeMaxLength() { return mfFlickerOffFadeMaxLength; }
 
+	float GetBrightness() { return mfBrightness; }
+	float GetFalloff() { return mfFalloff; }
 
 	void SetFlickerActive(bool abX);
 
@@ -275,6 +281,9 @@ public:
 	void SetFlickerOnFadeMaxLength(float afX);
 	void SetFlickerOffFadeMinLength(float afX);
 	void SetFlickerOffFadeMaxLength(float afX);
+
+	void SetBrightness(float afX);
+	void SetFalloff(float afX);
 
 	void UpdateFlickerParams();
 
@@ -315,6 +324,8 @@ protected:
 	float mfRadius;
 
 	cColor mcolDiffuseColor;
+	float mfBrightness;
+	float mfFalloff;
 
 	tString msFalloffMap;
 

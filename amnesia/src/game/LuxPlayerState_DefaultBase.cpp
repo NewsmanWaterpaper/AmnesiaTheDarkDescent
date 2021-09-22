@@ -49,6 +49,8 @@ iLuxPlayerState_DefaultBase::iLuxPlayerState_DefaultBase(cLuxPlayer *apPlayer, e
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_Pick] = pGui->CreateGfxImage("hud_crosshair_over_pick.tga",eGuiMaterial_Alpha);
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_LevelDoor] = pGui->CreateGfxImage("hud_crosshair_over_leveldoor.tga",eGuiMaterial_Alpha);
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_Ladder] = pGui->CreateGfxImage("hud_crosshair_over_ladder.tga",eGuiMaterial_Alpha);
+	mvFocusCrosshairGfx[eLuxFocusCrosshair_Talk] = pGui->CreateGfxImage("hud_crosshair_over_phone.tga", eGuiMaterial_Alpha);
+	mvFocusCrosshairGfx[eLuxFocusCrosshair_Note] = pGui->CreateGfxImage("hud_crosshair_over_note.tga", eGuiMaterial_Alpha);
 }
 
 //-----------------------------------------------------------------------
@@ -286,7 +288,7 @@ void iLuxPlayerState_DefaultBase::AddOutlineObjects(iPhysicsBody *apBody, iLuxEn
 	        
 			if(BodyIsAdded(static_cast<iPhysicsBody*>(pSubEnt->GetEntityParent()), lstAttachedBodies))
 			{
-				gpBase->mpEffectRenderer->AddOutlineObject(pSubEnt);
+				gpBase->mpEffectRenderer->AddOutlineObject(pSubEnt, pProp->GetGlowOutlineColor());
 			}
 		}
 	}
@@ -301,7 +303,7 @@ void iLuxPlayerState_DefaultBase::AddOutlineObjects(iPhysicsBody *apBody, iLuxEn
 
 			if(static_cast<iPhysicsBody*>(pSubEnt->GetEntityParent()) == apBody)
 			{
-				gpBase->mpEffectRenderer->AddOutlineObject(pSubEnt);
+				gpBase->mpEffectRenderer->AddOutlineObject(pSubEnt, pProp->GetGlowOutlineColor());
 			}
 		}
 	}

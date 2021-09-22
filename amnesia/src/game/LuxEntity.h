@@ -146,6 +146,7 @@ public:
 	//////////////////
 	// Properties
 	eLuxEntityType GetEntityType()const{ return mEntityType;}
+	//eLuxEnemyType  GetEnemyType()const { return mEnemyType; }
 	
 	const tString& GetName()const{ return msName;}
 	int GetID(){ return mlID;}
@@ -260,6 +261,7 @@ protected:
 
 private:
 	eLuxEntityType mEntityType;
+	eLuxEnemyType mEnemyType;
 
 	void DestroyMe(){ mbDestroyMe = true;}
 };

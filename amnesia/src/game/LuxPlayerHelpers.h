@@ -181,6 +181,8 @@ public:
 
 	void Update(float afTimeStep);
 
+	void UpdateSoundLoops(float afTimeStep);
+
 	void OnDraw(float afFrameTime);
 
 private:
@@ -190,6 +192,11 @@ private:
 	float mfMaxPantCount;
 	float mfPantSpeed;
 	float mfPantSize;
+
+	int mnPreviousSoundHealthLevel;
+	int mlHurtLevel;
+	cSoundEntry* mpCurrentHealthLoopSound;
+	int mlCurrentHealthLoopSoundID;
 
 	int mlCurrentNoise;
 	float mfNoiseUpdateCount;
@@ -420,6 +427,7 @@ private:
 	tString msDisabledSound;
 	float mfLowerOilSpeed;
 	float mfFadeLightOilAmount;
+	bool mbUseDrainsOil;
 	
 	bool mbDisabled;
 	int alLantern;

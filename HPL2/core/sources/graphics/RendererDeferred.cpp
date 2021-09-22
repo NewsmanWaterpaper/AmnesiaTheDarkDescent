@@ -164,6 +164,7 @@ namespace hpl {
 	#define kVar_afFalloffExp						20
 	#define kVar_afDepthDiffMul						21
 	#define kVar_afSkipEdgeLimit					22
+	#define kVar_afFalloff							23
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -511,6 +512,7 @@ namespace hpl {
 				mpProgramManager->AddGenerateProgramVariableId("a_mtxSpotViewProj", kVar_a_mtxSpotViewProj, eDefferredProgramMode_Lights);
 				mpProgramManager->AddGenerateProgramVariableId("a_mtxInvViewRotation", kVar_a_mtxInvViewRotation, eDefferredProgramMode_Lights);
 				mpProgramManager->AddGenerateProgramVariableId("avShadowMapOffsetMul", kVar_avShadowMapOffsetMul, eDefferredProgramMode_Lights);
+				mpProgramManager->AddGenerateProgramVariableId("afFalloff",	kVar_afFalloff, eDefferredProgramMode_Lights);
 			}
 
 			//////////////////////////////
@@ -1349,7 +1351,8 @@ namespace hpl {
 		///////////////////////
 		// General variables
 		apProgram->SetVec3f(kVar_avLightPos, apLightData->m_mtxViewSpaceRender.GetTranslation());
-		apProgram->SetColor4f(kVar_avLightColor, pLight->GetDiffuseColor());
+		apProgram->SetColor4f(kVar_avLightColor, pLight->GetColor());
+		apProgram->SetFloat(kVar_afFalloff, pLight->GetFalloff());
 		apProgram->SetFloat(kVar_afInvLightRadius, 1.0f / pLight->GetRadius());
 
 		////////////////////////
@@ -1418,7 +1421,7 @@ namespace hpl {
 		/////////////////////////
 		//Flag setup
 		tFlag lFlags = alExtraFlags;
-		if(pLight->GetDiffuseColor().a > 0)	lFlags |= eFeature_Light_Specular;
+		if(pLight->GetColor().a > 0)	lFlags |= eFeature_Light_Specular;
 		if(pLight->GetGoboTexture())		lFlags |= eFeature_Light_Gobo;
 		
 		//Spotlight specifics
@@ -1568,8 +1571,8 @@ namespace hpl {
 		
 		//////////////////////////
 		//Specular
-		int lHasSpecularA = pLightA->GetDiffuseColor().a > 0 ? 1 : 0;
-		int lHasSpecularB = pLightB->GetDiffuseColor().a > 0 ? 1 : 0;
+		int lHasSpecularA = pLightA->GetColor().a > 0 ? 1 : 0;
+		int lHasSpecularB = pLightB->GetColor().a > 0 ? 1 : 0;
 		if(lHasSpecularA != lHasSpecularB)
 		{
 			return lHasSpecularA < lHasSpecularB;
@@ -2380,7 +2383,7 @@ namespace hpl {
 		//Set up Light specific variables
 		if(mpLightBoxProgram[lProgramNum])
 		{
-			mpLightBoxProgram[lProgramNum]->SetColor4f(kVar_avLightColor,pLight->GetDiffuseColor());
+			mpLightBoxProgram[lProgramNum]->SetColor4f(kVar_avLightColor,pLight->GetColor());
 		}
 
 		//Blend mode

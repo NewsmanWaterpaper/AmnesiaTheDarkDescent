@@ -466,6 +466,8 @@ enum eLuxFocusCrosshair
 	eLuxFocusCrosshair_Pick,
 	eLuxFocusCrosshair_LevelDoor,
 	eLuxFocusCrosshair_Ladder,
+	eLuxFocusCrosshair_Note,
+	eLuxFocusCrosshair_Talk,
 
     eLuxFocusCrosshair_LastEnum
 };
@@ -525,14 +527,22 @@ typedef cSTLIterator<iLuxEntity*, tLuxEntityList, tLuxEntityListIt> cLuxEntityIt
 //----------------------------------------------
 
 class iLuxEnemy;
+class cLuxEnemy_ManPig;
 
 typedef std::list<iLuxEnemy*> tLuxEnemyList;
 typedef tLuxEnemyList::iterator tLuxEnemyListIt;
+
+typedef std::list<cLuxEnemy_ManPig*> tLuxEnemyManpigList;
+typedef tLuxEnemyManpigList::iterator tLuxEnemyManpigListIt;
 
 typedef std::set<iLuxEnemy*> tLuxEnemySet;
 typedef tLuxEnemySet::iterator tLuxEnemySetIt;
 
 typedef cSTLIterator<iLuxEnemy*, tLuxEnemyList, tLuxEnemyListIt> cLuxEnemyIterator;
+
+typedef cSTLIterator<cLuxEnemy_ManPig*, tLuxEnemyManpigList, tLuxEnemyManpigListIt> cLuxEnemyManpigIterator;
+
+
 
 //----------------------------------------------
 

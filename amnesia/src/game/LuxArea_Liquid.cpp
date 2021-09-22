@@ -123,6 +123,11 @@ void cLuxArea_Liquid::OnUpdate(float afTimeStep)
 	//Do not update this unless it is a proper game update (when eveything is 100% intialized)
 	if(afTimeStep < gpBase->mpEngine->GetStepSize()*0.8f) return;
 
+	if (mpParentBody)
+	{
+		mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
+	}
+
 	///////////////////////////
 	// Get data
 	iPhysicsWorld *pPhysicsWorld = mpMap->GetPhysicsWorld();
@@ -360,6 +365,8 @@ kSerializeVar(mfWaveFreq, eSerializeType_Float32)
 
 kSerializeVar(mfPlayerSpeedMul, eSerializeType_Float32)
 kSerializeVar(mfMaxWaveDistanceSqr, eSerializeType_Float32)
+kSerializeVar(mSurfacePlane, eSerializeType_Planef)
+kSerializeVar(mvPosition, eSerializeType_Vector3f)
 
 kEndSerialize()
 
@@ -397,6 +404,9 @@ void cLuxArea_Liquid::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 
 	kCopyToVar(pData, mfPlayerSpeedMul);
 	kCopyToVar(pData, mfMaxWaveDistanceSqr);
+	kCopyToVar(pData, mSurfacePlane);
+
+	pData->mvPosition = mpBody->GetWorldPosition();
 
 }
 
@@ -424,6 +434,9 @@ void cLuxArea_Liquid::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 
 	kCopyFromVar(pData, mfPlayerSpeedMul);
 	kCopyFromVar(pData, mfMaxWaveDistanceSqr);
+	kCopyFromVar(pData, mSurfacePlane);
+
+	mpBody->SetWorldPosition(pData->mvPosition);
 }
 
 //-----------------------------------------------------------------------

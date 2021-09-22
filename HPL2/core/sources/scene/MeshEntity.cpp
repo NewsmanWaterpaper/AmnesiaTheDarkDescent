@@ -1658,7 +1658,7 @@ namespace hpl {
 					pTrack->SetNodeIndex(lBoneIdx);
 					if (lBoneIdx < 0 && pTrack->GetNodeIndex() == -1)
 					{
-						Error("Track '%s' in '%s' does not have a corresponding bone! Skeleton bone name mismatch?\n", pTrack->GetName().c_str(), mpMesh->GetName().c_str());
+						//Error("Track '%s' in '%s' does not have a corresponding bone! Skeleton bone name mismatch?\n", pTrack->GetName().c_str(), mpMesh->GetName().c_str());
 						pTrack->SetNodeIndex(-2);
 					}
 				}

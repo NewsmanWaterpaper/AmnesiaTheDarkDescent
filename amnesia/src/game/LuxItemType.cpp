@@ -20,9 +20,12 @@
 #include "LuxItemType.h"
 
 #include "LuxInventory.h"
+#include "LuxPlayerHands.h"
 #include "LuxPlayer.h"
 #include "LuxPlayerHelpers.h"
 #include "LuxPlayerState.h"
+#include "LuxHandObject_LightSource.h"
+#include "LuxHandObject.h"
 #include "LuxMapHandler.h"
 #include "LuxMap.h"
 #include "LuxEntity.h"
@@ -255,7 +258,10 @@ bool cLuxItemType_Lantern::BeforeAddItem(cLuxInventory_Item *apItem)
 {
 	ProgLog(eLuxProgressLogLevel_Medium, "Picked up latern");
 
+	cLuxPlayerLantern* pLantern = gpBase->mpPlayer->GetHelperLantern();
 	gpBase->mpHintHandler->Add("PickLantern", kTranslate("Hints", "PickLantern"), 0);
+	int miLanternNum = apItem->GetAmount();
+	pLantern->SetLantern(miLanternNum);
 
 	return false;
 }
@@ -294,6 +300,13 @@ cLuxItemType_Health::cLuxItemType_Health() : iLuxItemType("Health", eLuxItemType
 bool cLuxItemType_Health::BeforeAddItem(cLuxInventory_Item *apItem)
 {
 	gpBase->mpHintHandler->Add("PickHealthPotion", kTranslate("Hints", "PickHealthPotion"), 0);
+
+	tString item = cString::ToLowerCase(apItem->GetName());
+
+	if (cString::GetFirstStringPos(item, "potion_health"))
+	{
+		gpBase->mpPlayer->AddLaudanum(1);
+	}
 
 	return false;
 }
@@ -367,12 +380,15 @@ bool cLuxItemType_LampOil::BeforeAddItem(cLuxInventory_Item *apItem)
 
 void cLuxItemType_LampOil::OnUse(cLuxInventory_Item *apItem, int alSlotIndex)
 {
+	if (gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetDrainsOil() == false) return;
+
 	cLuxInventory *pInventory = gpBase->mpInventory;
 	if(pInventory->HasItemOfType(eLuxItemType_Lantern)==false)
 	{
 		pInventory->SetMessageText(kTranslate("Inventory","OilNeedsLantern"),0);
 		return;
 	}
+	
 
 	float fLampOil = gpBase->mpPlayer->GetLampOil();
 	if(fLampOil >= 100) return;

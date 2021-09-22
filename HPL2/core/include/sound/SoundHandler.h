@@ -108,6 +108,8 @@ namespace hpl {
 		iSoundEntryCallback* GetCallBack(){ return mpCallback;}
 		void SetCallBack(iSoundEntryCallback* apCallback){ mpCallback = apCallback;}
 
+		iSoundChannel* GetSoundChannel() { return mpSound; }
+
 		void SetStopDisabled(bool abX){mbStopDisabled = abX;}
 		bool GetStopDisabled(){ return mbStopDisabled;}
 		

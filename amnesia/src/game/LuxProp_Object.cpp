@@ -449,6 +449,10 @@ void cLuxProp_Object::UpdatePropSpecific(float afTimeStep)
 	// Insanity vision
 	UpdateInsanityVision(afTimeStep);
 
+	/////////////////////////////
+	// Flash if near player
+	FlashIfNearPlayer(afTimeStep);
+
 	//////////////////////////
 	// Life length
 	if(mfLifeLength > 0)

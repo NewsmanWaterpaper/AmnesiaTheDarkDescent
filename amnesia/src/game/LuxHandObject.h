@@ -100,6 +100,9 @@ public:
 
 	float GetOilSpeed() { return msLowerOilSpeed; }
 	float msLowerOilSpeed;
+
+	bool mbDrainsOil;
+	bool GetDrainsOil() { return mbDrainsOil; }
 	
 protected:
 	virtual void LoadImplementedVars(cXmlElement *apVarsElem)=0;

@@ -1092,11 +1092,11 @@ void cLuxMainMenu::CreateTopMenuGui()
 																					  
 		////////////////////////////
 		// Set enabled to false if player does not have enough resources  
-		pLabel->SetEnabled(gpBase->mpPlayer->GetTinderboxes() >= 4);
+		pLabel->SetEnabled(gpBase->mpPlayer->GetLaudanum() >= 4||gpBase->mpPlayer->GetOilPotion() >= 4);
 
 		////////////////////////////
 		// Save cost label
-		tWString sText = kTranslate("MainMenu", "HardModeSaveCost");
+		tWString sText = kTranslate("MainMenu", "HardModeLaudanumSaveCost");
 		size_t lNumIndex = sText.find(L"#");
 		
 		if (lNumIndex != std::wstring::npos)
@@ -1129,15 +1129,15 @@ void cLuxMainMenu::CreateTopMenuGui()
 
 		//////////////////////////////////
 		// Tinder inventory label
-		sText = kTranslate("MainMenu", "HardModeTinderboxInInventory");
+		sText = kTranslate("MainMenu", "HardModeLaudanumInInventory");
 		lNumIndex = sText.find(L"#");
 
 		if (lNumIndex != std::wstring::npos)
 		{
 #if MAC_OS || LINUX
-            tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetTinderboxes())));
+            tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
 #else
-            tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetTinderboxes())));
+            tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
 #endif
             
 			tWString sSubString = sText.substr(lNumIndex + 1, sText.size() - lNumIndex);
@@ -1788,7 +1788,7 @@ bool cLuxMainMenu::PressSaveGame(iWidget* apWidget, const cGuiMessageData& aData
 
 	////////////////////////////
 	// Get translation and insert cost
-	tWString sText = kTranslate("MainMenu", "HardModeSavePopup");
+	tWString sText = kTranslate("MainMenu", "HardModeLaudanumSavePopup");
 	size_t lNumIndex = sText.find(L"#");
 	sText.replace(lNumIndex, gsHardMode_SaveCostString.size(), gsHardMode_SaveCostString);
 
@@ -1819,14 +1819,15 @@ bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData
 
 	///////////////////////////
 	// Get num tinderboxes
-	int lNumTinderboxes = gpBase->mpPlayer->GetTinderboxes();
+	int lNumTinderboxes = gpBase->mpPlayer->GetLaudanum();
+	int lNumOilPotions = gpBase->mpPlayer->GetOilPotion();
 
 	///////////////////////////
 	// decrement tinderboxes
 	if (lNumTinderboxes < 4)
 		return true;
 
-	gpBase->mpPlayer->SetTinderboxes(cMath::Max(0, lNumTinderboxes - 4));
+	gpBase->mpPlayer->SetLaudanum(cMath::Max(0, lNumTinderboxes - 4));
 
 	///////////////////////////
 	// Save game
@@ -1834,16 +1835,16 @@ bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData
 
 	//////////////////////////
 	// Update Labels
-	tWString sText = kTranslate("MainMenu", "HardModeTinderboxInInventory");
+	tWString sText = kTranslate("MainMenu", "HardModeLaudanumInInventory");
 	size_t lNumIndex = sText.find(L"#");
 
 	if (lNumIndex != std::wstring::npos)
 	{
 #if MAC_OS || LINUX
-        tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetTinderboxes())));
+        tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
 
 #else
-        tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetTinderboxes())));
+        tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
 
 #endif
 		tWString sSubString = sText.substr(lNumIndex + 1, sText.size() - lNumIndex);

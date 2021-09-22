@@ -19,6 +19,8 @@
 
 #include "LuxProp_LevelDoor.h"
 
+#include "LuxPlayer.h"
+#include "LuxEffectRenderer.h"
 #include "LuxMapHandler.h"
 #include "LuxSavedGame.h"
 #include "LuxMessageHandler.h"
@@ -150,6 +152,10 @@ void cLuxProp_LevelDoor::UpdatePropSpecific(float afTimeStep)
 	{
 		mfLockedCount -= afTimeStep;
 	}
+
+	/////////////////////////////////
+	// If near player, flash
+	FlashIfNearPlayer(afTimeStep);
 }
 
 //-----------------------------------------------------------------------

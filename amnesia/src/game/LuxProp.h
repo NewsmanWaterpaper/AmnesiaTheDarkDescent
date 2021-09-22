@@ -151,6 +151,7 @@ public:
 	bool mbMoveAngularUseOffset;
 	cVector3f mvMoveAngularWorldOffset;
 	cVector3f mvMoveAngularLocalOffset;
+	bool mbGlowEnabled;
 
 	int mlCurrentNonLoopAnimIndex;
 	tString msAnimCallback;
@@ -315,6 +316,15 @@ public:
 	bool GetStaticPhysics(bool abX){ return mbStaticPhysics;}
 	void SetStaticPhysics(bool abX);
 
+	void FlashIfNearPlayer(float afTimeStep);
+	void SetGlowColor(const cColor& acGlowColor) { mcGlowColor = acGlowColor; }
+	void SetGlowOutlineColor(const cColor& acGlowOutlineColor) { mcGlowOutlineColor = acGlowOutlineColor; }
+	void SetGlowEnabled(bool abGlowEnabled) { mbGlowEnabled = abGlowEnabled; }
+
+	const cColor& GetGlowColor() { return mcGlowColor; }
+	const cColor& GetGlowOutlineColor() { return mcGlowOutlineColor; }
+	bool GetGlowEnabled() { return mbGlowEnabled; }
+
 	//////////////////////
 	//Attached Prop
 	iLuxProp* GetAttachmentParent(){ return mpAttachmentParent;}
@@ -427,6 +437,10 @@ protected:
 	
 	float mfMovingVolume;
 	float mfMoveStartCount;
+
+	float mfFlashAlpha;
+	cColor mcGlowColor, mcGlowOutlineColor;
+	bool mbGlowEnabled;
 
 	bool mbMovingLinear;
 	float mfMoveLinearMaxSpeed;

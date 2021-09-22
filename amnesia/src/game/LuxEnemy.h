@@ -133,6 +133,7 @@ public:
 	bool mbCausesSanityDecrease;
 
 	bool mbBlind;
+	bool mbDeaf;
 
 	bool mbHallucination;
 	float mfHallucinationEndDist;
@@ -166,6 +167,8 @@ public:
 	int mlAttackHitCounter;
 	
 	float mfFOVMul;
+
+	tString msOverCallback;
 	
 	tString msCurrentAnimName;
 	bool mbAnimationIsSpeedDependant;
@@ -466,6 +469,9 @@ public:
 	//Properties
 	eLuxEnemyType GetEnemyType(){ return mEnemyType;}
 
+	bool GetDeaf() { return mbDeaf; }
+	
+	void SetDeaf(bool abX) { mbDeaf = abX; }
 	void SetBlind(bool abX) { mbBlind = abX; }
 
 	void SetDisabled(bool abX);
@@ -487,6 +493,9 @@ public:
 	void SetRunSpeedMul(float afX) { mfRunSpeedMul = afX; }
 	float GetRunSpeedMul() { return mfRunSpeedMul; }
 
+	void SetOverCallback(const tString& asFunc) { msOverCallback = asFunc; }
+	void SetEndOfPathCallback(const tString& asCallbackFunc, bool abRemoveWhenCalled);
+
 	cAnimationState* GetCurrentAnimation(){ return mpCurrentAnimation;}
 
 	const tString& GetDangerMusic() { return msDangerMusic; }
@@ -496,6 +505,9 @@ public:
 	int GetMusicPrio(eLuxEnemyMusic aType) { return mlMusicPrio[aType]; }
 
 	float GetActivationDistance() { return mfActivationDistance;}
+
+	float GetHearVolume() { return mfHearVolume; }
+	void SetHearVolume(float afX) { mfHearVolume = afX; }
 
 	float GetRegenHealthSpeed() { return mfRegenHealthSpeed; }
 	void SetRegenHealthSpeed(float afX) {mfRegenHealthSpeed = afX; }
@@ -657,6 +669,10 @@ protected:
 	bool mbCausesSanityDecreaseAsDefault;
 
 	bool mbBlind;
+	bool mbDeaf;
+
+	tString msOverCallback;
+	bool PatrolRemoveCallback;
 
 	eLuxEnemyState mCurrentState;
 	eLuxEnemyState mNextState;
@@ -765,6 +781,7 @@ protected:
 
 	float mfPlayerInDarknessLightLevel;
 	float mfCrouchVisibleRangeMul;
+
 
 	tString msDangerMusic;
 	int mlDangerMusicPrio;

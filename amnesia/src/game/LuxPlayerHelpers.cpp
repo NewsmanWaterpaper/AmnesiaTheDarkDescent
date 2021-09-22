@@ -318,11 +318,11 @@ void cLuxPlayerCamDirEffects::Update(float afTimeStep)
 {
 	////////////////////
 	// Check if insane
-	if(mbSwayActive==false && mpPlayer->GetSanity() <= mfStartSwayMaxSanity)
+	if(mbSwayActive==false && mpPlayer->GetHealth() <= mfStartSwayMaxSanity)
 	{
 		SetSwayActive(true);
 	}
-	else if(mbSwayActive && mpPlayer->GetSanity() > mfStartSwayMaxSanity)
+	else if(mbSwayActive && mpPlayer->GetHealth() > mfStartSwayMaxSanity)
 	{
 		SetSwayActive(false);
 	}
@@ -666,6 +666,9 @@ cLuxPlayerHurt::cLuxPlayerHurt(cLuxPlayer *apPlayer) : iLuxPlayerHelper(apPlayer
 	mfNoiseFreq =  gpBase->mpGameCfg->GetFloat("Player_General","Hurt_NoiseFreq",0);
 	mNoiseColor =  gpBase->mpGameCfg->GetColor("Player_General","Hurt_NoiseColor",cColor(0));
 
+	mpCurrentHealthLoopSound = NULL;
+	mlCurrentHealthLoopSoundID = -1;
+
 	cGui *pGui = gpBase->mpEngine->GetGui();
 	mvNoiseGfx.resize(8);
 	for(size_t i=0; i<mvNoiseGfx.size(); ++i)
@@ -698,6 +701,7 @@ void cLuxPlayerHurt::Reset()
 
 void cLuxPlayerHurt::Update(float afTimeStep)
 {
+	UpdateSoundLoops(afTimeStep);
 	///////////////////////////
 	// Health regain
 	if(mpPlayer->GetHealth() < mfHealthRegainLimit)
@@ -803,7 +807,7 @@ void cLuxPlayerHurt::Update(float afTimeStep)
 
 
 	mpPlayer->SetHeadPosAdd(eLuxHeadPosAdd_Hurt, cVector3f(0,mfPantPosAdd,0));
-
+	
 }
 
 //-----------------------------------------------------------------------
@@ -832,6 +836,90 @@ void cLuxPlayerHurt::OnDraw(float afFrameTime)
 	}
 }
 
+//-----------------------------------------------------------------------
+void cLuxPlayerHurt::UpdateSoundLoops(float afTimeStep)
+{
+	cSoundHandler* pSoundHandler = gpBase->mpEngine->GetSound()->GetSoundHandler();
+
+	int nHealthLevel = mpPlayer->GetHealthLevel();
+
+	if (nHealthLevel > mnPreviousSoundHealthLevel)
+	{
+		switch (nHealthLevel)
+		{
+			case 0:
+			case 1:
+			{
+				break;
+			}
+			case 2:
+			{
+				break;
+			}
+			case 3:
+			{
+				break;
+			}
+			case 4:
+			case 5:
+			{
+				break;
+			}
+		}
+	}
+	if (nHealthLevel != mnPreviousSoundHealthLevel)
+	{
+		
+
+		float fCrossFadeTime = nHealthLevel > mnPreviousSoundHealthLevel ? 0.5f : 2.0f;
+
+		if (mpCurrentHealthLoopSound && pSoundHandler->IsValid(mpCurrentHealthLoopSound, mlCurrentHealthLoopSoundID))
+		{
+			mpCurrentHealthLoopSound->FadeOut(fCrossFadeTime);
+		}
+
+
+		switch (nHealthLevel)
+		{
+		case 0:
+		{
+			
+			mpCurrentHealthLoopSound = NULL;
+			break;
+		}
+		case 1:
+		{
+			mpCurrentHealthLoopSound = pSoundHandler->PlayGui("infection_loop_3", true, 2.0f);
+			break;
+		}
+		case 2:
+		{
+			mpCurrentHealthLoopSound = pSoundHandler->PlayGui("infection_loop_2", true, 1.5f);
+			break;
+		}
+		case 3:
+		{
+			mpCurrentHealthLoopSound = pSoundHandler->PlayGui("infection_loop_1", true, 1.0f);
+			break;
+		}
+		case 4:
+		case 5:
+		{
+			mpCurrentHealthLoopSound = NULL;
+			break;
+		}
+		}
+
+		if (mpCurrentHealthLoopSound)
+		{
+			///mpCurrentHealthLoopSound->GetSoundChannel()->SetPriority(10);
+			mpCurrentHealthLoopSound->FadeIn(1.0f, fCrossFadeTime);
+			mlCurrentHealthLoopSoundID = mpCurrentHealthLoopSound->GetId();
+		}
+	}
+
+	mnPreviousSoundHealthLevel = nHealthLevel;
+}
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////
@@ -1645,6 +1733,7 @@ cLuxPlayerLantern::cLuxPlayerLantern(cLuxPlayer *apPlayer) : iLuxPlayerHelper(ap
 	msDisabledSound = gpBase->mpGameCfg->GetString("Player_Lantern","DisabledSound","");
 	//msTurnOnSound = gpBase->mpGameCfg->GetString("Player_Lantern","TurnOnSound","");
 	//msTurnOffSound = gpBase->mpGameCfg->GetString("Player_Lantern","TurnOffSound","");
+	
 
 	Reset();
 }
@@ -1673,6 +1762,7 @@ void cLuxPlayerLantern::Reset()
 
 void cLuxPlayerLantern::Update(float afTimeStep)
 {
+	
 	if(mbActive ==false && mfAlpha <=0)
 	{
 		return;
@@ -1702,7 +1792,7 @@ void cLuxPlayerLantern::Update(float afTimeStep)
 
 	////////////////////////////
 	// Lower oil
-	if(mbActive && gpBase->mpEffectHandler->GetEmotionFlash()->IsActive()==false)
+	if(mbActive && gpBase->mpEffectHandler->GetEmotionFlash()->IsActive()==false && mbUseDrainsOil == true)
 	{
 		float fOil = mpPlayer->GetLampOil();
 		fOil -= mfLowerOilSpeed *afTimeStep;
@@ -1773,7 +1863,6 @@ void cLuxPlayerLantern::DestroyWorldEntities(cLuxMap *apMap)
 void cLuxPlayerLantern::SetActive(bool abX, bool abUseEffects, bool abCheckForOilAndItems, bool abCheckIfAllowed)
 {
 	if(mbActive == abX) return;
-
 	/////////////////
 	// Check so allowed
 	if(abCheckIfAllowed && mpPlayer->GetCurrentStateData()->AllowLantern()==false)
@@ -1796,17 +1885,20 @@ void cLuxPlayerLantern::SetActive(bool abX, bool abUseEffects, bool abCheckForOi
 		return;
 	}
 	
+	
 	/////////////////
 	// Check if there is enough oil
-    if(abCheckForOilAndItems && abX && mpPlayer->GetLampOil() <=0)
+    if(abCheckForOilAndItems && abX && mpPlayer->GetLampOil() <=0 && mbUseDrainsOil == true)
 	{
 		if(abUseEffects)
 		{
 			gpBase->mpHintHandler->Add("LanternNoOil", kTranslate("Hints", "LanternNoOil"), 0);
 			gpBase->mpHelpFuncs->PlayGuiSoundData(msOutOfOilSound, eSoundEntryType_Gui);
+			gpBase->mpDebugHandler->AddMessage(_W("Out of Oil! "), false);
 		}
 		return;
 	}
+	
 
 
 	/////////////////
@@ -1816,9 +1908,10 @@ void cLuxPlayerLantern::SetActive(bool abX, bool abUseEffects, bool abCheckForOi
 	/////////////////
 	// Hand
 	if (mbActive) {
-		mpPlayer->GetHands()->SetActiveHandObject("lantern" + cString::ToString(alLantern));
+		mpPlayer->GetHands()->SetActiveHandObject("lantern" + cString::ToString(gpBase->mpPlayer->GetHelperLantern()->GetLantern()));
 		msTurnOnSound = gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetLanternOnSound();
 		mfLowerOilSpeed = gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetOilSpeed();
+		mbUseDrainsOil = gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetDrainsOil();
 		if (abUseEffects) gpBase->mpHelpFuncs->PlayGuiSoundData(msTurnOnSound, eSoundEntryType_Gui);
 	}
 	else {
@@ -1826,6 +1919,7 @@ void cLuxPlayerLantern::SetActive(bool abX, bool abUseEffects, bool abCheckForOi
 		msOutOfOilSound = gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetLanternOutOfOilSound();
 		if (abUseEffects) gpBase->mpHelpFuncs->PlayGuiSoundData(msTurnOffSound, eSoundEntryType_Gui);
 		mpPlayer->GetHands()->SetActiveHandObject("");
+		mbUseDrainsOil = false;
 	}
 
 
@@ -2914,10 +3008,10 @@ void cLuxPlayerInDarkness::Update(float afTimeStep)
 
 			////////////////////////
 			// HARDMODE
-			if (gpBase->mbHardMode)
+			/*if (gpBase->mbHardMode)
 				mpAmbientLight->FadeTo(mAmbientLightColor*mfAmbientLightIntensity * 0.75f , mpAmbientLight->GetRadius(), mfAmbientLightFadeInTime * 2.5f);
 			else
-				mpAmbientLight->FadeTo(mAmbientLightColor*mfAmbientLightIntensity, mpAmbientLight->GetRadius(), mfAmbientLightFadeInTime);
+				mpAmbientLight->FadeTo(mAmbientLightColor*mfAmbientLightIntensity, mpAmbientLight->GetRadius(), mfAmbientLightFadeInTime);*/
 
 		}
 
@@ -3017,8 +3111,8 @@ void cLuxPlayerInDarkness::CreateWorldEntities(cLuxMap *apMap)
 
 	/////////////////////
 	// HARDMODE
-	if(gpBase->mbHardMode)
-		mpAmbientLight->SetRadius(mfAmbientLightRadius*0.5f);
+	/*if(gpBase->mbHardMode)
+		mpAmbientLight->SetRadius(mfAmbientLightRadius*0.5f);*/
 
 
 	mpAmbientLight->SetCastShadows(false);

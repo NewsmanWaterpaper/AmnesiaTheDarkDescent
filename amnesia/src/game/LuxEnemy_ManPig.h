@@ -40,6 +40,8 @@ public:
 	float mfLanternSensitivity;
 
 	bool mbAllowZeroWaitTime;
+	bool mbCanTrackTeleport;
+	bool mbCallForHelp;
 	
 	int mIdleBehavior;
 	//int mPatrolMoveSpeed;
@@ -82,11 +84,13 @@ public:
 	void ChangePose(eLuxEnemyPoseType aPose, bool abSendMessage=true);
 	void ChangeMoveType(eLuxEnemyMoveType aMoveType);
 	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
+	void SetBehaviorType(eLuxIdleBehavior aBehaviorType);
 	void SetToFlee(bool abX);
 	void ThreatenOnAlertEnabled(bool abX);
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
 	void SetFleeHealth(float abX) { mfFleeHealth = abX; }
 	float GetFleeHealth() { return mfFleeHealth; }
+	void SetTrackTeleport(bool abX) { mbCanTrackTeleport = abX; }
 
 
 	//////////////////////
@@ -129,6 +133,7 @@ private:
 	//////////////////////
 	// State stuff
 	bool CheckEnemyAutoRemoval(float afDistance);
+	void FinishPatrolEndOfPath(bool callPatrolUpdateNow);
 	void PatrolUpdateGoal();
 	bool FleeTryToFindSafeNode();
 	bool StalkFindNode();
@@ -172,6 +177,8 @@ private:
 	float mfWaitTime;
 	float mfAlertRunTowardsCount;
 	bool mbPlayActivateSound;
+	bool mbCallForHelp;
+	bool mbCanTrackTeleport;
 	float mfLanternSensitivity;
 
 	bool mbLastShortAttackWasMiss;
@@ -213,6 +220,7 @@ private:
 
 	eLuxIdleBehavior mIdleBehavior;
 	//eLuxEnemyMoveSpeed mPatrolMoveSpeed;
+	bool mbPathReversed;
 	bool mbAllowZeroWaitTime;
 
 	float mfCheckFlashLightShining;

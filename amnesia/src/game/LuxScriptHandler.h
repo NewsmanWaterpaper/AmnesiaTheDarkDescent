@@ -211,6 +211,7 @@ private:
 	static void __stdcall SetPlayerHealth(float afHealth);
 	static void __stdcall AddPlayerHealth(float afHealth);
 	static float __stdcall GetPlayerHealth();
+	static int __stdcall GetPlayerHealthLevel();
 	static void __stdcall SetPlayerLampOil(float afOil);
 	static void __stdcall AddPlayerLampOil(float afOil);
 	static float __stdcall GetPlayerLampOil();
@@ -254,6 +255,8 @@ private:
 	 * Syntax: MyFun(bool abLit)
 	 */
 	static void __stdcall SetLanternLitCallback(string &asCallback);
+	static void __stdcall SetLanternFlickerActive(bool abX);
+	static bool __stdcall GetLanternFlickerActive();
 	/**
 	* if time is <=0 then the life time is calculated based on string length.
 	*/
@@ -462,10 +465,13 @@ private:
 	static void __stdcall SetNPCAwake(string& asName, bool abAwake, bool abEffects);
 	static void __stdcall SetNPCFollowPlayer(string& asName, bool abX);
 
+	static void __stdcall AttachAreaToProp(string& asAreaName, string& asProp, int alBody);
+
 	static void __stdcall SetEnemyDisabled(string& asName, bool abDisabled);
 	static void __stdcall SetEnemyIsHallucination(string& asName, bool abX);
 	static void __stdcall FadeEnemyToSmoke(string& asName, bool abPlaySound);
 	static void __stdcall ShowEnemyPlayerPosition(string& asName);
+	static void __stdcall SetEnemyEndOfPatrolCallback(string& asName, string& asFunc, bool abRemoveWhenCalled);
 	static void __stdcall AlertEnemyOfPlayerPresence(string& asName);
 	static void __stdcall ForceEnemyWaitState(string& asName);
 	static void __stdcall SetEnemyDisableTriggers(string& asName, bool abX);
@@ -478,29 +484,36 @@ private:
 	static float __stdcall GetEnemyPlayerDistance(string& asEnemyName);
 	static bool __stdcall GetPlayerCanSeeEnemy(string& asEnemyName);
 
+	static void __stdcall SetEnemyBlind(string& asName, bool abX);
+	static void __stdcall SetEnemyDeaf(string& asName, bool abX);
+
 	/**
 	 * Pose can be "Biped" or "Quadruped"
 	 */
 	static void __stdcall ChangeManPigPose(string& asName, string& asPoseType);
 	static void __stdcall ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType);
+	static void __stdcall ChangeEnemyState(string& asName, string& asState);
 	static void __stdcall SetManPigToFlee(string& asName, bool abX);
 	static void __stdcall SetManPigToThreatenOnAlert(string& asName, bool abX);
+	static void __stdcall SetManPigIdleBehavior(string& asName, string& asBehaviorType);
 
 	static void __stdcall SetTeslaPigFadeDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigSoundDisabled(string& asName, bool abX);
 	static void __stdcall SetTeslaPigEasyEscapeDisabled(string& asName, bool abX);
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
-	static void __stdcall SetEnemyBlind(string& asName, bool abX);
 	static string& __stdcall GetEnemyStateName(string& asName);
 	static float __stdcall GetEnemyHealth(string& asName);
 	static void __stdcall SetEnemyHealth(string& asName, float afHealth);
+	static float __stdcall GetEnemyHearVolume(string& asName);
+	static void __stdcall SetEnemyHearVolume(string& asName, float afHearVolume);
 	static float __stdcall GetEnemyRunSpeedMul(string& asName);
 	static void __stdcall SetEnemyRunSpeedMul(string& asName, float afRunSpeedMul);
 	static void __stdcall SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed);
 	static float __stdcall GetEnemyRegenHealthSpeed(string& asName);
 	static void __stdcall SetManPigFleeHealth(string& asName, float afFleeHealth);
 	static float __stdcall GetManPigFleeHealth(string& asName);
+	static void __stdcall SetManPigCanTrackTeleport(string& asName, bool abX);
 
 	static void __stdcall SetPropHealth(string& asName, float afHealth);
 	static void __stdcall AddPropHealth(string& asName, float afHealth);

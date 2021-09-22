@@ -75,7 +75,10 @@ namespace hpl {
 
 		mfShadowMapBiasMul = 1;
 		mfShadowMapSlopeScaleBiasMul = 1;
-			
+		
+		mfFalloff = 1.0f;
+		mfBrightness = 1.0f;
+
 		///////////////////////////////
 		//Fade and flicker init
 		mDiffuseColor = 0;
@@ -131,6 +134,7 @@ namespace hpl {
 
 	bool iLight::IsVisible()
 	{ 
+		if(mfBrightness <= 0) return false;
 		if(mDiffuseColor.r <=0 && mDiffuseColor.g <=0 && mDiffuseColor.b <=0 && mDiffuseColor.a <=0) 
 			return false;
 		if(mfRadius <= 0) return false;
@@ -156,6 +160,11 @@ namespace hpl {
 		}
 
 		OnSetDiffuse();
+	}
+
+	cColor iLight::GetColor()
+	{
+		return mDiffuseColor * cColor(mfBrightness, 1);
 	}
 
 	//-----------------------------------------------------------------------
@@ -518,6 +527,9 @@ namespace hpl {
 					mbCastShadows = cString::ToBool(pMainElem->Attribute("CastsShadows"),mbCastShadows);
 
 					mDiffuseColor.a = cString::ToFloat(pMainElem->Attribute("Specular"),mDiffuseColor.a);
+
+					mfBrightness = cString::ToFloat(pMainElem->Attribute("Brightness"), mfBrightness);
+					mfFalloff = cString::ToFloat(pMainElem->Attribute("Falloff"), mfFalloff);
 					
 					tString sFalloffImage = cString::ToString(pMainElem->Attribute("FalloffImage"),"");
 					iTexture *pTexture = mpTextureManager->Create1D(sFalloffImage,false);

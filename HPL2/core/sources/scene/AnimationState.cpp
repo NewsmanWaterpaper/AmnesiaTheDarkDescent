@@ -70,6 +70,8 @@ namespace hpl {
 		mfSpecialEventTime =0;
 
 		mfFadeStep=0;
+		mfFadeSpeed = 0;
+		mvSkeletonBounds.clear();
 	}
 	
 	//-----------------------------------------------------------------------
@@ -113,6 +115,21 @@ namespace hpl {
 			{
 				mfWeight =1;
 				mfFadeStep =0;
+			}
+		}
+		if(mfFadeSpeed!=0)
+		{
+			mfSpeed += mfFadeSpeed * afTimeStep;
+
+			if(mfSpeed<0)
+			{
+				mfSpeed =0;
+				mfFadeSpeed =0;
+			}
+			else if(mfSpeed>1.0f)
+			{
+				mfSpeed =1;
+				mfFadeSpeed =0;
 			}
 		}
 	}
@@ -231,6 +248,7 @@ namespace hpl {
 		{
 			mfTimePos = cMath::Clamp(afPosition, 0, mfLength);
 		}
+		mfPrevTimePos = mfTimePos;
 	}
 
 	float cAnimationState::GetTimePosition()
@@ -317,7 +335,10 @@ namespace hpl {
 
 		mfTimePos += afAdd*mfSpeed*mfBaseSpeed;
 
-		SetTimePosition(mfTimePos);
+		if(mbLoop)
+			mfTimePos = cMath::Wrap(mfTimePos,0,mfLength);
+		else
+			mfTimePos = cMath::Clamp(mfTimePos, 0, mfLength);
 	}
 	
 	//-----------------------------------------------------------------------

@@ -23,6 +23,7 @@
 #include "LuxPlayer.h"
 #include "LuxPlayerHelpers.h"
 #include "LuxPlayerHands.h"
+#include "LuxHandObject_LightSource.h"
 #include "LuxMapHandler.h"
 #include "LuxInputHandler.h"
 #include "LuxInventory.h"
@@ -561,6 +562,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetPlayerHealth(float afHealth)",(void *)SetPlayerHealth);
 	AddFunc("void AddPlayerHealth(float afHealth)",(void *)AddPlayerHealth);
 	AddFunc("float GetPlayerHealth()",(void *)GetPlayerHealth);
+	AddFunc("int GetPlayerHealthLevel()", (void*)GetPlayerHealthLevel);
 	AddFunc("void SetPlayerLampOil(float afOil)",(void *)SetPlayerLampOil);
 	AddFunc("void AddPlayerLampOil(float afOil)",(void *)AddPlayerLampOil);
 	AddFunc("float GetPlayerLampOil()",(void *)GetPlayerLampOil);
@@ -598,6 +600,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("bool GetLanternActive()",(void *)GetLanternActive);
 	AddFunc("void SetLanternDisabled(bool abX)",(void *)SetLanternDisabled);
 	AddFunc("void SetLanternLitCallback(string &in asCallback)",(void *)SetLanternLitCallback);
+	AddFunc("void SetLanternFlickerActive(bool abX)", (void*)SetLanternFlickerActive);
+	AddFunc("bool GetLanternFlickerActive()", (void*)GetLanternFlickerActive);
 	AddFunc("void SetMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",(void *)SetMessage);
 	AddFunc("void SetDeathHint(string &in asTextCategory, string &in asTextEntry)",(void *)SetDeathHint);
 	AddFunc("void DisableDeathStartSound()",(void *)DisableDeathStartSound);
@@ -733,11 +737,14 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetNPCAwake(string &in asName, bool abAwake, bool abEffects)",(void *)SetNPCAwake);
 	AddFunc("void SetNPCFollowPlayer(string &in asName, bool abX)",(void *)SetNPCFollowPlayer);
 
+	AddFunc("void AttachAreaToProp(string &in asAreaName, string &in asProp, int alBody)", (void*)AttachAreaToProp);
+
 	AddFunc("void SetEnemyDisabled(string &in asName, bool abDisabled)",(void *)SetEnemyDisabled);
 	AddFunc("void SetEnemyIsHallucination(string &in asName, bool abX)",(void *)SetEnemyIsHallucination);
 	AddFunc("void FadeEnemyToSmoke(string &in asName, bool abPlaySound)",(void *)FadeEnemyToSmoke);
 	AddFunc("void SetEnemyDisableTriggers(string &in asName, bool abX)",(void *)SetEnemyDisableTriggers);
 	AddFunc("void ShowEnemyPlayerPosition(string &in asName)",(void *)ShowEnemyPlayerPosition);
+	AddFunc("void SetEnemyEndOfPatrolCallback(string& asName, string &in asFunc, bool abRemoveWhenCalled)", (void*)SetEnemyEndOfPatrolCallback);
 	AddFunc("void ForceEnemyWaitState(string &in asName)", (void*)ForceEnemyWaitState);
 	AddFunc("void AlertEnemyOfPlayerPresence(string &in asName)",(void *)AlertEnemyOfPlayerPresence);
 	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation)",(void *)AddEnemyPatrolNode);
@@ -751,22 +758,28 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
 	AddFunc("void ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeEnemyPatrolSpeed);
+	AddFunc("void ChangeEnemyState(string& asName, string& asState)", (void*)ChangeEnemyState);
 	AddFunc("void SetManPigToFlee(string& asName, bool abX)", (void*)SetManPigToFlee);
 	AddFunc("void SetManPigToThreatenOnAlert(string& asName, bool abX)", (void*)SetManPigToThreatenOnAlert);
+	AddFunc("void SetManPigIdleBehavior(string& asName, string& asBehaviorType)", (void*)SetManPigIdleBehavior);
 	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigFadeDisabled);
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
 	AddFunc("void SetEnemyBlind(string&in asName, bool abX)", (void*)SetEnemyBlind);
+	AddFunc("void SetEnemyDeaf(string&in asName, bool abX)", (void*)SetEnemyDeaf);
 	AddFunc("float GetEnemyHealth(string& asName)", (void*) GetEnemyHealth);
 	AddFunc("void SetEnemyHealth(string &in asName, float afHealth)", (void*)SetEnemyHealth);
+	AddFunc("float GetEnemyHearVolume(string& asName)", (void*)GetEnemyHearVolume);
+	AddFunc("void SetEnemyHearVolume(string &in asName, float afHearVolume)", (void*)SetEnemyHearVolume);
 	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
 	AddFunc("void SetEnemyRunSpeedMul(string &in asName, float afRunSpeedMul)", (void*)SetEnemyRunSpeedMul);
 	AddFunc("void SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed)", (void*)SetEnemyRegenHealthSpeed);
 	AddFunc("float GetEnemyRegenHealthSpeed(string& asName)", (void*)GetEnemyRegenHealthSpeed);
 	AddFunc("void SetManPigFleeHealth(string& asName, float afFleeHealth)", (void*)SetManPigFleeHealth);
 	AddFunc("float GetManPigFleeHealth(string& asName)", (void*)GetManPigFleeHealth);
+	AddFunc("void SetManPigCanTrackTeleport(string& asName, bool abX)", (void*)SetManPigCanTrackTeleport);
 
 	AddFunc("void SetPropHealth(string &in asName, float afHealth)",(void *)SetPropHealth);
 	AddFunc("void AddPropHealth(string &in asName, float afHealth)",(void *)AddPropHealth);
@@ -1613,6 +1626,12 @@ float __stdcall cLuxScriptHandler::GetPlayerHealth()
 	return gpBase->mpPlayer->GetHealth();
 }
 
+	
+int __stdcall cLuxScriptHandler::GetPlayerHealthLevel()
+{
+	return gpBase->mpPlayer->GetHealthLevel();
+}
+
 void __stdcall cLuxScriptHandler::SetPlayerLampOil(float afOil)
 {
 	gpBase->mpPlayer->SetLampOil(afOil);
@@ -1851,6 +1870,25 @@ void __stdcall cLuxScriptHandler::SetLanternLitCallback(string &asCallback)
 	cLuxMap *pMap = gpBase->mpMapHandler->GetCurrentMap();
 
 	pMap->SetLanternLitCallback(asCallback);
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetLanternFlickerActive(bool abX)
+{
+	iLuxHandObject* object = gpBase->mpPlayer->GetHands()->GetHandObject("lantern" + cString::ToString(gpBase->mpPlayer->GetHelperLantern()->GetLantern()));
+
+	if (object)
+	{
+		cLuxHandObject_LightSource* lantern = (cLuxHandObject_LightSource*)object;
+
+		lantern->SetFlickering(abX);
+	}
+}
+bool  __stdcall cLuxScriptHandler::GetLanternFlickerActive()
+{
+	iLuxHandObject* object = gpBase->mpPlayer->GetHands()->GetHandObject("lantern" + cString::ToString(gpBase->mpPlayer->GetHelperLantern()->GetLantern()));
+	cLuxHandObject_LightSource* lantern = (cLuxHandObject_LightSource*)object;
+	
+	return lantern->GetFlickering();
 }
 
 //-----------------------------------------------------------------------
@@ -2581,6 +2619,8 @@ static eLuxFocusCrosshair StringToCrossHair(const tString &asCrossHair)
 	if(sLowCross=="pick")		return eLuxFocusCrosshair_Pick;
 	if(sLowCross=="leveldoor")	return eLuxFocusCrosshair_LevelDoor;
 	if(sLowCross=="ladder")		return eLuxFocusCrosshair_Ladder;
+	if (sLowCross == "note")		return eLuxFocusCrosshair_Note;
+	if (sLowCross == "talk")		return eLuxFocusCrosshair_Talk;
 
     Error("CrossHair type '%s' does not exist!\n", asCrossHair.c_str());
 	return eLuxFocusCrosshair_Default;
@@ -3456,6 +3496,21 @@ void __stdcall cLuxScriptHandler::DetachFromStickyArea(string& asAreaName)
 	if(pStickyArea) pStickyArea->DetachBody();
 }
 
+
+void __stdcall cLuxScriptHandler::AttachAreaToProp(string& asAreaName, string& asProp, int alBody)
+{
+	iLuxArea* pArea = ToArea(GetEntity(asAreaName, eLuxEntityType_Area, -1));
+
+	if (pArea == NULL)
+	{
+#if 1
+		Error("WARNING: AttachAreaToProp Area Not Found:'%s'\n", asAreaName.c_str());
+#endif
+		return;
+	}
+
+	pArea->AttachToBody(asProp, alBody);
+}
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::SetNPCAwake(string& asName, bool abAwake, bool abEffects)
@@ -3532,6 +3587,17 @@ void __stdcall cLuxScriptHandler::ShowEnemyPlayerPosition(string& asName)
 	
 	END_SET_PROPERTY
 }
+
+void __stdcall cLuxScriptHandler::SetEnemyEndOfPatrolCallback(string& asName, string& asFunc, bool abRemoveWhenCalled)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetEndOfPathCallback(asFunc, abRemoveWhenCalled);
+
+	END_SET_PROPERTY
+}
+
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::ForceEnemyWaitState(string& asName)
@@ -3631,6 +3697,16 @@ void __stdcall cLuxScriptHandler::SetEnemyBlind(string& asName, bool abX)
 
 		iLuxEnemy* pEnemy = ToEnemy(pEntity);
 		pEnemy->SetBlind(abX);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetEnemyDeaf(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetDeaf(abX);
 
 	END_SET_PROPERTY
 }
@@ -3769,6 +3845,67 @@ void __stdcall cLuxScriptHandler::ChangeEnemyPatrolSpeed(string& asName, string&
 	END_SET_PROPERTY
 }
 //-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::ChangeEnemyState(string& asName, string& asState)
+{
+	eLuxEnemyState state = eLuxEnemyState_LastEnum;
+		
+	if (asState == "Patrol")
+	{
+		state = eLuxEnemyState_Patrol;
+	}
+	else if (asState == "Investigate")
+	{
+		state = eLuxEnemyState_Investigate;
+	}
+	else if (asState == "Hunt")
+	{
+		state = eLuxEnemyState_Hunt;
+	}
+	else if (asState == "Idle")
+	{
+		state = eLuxEnemyState_Idle;
+	}
+	else if (asState == "Wait")
+	{
+		state = eLuxEnemyState_Wait;
+	}
+	else if (asState == "Alert")
+	{
+		state = eLuxEnemyState_Alert;
+	}
+	else if (asState == "HuntPause")
+	{
+		state = eLuxEnemyState_HuntPause;
+	}
+	else if (asState == "HuntWander")
+	{
+		state = eLuxEnemyState_HuntWander;
+	}
+	else if (asState == "Hurt")
+	{
+		state = eLuxEnemyState_Hurt;
+	}
+	else if (asState == "Track")
+	{
+		state = eLuxEnemyState_Track;
+	}
+
+	if (state == eLuxEnemyState_LastEnum)
+	{
+		Error("Could not set State '%s' for enemy '%s'. State does not exist!\n", asState.c_str(), asName.c_str());
+		return;
+	}
+
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->ChangeState(state);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
 void __stdcall cLuxScriptHandler::SetManPigToFlee(string& asName, bool abX)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
@@ -3791,6 +3928,37 @@ void __stdcall cLuxScriptHandler::SetManPigToThreatenOnAlert(string& asName, boo
 	END_SET_PROPERTY
 }
 
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetManPigIdleBehavior(string& asName, string& asBehaviorType)
+{
+	eLuxIdleBehavior behavior = eLuxIdleBehavior_LastEnum;
+	if (asBehaviorType == "Stalk")
+	{
+		behavior = eLuxIdleBehavior_Stalk;
+	}
+	else if (asBehaviorType == "Track")
+	{
+		behavior = eLuxIdleBehavior_Track;
+	}
+	else if (asBehaviorType == "None")
+	{
+		behavior = eLuxIdleBehavior_None;
+	}
+
+	if (behavior == eLuxEnemyPoseType_LastEnum)
+	{
+		Error("Could not set Idle Behavior type '%s' for enemy '%s'. Idle Behavior type does not exist!\n", asBehaviorType.c_str(), asName.c_str());
+		return;
+	}
+
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBehaviorType(behavior);
+
+	END_SET_PROPERTY
+}
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::SetTeslaPigFadeDisabled(string& asName, bool abX)
@@ -3879,6 +4047,28 @@ void __stdcall cLuxScriptHandler::SetEnemyHealth(string& asName, float afHealth)
 	END_SET_PROPERTY
 }
 //-----------------------------------------------------------------------
+float __stdcall cLuxScriptHandler::GetEnemyHearVolume(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetHearVolume();
+}
+
+void __stdcall cLuxScriptHandler::SetEnemyHearVolume(string& asName, float afHearVolume)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetHearVolume(afHearVolume);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
 float __stdcall cLuxScriptHandler::GetEnemyRunSpeedMul(string& asName)
 {
 	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
@@ -3946,6 +4136,16 @@ float __stdcall cLuxScriptHandler::GetManPigFleeHealth(string& asName)
 	return pEnemy->GetFleeHealth();
 }
 
+void __stdcall cLuxScriptHandler::SetManPigCanTrackTeleport(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_ManPig* pEnemy = ToManPig(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetTrackTeleport(abX);
+
+	END_SET_PROPERTY
+}
 
 //-----------------------------------------------------------------------
 

@@ -20,6 +20,7 @@
 #include "LuxProp_Item.h"
 
 #include "LuxPlayer.h"
+#include "LuxPlayerHelpers.h"
 #include "LuxMap.h"
 #include "LuxHelpFuncs.h"
 #include "LuxInventory.h"
@@ -84,6 +85,13 @@ void cLuxPropLoader_Item::LoadVariables(iLuxProp *apProp, cXmlElement *apRootEle
 	{
 		pItem->mfAmount = GetVarFloat("OilAmount", 0);
 	}
+	///////////////////////////
+	// Lantern
+	else if (pItem->mItemType == eLuxItemType_Lantern)
+	{
+		pItem->mfAmount = GetVarFloat("LanternNumber", 0);
+	}
+
 }
 
 //-----------------------------------------------------------------------
@@ -113,6 +121,7 @@ void cLuxPropLoader_Item::LoadInstanceVariables(iLuxProp *apProp, cResourceVarsO
 		pItem->msVal = apInstanceVars->GetVarString("DiaryText", "");
 		pItem->msExtraVal = apInstanceVars->GetVarString("DiaryCallback", "");
 	}
+	
 }
 //-----------------------------------------------------------------------
 
@@ -127,6 +136,7 @@ cLuxProp_Item::cLuxProp_Item(const tString &asName,int alID, cLuxMap *apMap) : i
 	mfAmount = 1.0f;
 	mlSpawnContainerID =-1;
 	mfFlashAlpha =0;
+	mfLantern = 0;
 }
 
 //-----------------------------------------------------------------------
@@ -204,34 +214,7 @@ void cLuxProp_Item::UpdatePropSpecific(float afTimeStep)
 
 	/////////////////////////////////
 	// If near player, flash
-	cCamera *pCam =  gpBase->mpPlayer->GetCamera();
-	cVector3f vCameraPos = pCam->GetPosition();
-	cVector3f vBodyPos = mvBodies[0]->GetLocalPosition();
-	vCameraPos.y=0; 
-	vBodyPos.y =0;
-
-	float fDistSqrt = cMath::Vector3DistSqr(vCameraPos, vBodyPos);
-	if(fDistSqrt < 4.0f * 4.0f)
-	{
-		mfFlashAlpha += afTimeStep;
-		if(mfFlashAlpha >1)mfFlashAlpha =1;
-	}
-	else
-	{
-		mfFlashAlpha -=afTimeStep;
-		if(mfFlashAlpha <0)mfFlashAlpha =0;
-	}
-
-	if(mfFlashAlpha> 0)
-	{
-		for(int i=0; i<mpMeshEntity->GetSubMeshEntityNum(); ++i)
-		{
-			cSubMeshEntity *pSubEnt = mpMeshEntity->GetSubMeshEntity(i);
-
-			if(pCam->GetFrustum()->CollideBoundingVolume(pSubEnt->GetBoundingVolume()) != eCollision_Outside)
-				gpBase->mpEffectRenderer->AddFlashObject(pSubEnt, mfFlashAlpha);
-		}
-	}
+	FlashIfNearPlayer(afTimeStep);
 }
 
 //-----------------------------------------------------------------------
@@ -244,7 +227,8 @@ void cLuxProp_Item::BeforePropDestruction()
 
 eLuxFocusCrosshair cLuxProp_Item::GetFocusCrosshair(iPhysicsBody *apBody, const cVector3f &avPos)
 {
-	return eLuxFocusCrosshair_Pick;
+	if (mItemType == eLuxItemType_Note || mItemType == eLuxItemType_Diary)	return eLuxFocusCrosshair_Note;
+	else								return eLuxFocusCrosshair_Pick;
 }
 
 //-----------------------------------------------------------------------
@@ -299,7 +283,8 @@ void cLuxProp_Item::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,msVal);
 	kCopyToVar(pData,msExtraVal);
 	kCopyToVar(pData,mlSpawnContainerID);
-	kCopyToVar(pData,mfAmount);
+	kCopyToVar(pData,mfAmount); 
+	kCopyToVar(pData,mfLantern);
 	kCopyToVar(pData,msSubItemTypeName);
 }
 
@@ -318,6 +303,7 @@ void cLuxProp_Item::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,msExtraVal);
 	kCopyFromVar(pData,mlSpawnContainerID);
 	kCopyFromVar(pData,mfAmount);
+	kCopyFromVar(pData, mfLantern);
 	kCopyFromVar(pData,msSubItemTypeName);
 }
 

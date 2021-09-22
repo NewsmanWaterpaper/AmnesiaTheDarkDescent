@@ -45,11 +45,30 @@ public:
 	bool DoAction(eLuxPlayerAction aAction, bool abPressed);
 	bool AnimationIsOver();
 
+	void SetFlickering(bool abX);
+	bool GetFlickering() { return mbFlickering; }
+
+	void SetFlickeringSpeed(float afX) { mfFlickeringSpeed = afX; }
+	float GetFlickeringSpeed() { return mfFlickeringSpeed; }
+
 private:
 	void UpdateSwayPhysics(float afTimeStep);
+	float UpdateFlickering(float afTimeStep);
+
+	bool mbFlickering;
+	float mfFlickeringSpeed;
+	int mlFlickeringState;
+
+	float mfFlickerAmount;
+	float mfFlickerTime;
+	float mfFlickerPauseTime;
 
 	float mfFadeInSpeed;
 	float mfFadeOutSpeed;
+
+	float mfStrobeDroneTime;
+	cSoundEntry* mpDroneSound;
+	int mlDroneSoundId;
 	
 	bool mbHasSwayPhysics;
 	float mfMaxSwayVel;
@@ -64,6 +83,8 @@ private:
 	
 	float mfSwayAngle;
 	float mfSwayVel;
+
+	bool mbUseFlicker;
 
 	std::vector<cColor> mvLightFadeOutColor;
 	std::vector<cColor> mvDefaultLightColors;
