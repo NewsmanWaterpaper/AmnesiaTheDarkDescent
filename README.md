@@ -52,6 +52,21 @@ Simliar to HideScreenImageImmediately but allows you to fade out the image inste
 
 ## Entities:
 ```as
+void  AttachAreaToProp(string& asAreaName, string& asProp, int alBody);
+```
+Attaches an area to a prop.
+1. *asAreaName* - The area to attach
+2. *asProp* - The prop to attach area to
+3. *alBody* - Body of the prop to attach the area to
+---------------------------------------
+```as
+float GetEntitiesDistance(string& asEntityA, string& asEntityB);
+```
+Returns the distance between two entities.
+1. *asEntityA* - The name of the first entity
+2. *asEntityB* - The name of the second entity
+---------------------------------------
+```as
 void  SetSwingDoorOpenAmount(string& asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle);
 ```
 Sets the open amount for a swing door.
@@ -176,6 +191,14 @@ float  GetEnemyHealth(string& asName);
 Modifies/returns the amount of health for a specific enemy.
 1. *asName* - Internal name of the enemy
 2. *afHealth* - The amount of health to change to
+---------------------------------------
+```as
+void  SetEnemyHearVolume(string& asName, float afHearVolume);
+float  GetEnemyHearVolume(string& asName);
+```
+Modifies/returns the amount of volume needed for an enemy to hear sounds.
+1. *asName* - Internal name of the enemy
+2. *afHearVolume* - The hearing volume to change to
 ---------------------------------------
 ```as
 void   SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed);
