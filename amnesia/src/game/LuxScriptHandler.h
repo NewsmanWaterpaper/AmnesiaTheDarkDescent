@@ -409,6 +409,7 @@ private:
 	 * This function does NOT support asterix!
 	 */
 	static bool __stdcall GetEntitiesCollide(string& asEntityA, string& asEntityB);
+	static float __stdcall GetEntitiesDistance(string& asEntityA, string& asEntityB);
 
 	static void __stdcall SetPropEffectActive(string& asName, bool abActive, bool abFadeAndPlaySounds);
 	static void __stdcall SetPropActiveAndFade(string& asName, bool abActive, float afFadeTime);

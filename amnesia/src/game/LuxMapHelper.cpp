@@ -43,7 +43,7 @@ void cLuxLineOfSightCallback::Reset()
 
 bool cLuxLineOfSightCallback::BeforeIntersect(iPhysicsBody *apBody)
 {
-	if (apBody->GetBlocksPathfinding())
+	if ( apBody->GetBlocksPathfinding() )
 	{
 		return false;
 	}
@@ -476,6 +476,20 @@ bool cLuxMapHelper::CheckLineOfSight(const cVector3f& avStart, const cVector3f& 
 	pPhysicsWorld->CastRay(	&mLineOfSightCallback, avStart,avEnd,false,false,false,true);
 
 	return mLineOfSightCallback.GetIntersected()==false;
+}
+//-----------------------------------------------------------------------
+
+
+float cLuxMapHelper::CheckDistance(const cVector3f& avStart, const cVector3f& avEnd)
+{
+	////////////////////////////
+	//Check so there really is a world
+	cLuxMap* pCurrentMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pCurrentMap == NULL) return false;
+
+	iPhysicsWorld* pPhysicsWorld = pCurrentMap->GetPhysicsWorld();
+
+	return cMath::Vector3Dist(avStart, avEnd);
 }
 //-----------------------------------------------------------------------
 

@@ -25,6 +25,7 @@
 #include "LuxPlayerHands.h"
 #include "LuxHandObject_LightSource.h"
 #include "LuxMapHandler.h"
+#include "LuxMapHelper.h"
 #include "LuxInputHandler.h"
 #include "LuxInventory.h"
 #include "LuxMoveState_Normal.h"
@@ -695,6 +696,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEntityConnectionStateChangeCallback(string& asName, string& asCallback)", (void *)SetEntityConnectionStateChangeCallback);
 	AddFunc("void SetEntityInteractionDisabled(string& asName, bool abDisabled)", (void *)SetEntityInteractionDisabled);
 	AddFunc("bool GetEntitiesCollide(string &in asEntityA, string &in asEntityB)",(void *)GetEntitiesCollide);
+	AddFunc("float GetEntitiesDistance(string &in asEntityA, string &in asEntityB)", (void*)GetEntitiesDistance);
 	
 	AddFunc("void SetPropEffectActive(string &in asName, bool abActive, bool abFadeAndPlaySounds)", (void *)SetPropEffectActive);
 	AddFunc("void SetPropActiveAndFade(string &in asName, bool abActive, float afFadeTime)",(void *)SetPropActiveAndFade);
@@ -3079,6 +3081,14 @@ bool __stdcall cLuxScriptHandler::GetEntitiesCollide(string& asEntityA, string& 
 	if(pEntityB==NULL) return false;
 
 	return pEntityA->CheckEntityCollision(pEntityB, gpBase->mpMapHandler->GetCurrentMap());
+}
+
+float __stdcall cLuxScriptHandler::GetEntitiesDistance(string& asEntityA, string& asEntityB)
+{
+	iLuxEntity* pEntityA = GetEntity(asEntityA, eLuxEntityType_LastEnum, -1);
+	iLuxEntity* pEntityB = GetEntity(asEntityB, eLuxEntityType_LastEnum, -1);
+	if (pEntityA == NULL || pEntityB == NULL) { return 0.001f; }
+	return gpBase->mpMapHelper->CheckDistance(pEntityA->GetBody(0)->GetWorldPosition(), pEntityB->GetBody(0)->GetWorldPosition());
 }
 
 //-----------------------------------------------------------------------

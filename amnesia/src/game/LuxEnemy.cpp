@@ -474,6 +474,7 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 	mfFOVMul = 1.0f;
 
 	mpCurrentAnimation = NULL;
+	mlNextAnimationIndex = -1;
 
 	mbAnimationIsSpeedDependant = false;
 	mfAnimationSpeedMul = 1;

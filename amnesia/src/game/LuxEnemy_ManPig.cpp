@@ -383,6 +383,9 @@ void cLuxEnemy_ManPig::ChangeMoveType(eLuxEnemyMoveType aMoveType)
 
 	mCurrentMoveType = aMoveType;
 
+	mpCharBody->StopMovement();
+	mpCharBody->SetMoveDelay(0.5);
+
 	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
 	mpMover->UpdateMoveAnimation(0.001f);
 }
@@ -1130,7 +1133,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		//Wait a few secs
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
 			//cAINode * pNode = GetSearchForPlayerNode();
-			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30,false, false, true, NULL, 1); //GetFeetPosition(), 4, 12,false, false, true, NULL);
+			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30,false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
 			if(pNode)
 				mpPathfinder->MoveTo(pNode->GetPosition());
 			else

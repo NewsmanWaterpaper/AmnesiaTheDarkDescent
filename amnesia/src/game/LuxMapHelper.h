@@ -112,6 +112,8 @@ public:
 
 	bool CheckLineOfSight(const cVector3f& avStart, const cVector3f& avEnd, bool abCheckShadows);
 
+	float CheckDistance(const cVector3f& avStart, const cVector3f& avEnd);
+
 	bool GetClosestEntity(	const cVector3f& avStart,const cVector3f& avDir, float afRayLength,
 							float *afDistance, iPhysicsBody** apBody, iLuxEntity **apEntity);
 
