@@ -351,6 +351,7 @@ cLuxSaveGame_SaveData *cLuxSaveHandler::CreateSaveGameData()
 	pSave->mMusicHandler.FromMusicHandler(gpBase->mpMusicHandler);
 	pSave->mEffectHandler.FromEffectHandler(gpBase->mpEffectHandler);
 	pSave->mGlobalDataHandler.FromGlobalDataHandler(gpBase->mpGlobalDataHandler);
+	pSave->mProgressLogHandler.FromProgLog(gpBase->mpProgressLogHandler);
 	pSave->mHintHandler.FromHintHandler(gpBase->mpHintHandler);
 	pSave->mInsanityHandler.FromInsanityHandler(gpBase->mpInsanityHandler);
 	pSave->mLoadScreenHandler.FromLoadScreenHandler(gpBase->mpLoadScreenHandler);
@@ -465,6 +466,7 @@ void cLuxSaveHandler::LoadSaveGameData(cLuxSaveGame_SaveData *apSave)
 	apSave->mMusicHandler.ToMusicHandler(pCurrentMap, gpBase->mpMusicHandler);
 	apSave->mEffectHandler.ToEffectHandler(pCurrentMap, gpBase->mpEffectHandler);
 	apSave->mGlobalDataHandler.ToGlobalDataHandler(pCurrentMap, gpBase->mpGlobalDataHandler);
+	apSave->mProgressLogHandler.ToProgLog(pCurrentMap, gpBase->mpProgressLogHandler);
 	apSave->mInsanityHandler.ToInsanityHandler(pCurrentMap, gpBase->mpInsanityHandler);
 	apSave->mLoadScreenHandler.ToLoadScreenHandler(pCurrentMap, gpBase->mpLoadScreenHandler);
 							 

@@ -40,6 +40,7 @@ public:
 
 	void AddKeyPart(int alKey);
 	void Setup(const tString& asMusic, bool abLoopMusic, const tString& asTextCat, const tString& asTextEntry, int alEndNum);
+	void SetupWithRankScreen(const tString& asMusic, bool abLoopMusic, const tString& asTextCat, const tString& asTextEntry, bool abRankScreen, bool abBackground);
 
 	void OnEnterContainer(const tString& asOldContainer);
 	void OnLeaveContainer(const tString& asNewContainer);
@@ -84,6 +85,7 @@ private:
 	cBinaryBuffer mKeyBuffer;
 	tString msMusic;
 	bool mbLoopMusic;
+	bool mbDoRankScreen;
 	int mlEndNum;
 
 	tWStringVec mvTextRows;

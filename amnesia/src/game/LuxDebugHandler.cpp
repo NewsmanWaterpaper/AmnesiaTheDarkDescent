@@ -26,6 +26,7 @@
 #include "LuxMapHandler.h"
 #include "LuxInputHandler.h"
 #include "LuxMoveState_Normal.h"
+#include "LuxProgressLogHandler.h"
 #include "LuxSaveHandler.h"
 #include "LuxPlayerState.h"
 #include "LuxEntity.h"
@@ -423,6 +424,8 @@ void cLuxDebugHandler::OnDraw(float afFrameTime)
 		cLuxPlayer *pPlayer = gpBase->mpPlayer;
 		iCharacterBody *pCharBody = pPlayer->GetCharacterBody();
 
+		cLuxProgressLogHandler *pProgLog = gpBase->mpProgressLogHandler;
+
 		gpBase->mpGameDebugSet->DrawFont(gpBase->mpDefaultFont, cVector3f(5,fY,10),14,cColor(1,1),
 			_W("Position: %ls OnGround: %d Moved: %d Mass: %f ActiveSize: %d\n"),cString::To16Char(pCharBody->GetPosition().ToString()).c_str(), 
 															pCharBody->IsOnGround(),pCharBody->GetMovedLastUpdate(),
@@ -459,6 +462,10 @@ void cLuxDebugHandler::OnDraw(float afFrameTime)
 		gpBase->mpGameDebugSet->DrawFont(gpBase->mpDefaultFont, cVector3f(5,fY,10),14,cColor(1,1),
 							_W("ExtLightLevel: %f NormalLightlevel: %f\n"), pPlayer->GetHelperLightLevel()->GetExtendedLightLevel(), pPlayer->GetHelperLightLevel()->GetNormalLightLevel() );
 		fY+=15.0f;
+
+		gpBase->mpGameDebugSet->DrawFont(gpBase->mpDefaultFont, cVector3f(5, fY, 10), 14, cColor(1, 1),
+			_W("Time: %ls\n"), cString::To16Char(pProgLog->GetPlayTime().c_str()));
+		fY += 15.0f;
 
 		gpBase->mpGameDebugSet->DrawFont(gpBase->mpDefaultFont, cVector3f(5,fY,10),14,cColor(1,1),
 							_W("Health: %f Terror: %f\n"), pPlayer->GetHealth(), pPlayer->GetTerror() );

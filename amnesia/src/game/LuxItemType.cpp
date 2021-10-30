@@ -27,6 +27,7 @@
 #include "LuxHandObject_LightSource.h"
 #include "LuxHandObject.h"
 #include "LuxMapHandler.h"
+#include "LuxDebugHandler.h"
 #include "LuxMap.h"
 #include "LuxEntity.h"
 #include "LuxJournal.h"
@@ -47,6 +48,7 @@ iLuxItemType::iLuxItemType(const tString& asName, eLuxItemType aType)
 	mType = aType;
 	mbHasCount = false;
 	mbShowPickUpMessage = true;
+	
 }
 
 //-----------------------------------------------------------------------
@@ -299,14 +301,10 @@ cLuxItemType_Health::cLuxItemType_Health() : iLuxItemType("Health", eLuxItemType
 
 bool cLuxItemType_Health::BeforeAddItem(cLuxInventory_Item *apItem)
 {
-	gpBase->mpHintHandler->Add("PickHealthPotion", kTranslate("Hints", "PickHealthPotion"), 0);
-
-	tString item = cString::ToLowerCase(apItem->GetName());
-
-	if (cString::GetFirstStringPos(item, "potion_health"))
-	{
-		gpBase->mpPlayer->AddLaudanum(1);
-	}
+	//gpBase->mpHintHandler->Add("PickHealthPotion", kTranslate("Hints", "PickHealthPotion"), 0);
+	ProgLog(eLuxProgressLogLevel_Medium, "Picked up health item " +apItem->GetName());
+	//gpBase->mpDebugHandler->AddMessage(cString::To16Char("Picked up health item " + apItem->GetName()), false);
+	//gpBase->mpPlayer->AddTotalItemCount(1);
 
 	return false;
 }
@@ -320,8 +318,9 @@ void cLuxItemType_Health::OnUse(cLuxInventory_Item *apItem, int alSlotIndex)
 	if(fHealth > 100) fHealth = 100;
 	gpBase->mpPlayer->SetHealth(fHealth);
 	gpBase->mpInventory->RemoveItem(apItem);
-
+	gpBase->mpPlayer->AddHealthItemsUsed(1);
 	gpBase->mpHelpFuncs->PlayGuiSoundData("ui_use_health", eSoundEntryType_Gui);
+	
 }
 
 //-----------------------------------------------------------------------
@@ -369,18 +368,24 @@ cLuxItemType_LampOil::cLuxItemType_LampOil()  : iLuxItemType("LampOil", eLuxItem
 {
 	mbHasCount = true;
 	mlMaxCount = 99;
+	
 }
 
 bool cLuxItemType_LampOil::BeforeAddItem(cLuxInventory_Item *apItem)
 {
-	gpBase->mpHintHandler->Add("PickOil", kTranslate("Hints", "PickOil"), 0);
+	//gpBase->mpHintHandler->Add("PickOil", kTranslate("Hints", "PickOil"), 0);
+
+	ProgLog(eLuxProgressLogLevel_Medium, "Picked up oil item " + apItem->GetName());
+	//gpBase->mpDebugHandler->AddMessage(cString::To16Char("Picked up oil item " + apItem->GetName()), false);
+	
+	//gpBase->mpPlayer->AddTotalItemCount(1);
 
 	return false;
 }
 
 void cLuxItemType_LampOil::OnUse(cLuxInventory_Item *apItem, int alSlotIndex)
 {
-	if (gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetDrainsOil() == false) return;
+	//if (gpBase->mpPlayer->GetHands()->GetCurrentHandObject()->GetDrainsOil() == false) return;
 
 	cLuxInventory *pInventory = gpBase->mpInventory;
 	if(pInventory->HasItemOfType(eLuxItemType_Lantern)==false)
@@ -397,6 +402,8 @@ void cLuxItemType_LampOil::OnUse(cLuxInventory_Item *apItem, int alSlotIndex)
 	if(fLampOil > 100) fLampOil = 100;
 	gpBase->mpPlayer->SetLampOil(fLampOil);
 	pInventory->RemoveItem(apItem);
+
+	gpBase->mpPlayer->AddOilItemsUsed(1);
 
 	gpBase->mpHelpFuncs->PlayGuiSoundData("ui_use_oil", eSoundEntryType_Gui);
 }

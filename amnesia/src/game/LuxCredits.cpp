@@ -109,10 +109,12 @@ void cLuxCredits::Reset()
 {
 	msMusic = "";
 	mbLoopMusic = false;
+	mbDoRankScreen = false;
 	mvTextRows.clear();
 
 	mbActive = false;
 
+	mlEndNum = 3;
 	mfYPos =600;
 	mlState =0;
 	mfTime =0;
@@ -153,6 +155,9 @@ void cLuxCredits::OnLeaveContainer(const tString& asNewContainer)
 	mpViewport->SetVisible(false);
 
 	mpGuiSet->SetActive(false);
+
+	cMusicHandler* pMusHandler = gpBase->mpEngine->GetSound()->GetMusicHandler();
+	pMusHandler->Stop(0.3f);
 }
 
 //-----------------------------------------------------------------------
@@ -225,10 +230,17 @@ void cLuxCredits::Update(float afTimeStep)
 			//Last fae out, end game
 			if(mlState==4)
 			{
-				gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
+				if(mbDoRankScreen)
+				{ 
+					gpBase->mpEngine->GetUpdater()->SetContainer("RankScreen");
+				}
+				else
+				{
+					gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 
-				gpBase->mpLoadScreenHandler->DrawMenuScreen();
-				gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
+					gpBase->mpLoadScreenHandler->DrawMenuScreen();
+					gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
+				}
 			}
 			//NExt state
 			else
@@ -285,6 +297,19 @@ void cLuxCredits::Setup(const tString& asMusic, bool abLoopMusic, const tString&
 
 	tWString sText = kTranslate(asTextCat, asTextEntry);
 	mpFontNormal->GetWordWrapRows(750, 19,17,sText,&mvTextRows);	
+}
+
+void cLuxCredits::SetupWithRankScreen(const tString& asMusic, bool abLoopMusic, const tString& asTextCat, const tString& asTextEntry, bool abRankScreen, bool abBackground)
+{
+	msMusic = asMusic;
+	mbLoopMusic = abLoopMusic;
+	mbDoRankScreen = abRankScreen;
+
+	if(abBackground) mpBlackGfx = mpGui->CreateGfxFilledRect(cColor(0, 1), eGuiMaterial_Alpha);
+	else mpBlackGfx = mpGui->CreateGfxFilledRect(cColor(0, 0), eGuiMaterial_Alpha);
+
+	tWString sText = kTranslate(asTextCat, asTextEntry);
+	mpFontNormal->GetWordWrapRows(750, 19, 17, sText, &mvTextRows);
 }
 
 //-----------------------------------------------------------------------

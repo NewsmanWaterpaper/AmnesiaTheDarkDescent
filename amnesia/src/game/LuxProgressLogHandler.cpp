@@ -22,6 +22,8 @@
 #include "LuxMapHandler.h"
 #include "LuxMap.h"
 #include "LuxPlayer.h"
+#include "LuxHelpFuncs.h"
+#include "LuxDebugHandler.h"
 
 //-----------------------------------------------------------------------
 
@@ -38,6 +40,14 @@ cLuxProgressLogHandler::cLuxProgressLogHandler() : iLuxUpdateable("LuxProgressLo
 	mlCounter =0;
 
 	mbActive = false;
+	mbCounterActive = true;
+	mbShowCounterHUD = false;
+
+	mpCountFont = LoadFont("menu.fnt");
+	mvCounterPos = cVector3f(400.0f, 50, 10);
+	mvCounterSize = cVector2f(25);
+	mCounterTextAlign = eFontAlign_Center;
+	mCounterTextColor = cColor(1,1);
 }
 
 //-----------------------------------------------------------------------
@@ -78,6 +88,20 @@ void cLuxProgressLogHandler::Reset()
 	
 }
 
+//-----------------------------------------------------------------------
+
+tString cLuxProgressLogHandler::GetPlayTime()
+{
+	int lSec = (mlCounter / 60) % 60;
+	int lMin = (mlCounter / (60 * 60)) % 60;
+	int lHour = mlCounter / (60 * 60 * 60);
+
+	char sTime[1024];
+	sprintf(sTime, "%02d:%02d:%02d", lHour, lMin, lSec);
+
+	tString sFinalTimeString = sTime; 
+	return sFinalTimeString;
+}
 //-----------------------------------------------------------------------
 
 void cLuxProgressLogHandler::CreateAndResetLogFile()
@@ -123,17 +147,37 @@ void cLuxProgressLogHandler::CreateAndResetLogFile()
 	}
 
 
-	mlCounter =0;
+	//mlCounter =0;
 }
 
 //-----------------------------------------------------------------------
 
 void cLuxProgressLogHandler::Update(float afTimeStep)
 {
-	if(mbActive==false) return;
+	//if(mbActive==false) return;
 
+	if (mbCounterActive == false) return;
 
 	mlCounter++;
+	tWString sTimerText = cString::To16Char(GetPlayTime());
+	msTimerDisplayText = sTimerText;
+	DrawHud(afTimeStep);
+
+}
+
+void cLuxProgressLogHandler::DrawHud(float afTimeStep)
+{
+	
+	if(mbShowCounterHUD)
+	{
+		gpBase->mpGameHudSet->DrawFont(msTimerDisplayText, mpCountFont, mvCounterPos, mvCounterSize, mCounterTextColor, mCounterTextAlign);
+		//gpBase->mpDebugHandler->AddMessage(cString::To16Char("Counter text is being displayed"), false);
+	}
+	else
+	{
+		gpBase->mpGameHudSet->DrawFont(msTimerDisplayText, mpCountFont, mvCounterPos, mvCounterSize, cColor(0,0), mCounterTextAlign);
+		//gpBase->mpDebugHandler->AddMessage(cString::To16Char("Counter text is NOT being displayed"), false);
+	}
 }
 
 //-----------------------------------------------------------------------
@@ -174,6 +218,7 @@ void cLuxProgressLogHandler::AddLog(eLuxProgressLogLevel aLevel, const tString& 
 	fprintf(mpFile, "%s", sFinalMess.c_str());
 	fflush(mpFile);
 }
+
 
 //-----------------------------------------------------------------------
 

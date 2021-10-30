@@ -53,6 +53,7 @@ protected:
 	void AddCompletionAmount(int alAmount);
 	bool mbHasCount;
 	int mlMaxCount;
+	int mlItemCount;
 	bool mbShowPickUpMessage;
 	
 private:
@@ -141,6 +142,7 @@ public:
 	void OnUse(cLuxInventory_Item *apItem, int alSlotIndex);
 
 private:
+	//int mlHealthItemUsed;
 };
 
 //----------------------------------------------
@@ -167,6 +169,7 @@ public:
 	void OnUse(cLuxInventory_Item *apItem, int alSlotIndex);
 
 private:
+	//int mlOilItemUsed;
 };
 
 //----------------------------------------------

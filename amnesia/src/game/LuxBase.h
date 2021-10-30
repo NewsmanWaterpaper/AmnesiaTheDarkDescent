@@ -38,6 +38,7 @@ class cLuxDebugHandler;
 class cLuxSaveHandler;
 class cLuxScriptHandler;
 class cLuxHelpFuncs;
+class cLuxEndingsHandler;
 class cLuxEffectRenderer;
 class cLuxMusicHandler;
 class cLuxMessageHandler;
@@ -57,6 +58,8 @@ class cLuxInventory;
 class cLuxCredits;
 
 class cLuxDemoEnd;
+
+class cLuxRankScreen;
 
 class cLuxPreMenu;
 
@@ -200,10 +203,12 @@ public:
 	cConfigFile* mpMainConfig;
 	cConfigFile* mpUserConfig;
 	cConfigFile* mpUserKeyConfig;
+	cConfigFile* mpUserEndingConfig;
 
 	cConfigFile* mpGameCfg;
 	cConfigFile* mpMenuCfg;
 	cConfigFile* mpDemoCfg;
+	cConfigFile* mpRankCfg;
 	cGuiSet *mpGameDebugSet;
 	cGuiSet *mpGameHudSet;
 	iFontData *mpDefaultFont;
@@ -237,9 +242,11 @@ public:
 	cLuxPostEffectHandler *mpPostEffectHandler;
 	cLuxInsanityHandler *mpInsanityHandler;
 	cLuxProgressLogHandler *mpProgressLogHandler;
+	cLuxEndingsHandler* mpEndingsHandler;
 	cLuxLoadScreenHandler *mpLoadScreenHandler;
 	cLuxCredits *mpCredits;
 	cLuxDemoEnd* mpDemoEnd;
+	cLuxRankScreen* mpRankScreen;
 	iLuxAchievementHandler* mpAchievementHandler;
 
 	tString msGameName;
@@ -271,7 +278,7 @@ public:
 	/////////////////////////
 	// HARDMODE
 	bool mbHardMode;
-	bool mbAllowHardmode;
+	//bool mbAllowHardmode;
 
 	/////////////////////////
 	// Kinda private variables
@@ -280,6 +287,7 @@ public:
 
 	tWString msDefaultMainConfigPath;
 	tWString msDefaultUserConfigPath;
+	tWString msDefaultUserEndingConfigPath;
 	tWString msDefaultUserKeyConfigPath;
 	tString msResourceConfigPath;
 	tString msMaterialConfigPath;
@@ -298,6 +306,7 @@ public:
 	tWString msMenuConfigPath;
 	tWString msPreMenuConfigPath;
 	tWString msDemoConfigPath;
+	tWString msRankConfigPath;
 
 	tWString msCrashFlagPath;
 	tWString msFirstStartFlagPath;

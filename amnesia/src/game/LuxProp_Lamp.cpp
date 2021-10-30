@@ -55,6 +55,7 @@ void cLuxPropLoader_Lamp::LoadVariables(iLuxProp *apProp, cXmlElement *apRootEle
 	pLamp->mbCanBeLitByPlayer = GetVarBool("CanBeLitByPlayer", true);
 
 	pLamp->mbCanBeGrabbed = GetVarBool("CanBeGrabbed", false);
+	pLamp->mbCanBeTurnedOff = GetVarBool("CanBeTurnedOff", false);
 
 	///////////////////////////
 	// Grab specific
@@ -206,7 +207,7 @@ cLuxProp_Lamp::~cLuxProp_Lamp()
 
 bool cLuxProp_Lamp::CanInteract(iPhysicsBody *apBody)
 {
-	if(CanBeIgnitByPlayer() && mbLit==false) return true;
+	if (mbCanBeLitByPlayer && (mbLit == false || mbCanBeTurnedOff)) return true;
 	if(msInteractCallback != "") return true;
 	
 	return false;
@@ -218,10 +219,9 @@ bool cLuxProp_Lamp::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 {
 	//////////////////////
 	//Turn off
-	if(mbLit)
+	if (mbCanBeTurnedOff)
 	{
-		//SetLit(false, true);
-		//Nothing...
+		SetLit(false, true);
 	}
 	//////////////////////
 	//Ignite
@@ -229,25 +229,17 @@ bool cLuxProp_Lamp::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 	{
 		/////////////////////
 		// Check so has enough tinderboxes
-		if(gpBase->mpPlayer->GetTinderboxes()<=0)
+		/*if(gpBase->mpPlayer->GetTinderboxes()<=0)
 		{
 			gpBase->mpMessageHandler->SetMessage(kTranslate("Game","NoMoreTinderboxes"), 0);
 			return false;
-		}
-
-		/////////////////////
-		// Add sanity
-		float fIncreaseAmount = 1.0f - gpBase->mpPlayer->GetSanity() / 100.0f;
-		fIncreaseAmount = fIncreaseAmount*fIncreaseAmount; //Want exp curve
-		float fSanityAdd =	gpBase->mpGlobalDataHandler->GetLightLampMinSanityIncrease() * (1-fIncreaseAmount) + 
-							gpBase->mpGlobalDataHandler->GetLightLampMaxSanityIncrease()*fIncreaseAmount;
-		gpBase->mpPlayer->AddSanity(fSanityAdd, false);
+		}*/
 
 		////////////////////
 		// Negate tinderboxes
-		gpBase->mpPlayer->AddTinderboxes(-1);
+		//gpBase->mpPlayer->AddTinderboxes(-1);
 		
-		gpBase->mpHelpFuncs->PlayGuiSoundData("ui_use_tinderbox", eSoundEntryType_Gui);
+		//gpBase->mpHelpFuncs->PlayGuiSoundData("ui_use_tinderbox", eSoundEntryType_Gui);
 
 		RunCallbackFunc("OnIgnite");
 		
@@ -353,6 +345,10 @@ void cLuxProp_Lamp::BeforePropDestruction()
 
 eLuxFocusCrosshair cLuxProp_Lamp::GetFocusCrosshair(iPhysicsBody *apBody, const cVector3f &avPos)
 {
+	if (mbCanBeLitByPlayer && (mbCanBeTurnedOff || !mbLit))
+	{
+		return eLuxFocusCrosshair_Ignite;
+	}
 	//if(CanBeIgnitByPlayer())	return eLuxFocusCrosshair_Ignite;
 	if(mCustomFocusCrossHair != eLuxFocusCrosshair_Default && mbLit==true)
 	{
@@ -368,7 +364,7 @@ tWString cLuxProp_Lamp::GetFocusText()
 {
 	if(CanInteract(GetMainBody()) && mbLit==false) 
 	{
-		return _W("x ") + cString::ToStringW(gpBase->mpPlayer->GetTinderboxes());
+		return _W("");
 	}
 	return _W("");
 }
@@ -514,6 +510,9 @@ kSerializeVar(msConnectionLight,			eSerializeType_String)
 kSerializeVar(mfConnectionLightAmount,		eSerializeType_Float32)
 kSerializeVar(mbConnectionLightUseOnColor,	eSerializeType_Bool)
 kSerializeVar(mbConnectionLightUseSpec,		eSerializeType_Bool)
+kSerializeVar(mbCanBeLitByPlayer, eSerializeType_Bool)
+kSerializeVar(mbCanBeGrabbed, eSerializeType_Bool)
+kSerializeVar(mbCanBeTurnedOff, eSerializeType_Bool)
 kSerializeVar(mbSynchronizeFlickering,		eSerializeType_Bool)
 kSerializeVar(mbFlickerActive,		eSerializeType_Bool)														  
 kEndSerialize()
@@ -543,7 +542,10 @@ void cLuxProp_Lamp::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mbConnectionLightUseOnColor);
 	kCopyToVar(pData,mbConnectionLightUseSpec);
 	kCopyToVar(pData,mbSynchronizeFlickering);
-	kCopyToVar(pData,mbFlickerActive);							   
+	kCopyToVar(pData,mbFlickerActive);	
+	kCopyToVar(pData, mbCanBeLitByPlayer);
+	kCopyToVar(pData, mbCanBeGrabbed);
+	kCopyToVar(pData, mbCanBeTurnedOff);
 }
 
 //-----------------------------------------------------------------------
@@ -564,7 +566,10 @@ void cLuxProp_Lamp::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mbConnectionLightUseOnColor);
 	kCopyFromVar(pData,mbConnectionLightUseSpec);
 	kCopyFromVar(pData,mbSynchronizeFlickering);
-	kCopyFromVar(pData,mbFlickerActive);						
+	kCopyFromVar(pData,mbFlickerActive);
+	kCopyFromVar(pData, mbCanBeLitByPlayer);
+	kCopyFromVar(pData, mbCanBeGrabbed);
+	kCopyFromVar(pData, mbCanBeTurnedOff);
 }
 
 //-----------------------------------------------------------------------

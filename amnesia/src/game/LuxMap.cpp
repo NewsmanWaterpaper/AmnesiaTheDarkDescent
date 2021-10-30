@@ -342,6 +342,7 @@ void cLuxMap::OnEnter(bool abRunScript, bool abFirstTime)
 		pEntity->OnMapEnter();
 	}
 
+
 	if(abRunScript)
 	{
 		///////////////
@@ -355,6 +356,10 @@ void cLuxMap::OnEnter(bool abRunScript, bool abFirstTime)
 			}
 
 			mpScript->Run("OnEnter()");
+
+			//cLuxProgressLogHandler* pProgLogTimer;
+			//pProgLogTimer->SetProgLogCounterActive(true);
+			gpBase->mpProgressLogHandler->SetProgLogCounterActive(true);
 		}
 	}
 	
@@ -365,9 +370,16 @@ void cLuxMap::OnEnter(bool abRunScript, bool abFirstTime)
 
 void cLuxMap::OnLeave(bool abRunScript)
 {
+
 	if(abRunScript)
 	{
-		if(mpScript) mpScript->Run("OnLeave()");
+		if (mpScript)
+		{
+			mpScript->Run("OnLeave()");
+			//cLuxProgressLogHandler* pProgLogTimer;
+			//pProgLogTimer->SetProgLogCounterActive(false);
+			gpBase->mpProgressLogHandler->SetProgLogCounterActive(false);
+		}
 	}
 }
 

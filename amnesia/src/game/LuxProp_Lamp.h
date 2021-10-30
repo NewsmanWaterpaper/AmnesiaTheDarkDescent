@@ -38,7 +38,10 @@ public:
 	bool mbConnectionLightUseOnColor;
 	bool mbConnectionLightUseSpec;
 	bool mbSynchronizeFlickering;
-	bool mbFlickerActive;						
+	bool mbFlickerActive;
+	bool mbCanBeLitByPlayer;
+	bool mbCanBeGrabbed;
+	bool mbCanBeTurnedOff;
 };
 
 
@@ -148,6 +151,7 @@ private:
 	//Data
 	bool mbCanBeLitByPlayer;
 	bool mbCanBeGrabbed;
+	bool mbCanBeTurnedOff;
 
 	
 	cLuxInteractData_Grab mGrabData;

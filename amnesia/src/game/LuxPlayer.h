@@ -200,6 +200,22 @@ public:
 	int GetTinderboxes(){ return mlTinderboxes;}
 	void SetTinderboxes(int alX){ mlTinderboxes = alX; }
 	void AddTinderboxes(int alX){ mlTinderboxes += alX; }
+
+	float GetTotalDamageTaken() { return mfTotalDamageTaken; }
+	
+	int GetTotalDeaths() { return mlTotalDeaths; }
+
+	int GetTotalItemCount() { return mlTotalItemCount; }
+	void SetTotalItemCount(int alX) { mlTotalItemCount = alX; }
+	void AddTotalItemCount(int alX) { mlTotalItemCount += alX; }
+
+	int GetHealthItemsUsed() { return mlHealthItemUsed; }
+	void SetHealthItemsUsed(int alX) { mlHealthItemUsed = alX; }
+	void AddHealthItemsUsed(int alX) { mlHealthItemUsed += alX; }
+
+	int GetOilItemsUsed() { return mlOilItemUsed; }
+	void SetOilItemsUsed(int alX) { mlOilItemUsed = alX; }
+	void AddOilItemsUsed(int alX) { mlOilItemUsed += alX; }
 	
 	bool IsDead(){ return mfHealth <=0;}
 
@@ -339,10 +355,15 @@ private:
 	float mfSanity;
 	float mfLampOil;
 	float mfTerror;
+	float mfTotalDamageTaken;
 	int mlCoins;
 	int mlTinderboxes; 
 	int mlLaudanum;
 	int mlOilPotion;
+	int mlTotalItemCount;
+	int mlTotalDeaths;
+	int mlHealthItemUsed;
+	int mlOilItemUsed;
 
 	int miNumberOfHealthLevels;
 

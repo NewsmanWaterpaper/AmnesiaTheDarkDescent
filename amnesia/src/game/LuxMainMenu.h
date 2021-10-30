@@ -221,6 +221,12 @@ private:
 	bool PressSaveGame(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(PressSaveGame);
 
+	bool PressSaveGameWithOil(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(PressSaveGameWithOil);
+
+	bool PressSaveGameWithLaudanum(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(PressSaveGameWithLaudanum);
+
 	bool ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(ClickedSaveGamePopup);
 

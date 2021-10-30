@@ -267,9 +267,16 @@ void cLuxPlayer::Reset()
 	msCurrentPermaDeathSound = "";
 
 	mfHealth = 100;
+	mfTotalDamageTaken = 0;
 	mfSanity = 100;
 	mfLampOil = 100;
 	mlTinderboxes =0;
+	mlLaudanum =0;
+	mlOilPotion =0;
+	mlTotalDeaths = 0;
+	mlTotalItemCount = 0;
+	mlHealthItemUsed = 0;
+	mlOilItemUsed = 0;
 
 	mvHeadPosAddSum =0;
 
@@ -601,6 +608,7 @@ void cLuxPlayer::GiveDamage(float afAmount, int alStrength, eLuxDamageType aType
 	if(mfHealth <=0) return;
 
 	mfHealth -= afAmount;
+	mfTotalDamageTaken += afAmount;
 
 	mpHudEffect->AddDamageSplash(aType);
 	mpHudEffect->Flash(cColor(0.6f,0,0, 0.5f),eGuiMaterial_Alpha,0,0.25f);

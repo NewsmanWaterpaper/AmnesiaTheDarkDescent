@@ -28,7 +28,9 @@
 #include "LuxSaveHandler.h"
 #include "LuxConfigHandler.h"
 #include "LuxDebugHandler.h"
+#include "LuxEndingsHandler.h"
 #include "LuxLoadScreenHandler.h"
+#include "LuxProgressLogHandler.h"
 
 #include "LuxMainMenu_Profile.h"
 #include "LuxMainMenu_Options.h"
@@ -366,6 +368,10 @@ void cLuxMainMenu::OnEnterContainer(const tString& asOldContainer)
 	CreateGui();
 	CreateBackground();
 
+	//cLuxProgressLogHandler* pProgLogTimer;
+	//pProgLogTimer->SetProgLogCounterActive(false);
+	gpBase->mpProgressLogHandler->SetProgLogCounterActive(false);
+
 	////////////////////////////////////
 	//No User Config, start with Profiles
 	if(gpBase->mpUserConfig==NULL)
@@ -658,6 +664,8 @@ void cLuxMainMenu::OnMenuExit()
 		gpBase->mpInputHandler->ChangeState(eLuxInputState_Game);
 		gpBase->mpEngine->GetUpdater()->SetContainer("Default");
 
+		gpBase->mpProgressLogHandler->SetProgLogCounterActive(true);
+
 		break;
 	////////////////
 	// Start Game
@@ -714,6 +722,10 @@ void cLuxMainMenu::OnMenuExit()
 			//Start up menu again
 			OnLeaveContainer("");
 			OnEnterContainer("");
+
+			//cLuxProgressLogHandler* pProgLogTimer;
+			//pProgLogTimer->SetProgLogCounterActive(false);
+			gpBase->mpProgressLogHandler->SetProgLogCounterActive(false);
 		}
 		break;
 	
@@ -740,6 +752,10 @@ void cLuxMainMenu::OnMenuExit()
 			//Start up menu again
 			OnLeaveContainer("");
 			OnEnterContainer("");
+
+			//cLuxProgressLogHandler* pProgLogTimer;
+			//pProgLogTimer->SetProgLogCounterActive(false);
+			gpBase->mpProgressLogHandler->SetProgLogCounterActive(false);
 		}
 		break;
         
@@ -962,6 +978,7 @@ void cLuxMainMenu::CreateTopMenuGui()
 	//Set up variables
 	cWidgetLabel *pLabel =0;
 	cWidgetLabel *pSaveLabel = 0;
+	cWidgetLabel* pSaveLabelAlt = 0;
 
 
 	float fInvScreenRatio = mvScreenSize.y / mvScreenSize.x;
@@ -1001,6 +1018,8 @@ void cLuxMainMenu::CreateTopMenuGui()
 	//////////////////////
 	// HARDMODE
 	vLabels.push_back(kTranslate("MainMenu","Save")); // TRANSLATE THIS
+	vLabels.push_back(kTranslate("MainMenu", "SaveWithOil"));
+	vLabels.push_back(kTranslate("MainMenu", "SaveWithLaudanum"));
 	//////////////////////
 
 
@@ -1092,75 +1111,9 @@ void cLuxMainMenu::CreateTopMenuGui()
 																					  
 		////////////////////////////
 		// Set enabled to false if player does not have enough resources  
-		pLabel->SetEnabled(gpBase->mpPlayer->GetLaudanum() >= 4||gpBase->mpPlayer->GetOilPotion() >= 4);
+		pLabel->SetEnabled(false);
 
-		////////////////////////////
-		// Save cost label
-		tWString sText = kTranslate("MainMenu", "HardModeLaudanumSaveCost");
-		size_t lNumIndex = sText.find(L"#");
-		
-		if (lNumIndex != std::wstring::npos)
-		{
-			tWString sSubString = sText.substr(lNumIndex + 1, sText.size() - lNumIndex);
-			sText = sText.substr(0, lNumIndex);
-			sText.replace(lNumIndex, gsHardMode_SaveCostString.size(), gsHardMode_SaveCostString);
-			sText += sSubString;
-		}
-
-		cVector3f vSaveDescriptionPosition = 0;
-		vSaveDescriptionPosition.x = (mvScreenSize.x / 16.0f);
-		vSaveDescriptionPosition.x = pLabel->GetGlobalPosition().x + pLabel->GetSize().x + 100;
-		vSaveDescriptionPosition.y = mvTopMenuStartPosInGame.y - (2.5f * fRowAdd);
-		vSaveDescriptionPosition.z = 2.0f;
-
-		vSaveDescriptionPosition.x = mvTopMenuStartPosInGame.x;
-
-		mpSaveCost = mpGuiSet->CreateWidgetLabel(vSaveDescriptionPosition, 0, sText, NULL, "SaveDescription");
-		mpSaveCost->SetTextAlign(eFontAlign_Center);
-		mpSaveCost->SetDefaultFontColor(cColor(0.5f, 0));
-		mpSaveCost->SetDefaultFontSize(mvTopMenuFontSize*mfTopMenuFontSizeMul * 0.85f);
-		mpSaveCost->SetDefaultFontType(mpFont);
-		mpSaveCost->SetAutogenerateSize(true);
-		mpSaveCost->AddCallback(eGuiMessage_OnDraw, this, kGuiCallback(HardModeTextDraw));
-		mpSaveCost->SetAutogenerateSize(true);
-		mpSaveCost->SetPosition(mpSaveCost->GetLocalPosition() - cVector3f(mpSaveCost->GetSize().x*0.5f, 0, 0));
-
-		vSaveDescriptionPosition.y += fRowAdd * 0.65f;
-
-		//////////////////////////////////
-		// Tinder inventory label
-		sText = kTranslate("MainMenu", "HardModeLaudanumInInventory");
-		lNumIndex = sText.find(L"#");
-
-		if (lNumIndex != std::wstring::npos)
-		{
-#if MAC_OS || LINUX
-            tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
-#else
-            tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
-#endif
-            
-			tWString sSubString = sText.substr(lNumIndex + 1, sText.size() - lNumIndex);
-			sText = sText.substr(0, lNumIndex);
-			sText.replace(lNumIndex, sNumTinderboxes.size(), sNumTinderboxes);
-			sText += sSubString;
-		}
-
-		mpNumTinderboxes = mpGuiSet->CreateWidgetLabel(vSaveDescriptionPosition, 0, sText, NULL, "NumTinderboxes");
-		mpNumTinderboxes->SetTextAlign(eFontAlign_Center);
-		mpNumTinderboxes->SetDefaultFontColor(cColor(0.5f, 0));
-		mpNumTinderboxes->SetDefaultFontSize(mvTopMenuFontSize*mfTopMenuFontSizeMul * 0.75f);
-		mpNumTinderboxes->SetDefaultFontType(mpFont);
-		mpNumTinderboxes->SetAutogenerateSize(true);
-		mpNumTinderboxes->AddCallback(eGuiMessage_OnDraw, this, kGuiCallback(HardModeTextDraw));
-		mpNumTinderboxes->SetAutogenerateSize(true);
-		mpNumTinderboxes->SetPosition(mpNumTinderboxes->GetLocalPosition() - cVector3f(mpNumTinderboxes->GetSize().x*0.5f, 0, 0));
-
-		mbFadeInDescription = true;
-		mfDescriptionAlpha = 0.0f;
-		vPos.y += fRowAdd;
 	}
-
 	///////////////
 	//Custom map
 	
@@ -1542,7 +1495,7 @@ bool cLuxMainMenu::PressStartGame(iWidget* apWidget, const cGuiMessageData& aDat
 	/////////////
 	//HARDMODE
 
-    if (gpBase->mbAllowHardmode == true && gpBase->mpCustomStory == 0)
+    if (gpBase->mpEndingsHandler->mbAllowHardmode == true && gpBase->mpCustomStory == 0)
 	{
 		SetWindowActive(eLuxMainMenuWindow_StartGame);
 		gpBase->mbHardMode = false;
@@ -1594,6 +1547,10 @@ bool cLuxMainMenu::PressBackToGame(iWidget* apWidget, const cGuiMessageData& aDa
 		return true;
 
 	ExitMenu(eLuxMainMenuExit_ReturnToGame);
+
+	//cLuxProgressLogHandler* pProgLogTimer;
+	//pProgLogTimer->SetProgLogCounterActive(true);
+	gpBase->mpProgressLogHandler->SetProgLogCounterActive(true);
 	
 	return true;
 }
@@ -1805,6 +1762,8 @@ bool cLuxMainMenu::PressSaveGame(iWidget* apWidget, const cGuiMessageData& aData
 }
 kGuiCallbackDeclaredFuncEnd(cLuxMainMenu, PressSaveGame);
 
+
+
 //-----------------------------------------------------------------------
 
 bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData& aData)
@@ -1837,20 +1796,28 @@ bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData
 	// Update Labels
 	tWString sText = kTranslate("MainMenu", "HardModeLaudanumInInventory");
 	size_t lNumIndex = sText.find(L"#");
+	size_t lNumIndexAlt = sText.find(L"@");
 
 	if (lNumIndex != std::wstring::npos)
 	{
 #if MAC_OS || LINUX
         tWString sNumTinderboxes = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
+		tWString sNumOilPotions = tWString(LongToWString(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
 
 #else
         tWString sNumTinderboxes = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetLaudanum())));
+		tWString sNumOilPotions = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetOilPotion())));
 
 #endif
 		tWString sSubString = sText.substr(lNumIndex + 1, sText.size() - lNumIndex);
 		sText = sText.substr(0, lNumIndex);
 		sText.replace(lNumIndex, sNumTinderboxes.size(), sNumTinderboxes);
 		sText += sSubString;
+
+		tWString sSubStringAlt = sText.substr(lNumIndexAlt + 1, sText.size() - lNumIndexAlt);
+		sText = sText.substr(0, lNumIndexAlt);
+		sText.replace(lNumIndexAlt, sNumOilPotions.size(), sNumOilPotions);
+		sText += sSubStringAlt;  
 	}
 	cVector3f vGlobalPos = mpNumTinderboxes->GetGlobalPosition();
 	vGlobalPos.x = mvTopMenuStartPosInGame.x;
@@ -1862,8 +1829,10 @@ bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData
 	// Get save label
 #if MAC_OS || LINUX
     cWidgetLabel* pSaveLabel = 0;
+	cWidgetLabel* pSaveLabelAlt = 0;
 #else
     cWidgetLabel* pSaveLabel = nullptr;
+	
 #endif
 	for (size_t i = 0; i < mvTopMenuLabels.size(); ++i)
 	{
@@ -1886,6 +1855,7 @@ bool cLuxMainMenu::ClickedSaveGamePopup(iWidget* apWidget, const cGuiMessageData
 		pWidgetAbove->SetFocusNavigation(eUIArrow_Down, pWidgetBelow);
 		pWidgetBelow->SetFocusNavigation(eUIArrow_Up, pWidgetAbove);
 
+		
 	}
 
 	return true;

@@ -40,6 +40,7 @@ class cLuxHintHandler;
 class cLuxSavedGameMapCollection;
 class cLuxSanityHandler;
 class cLuxLoadScreenHandler;
+class cLuxProgressLogHandler;
 
 //----------------------------------------------
 
@@ -349,8 +350,15 @@ public:
 	float mfTerror;
 	float mfSanity;
 	float mfLampOil;
+	float mfTotalDamageTaken;
 	int mlCoins;
 	int mlTinderboxes;
+	int mlLaudanum;
+	int mlOilPotion;
+	int mlTotalItemCount;
+	int mlTotalDeaths;
+	int mlHealthItemUsed;
+	int mlOilItemUsed;
 
 	bool mbIsInWater;
 	tString msWaterStepSound;
@@ -455,6 +463,16 @@ public:
 	cContainerList<cLuxCollideCallback_SaveData> mlstCollideCallbacks;
 };
 
+class cLuxProgressLogHandler_SaveData : public iSerializable
+{
+	kSerializableClassInit(cLuxProgressLogHandler_SaveData)
+public:
+	void FromProgLog(cLuxProgressLogHandler* apProgLog);
+	void ToProgLog(cLuxMap* apMap,cLuxProgressLogHandler* apProgLog);
+
+	int mlCounter;
+};
+
 //----------------------------------------------
 
 class cLuxSaveGame_SaveData: public iSerializable
@@ -479,6 +497,7 @@ public:
 	cLuxHintHandler_SaveData mHintHandler;
 	cLuxInsanityHandler_SaveData mInsanityHandler;
 	cLuxLoadScreenHandler_SaveData mLoadScreenHandler;
+	cLuxProgressLogHandler_SaveData mProgressLogHandler;
 
 	cLuxSavedGameMapCollection *mpSavedMaps;
 };

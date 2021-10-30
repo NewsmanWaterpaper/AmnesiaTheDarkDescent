@@ -104,6 +104,7 @@ enum eLuxInputState
 	eLuxInputState_PreMenu,
 	eLuxInputState_Credits,
 	eLuxInputState_DemoEnd,
+	eLuxInputState_RankScreen,
 	eLuxInputState_LoadScreen,
 
 	eLuxInputState_LastEnum
@@ -507,6 +508,19 @@ enum eLuxProgressLogLevel
 	eLuxProgressLogLevel_High,
 
 	eLuxProgressLogLevel_LastEnum,
+};
+
+//----------------------------------------------
+
+enum eLuxEnding
+{
+	eLuxEnding_DefaultGood,
+	eLuxEnding_DefaultBad,
+	eLuxEnding_GoodJoke,
+	eLuxEnding_BadJoke,
+	eLuxEnding_BeatenHardMode,
+
+	eLuxEnding_LastEnum,
 };
 
 //----------------------------------------------

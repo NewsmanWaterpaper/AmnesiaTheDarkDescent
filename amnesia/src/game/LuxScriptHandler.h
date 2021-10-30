@@ -65,6 +65,10 @@ private:
 	 * Type can be "Low", "Medium" or "High"
 	 */
 	static void __stdcall ProgLog(string& asLevel, string& asMessage);
+	static void __stdcall SetProgLogTimerActive(bool abTimerActive);
+	static void __stdcall DisplayCounterTimer(bool abDisplayTimer);
+	static void __stdcall DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign);
+
 	static bool __stdcall ScriptDebugOn();
 
 
@@ -106,12 +110,21 @@ private:
 
 	// Game
 	static void __stdcall StartCredits(string& asMusic, bool abLoopMusic, string& asTextCat, string& asTextEntry, int alEndNum);
+	static void __stdcall StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName);
+	static void __stdcall SetEnding(string& asEnding, bool abCompletedOnHardMode);
+	static string& __stdcall GetPreviousEnding();
+	static bool __stdcall GetEndingCompletion(string& asEndingType);
+	static int __stdcall GetGameClears();
+	static void __stdcall ForceExitDirectlyToMenu();
+	static bool __stdcall HardModeEnabled();
 	static void __stdcall AddKeyPart(int alKeyPart);
 
 	static void __stdcall StartDemoEnd();
+	static void __stdcall StartRankScreen();
 
 	// Saving
 	static void __stdcall AutoSave();
+	static void __stdcall DoHardModeSave();
 	/**
 	 * Callback syntax: MyFunc(string &in asName, int alCount), Count is 0 on first checkpoint load!
 	 */

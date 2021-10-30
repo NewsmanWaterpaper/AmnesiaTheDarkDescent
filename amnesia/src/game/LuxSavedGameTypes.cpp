@@ -35,6 +35,7 @@
 #include "LuxHintHandler.h"
 #include "LuxInsanityHandler.h"
 #include "LuxLoadScreenHandler.h"
+#include "LuxProgressLogHandler.h"
 #include "LuxMoveState_Normal.h"
 #include "LuxHandObject_LightSource.h"
 
@@ -936,6 +937,25 @@ kEndSerialize()
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////
+// PROGRESS LOG
+//////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------
+void cLuxProgressLogHandler_SaveData::FromProgLog(cLuxProgressLogHandler* apProgLog)
+{
+	mlCounter = apProgLog->mlCounter; 
+}
+void cLuxProgressLogHandler_SaveData::ToProgLog(cLuxMap* apMap, cLuxProgressLogHandler* apProgLog)
+{
+	apProgLog->mlCounter = mlCounter;
+}
+
+kBeginSerializeBase(cLuxProgressLogHandler_SaveData)
+kSerializeVar(mlCounter, eSerializeType_Int32)
+kEndSerialize()
+//-----------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////
 // PLAYER HANDS
 //////////////////////////////////////////////////////////////////////////
 
@@ -1055,10 +1075,17 @@ void cLuxPlayer_SaveData::FromPlayer(cLuxPlayer *apPlayer)
 	mfHealth = apPlayer->mfHealth;
 	mfSanity = apPlayer->mfSanity;
 	mfLampOil = apPlayer->mfLampOil;
+	mfTotalDamageTaken = apPlayer->mfTotalDamageTaken; 
 
 	mfTerror = apPlayer->mfTerror;
 	mlCoins = apPlayer->mlCoins;
 	mlTinderboxes = apPlayer->mlTinderboxes;
+	mlLaudanum = apPlayer->mlLaudanum;
+	mlOilPotion = apPlayer->mlOilPotion;
+	mlTotalDeaths = apPlayer->mlTotalDeaths;
+	mlTotalItemCount = apPlayer->mlTotalItemCount;
+	mlHealthItemUsed = apPlayer->mlHealthItemUsed;
+	mlOilItemUsed = apPlayer->mlOilItemUsed;
 
 	mvHeadSpinSpeed = apPlayer->mvHeadSpinSpeed;
 
@@ -1242,10 +1269,17 @@ void cLuxPlayer_SaveData::ToPlayer(cLuxMap *apMap,cLuxPlayer *apPlayer)
 	apPlayer->mfHealth = mfHealth;
 	apPlayer->mfSanity = mfSanity;
 	apPlayer->mfLampOil = mfLampOil;
+	apPlayer->mfTotalDamageTaken = mfTotalDamageTaken;
 	
 	apPlayer->mfTerror = mfTerror;
 	apPlayer->mlCoins = mlCoins;
 	apPlayer->mlTinderboxes = mlTinderboxes;
+	apPlayer->mlLaudanum = mlLaudanum;
+	apPlayer->mlOilPotion = mlOilPotion;
+	apPlayer->mlTotalDeaths = mlTotalDeaths;
+	apPlayer->mlTotalItemCount = mlTotalItemCount;
+	apPlayer->mlHealthItemUsed = mlHealthItemUsed;
+	apPlayer->mlOilItemUsed = mlOilItemUsed;
 
 	apPlayer->mvHeadSpinSpeed = mvHeadSpinSpeed;
 

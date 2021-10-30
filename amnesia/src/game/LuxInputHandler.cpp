@@ -27,6 +27,7 @@
 #include "LuxMainMenu.h"
 #include "LuxCredits.h"
 #include "LuxDemoEnd.h"
+#include "LuxRankScreen.h"
 
 #include "LuxInventory.h"
 #include "LuxJournal.h"
@@ -505,6 +506,8 @@ void cLuxInputHandler::Update(float afTimeStep)
 	case eLuxInputState_Credits: UpdateCreditsInput(); break;
 	//Demo End
 	case eLuxInputState_DemoEnd: UpdateDemoEndInput(); break;
+	//Demo End
+	case eLuxInputState_RankScreen: UpdateRankScreenInput(); break;
 	//Load Screen
 	case eLuxInputState_LoadScreen: UpdateLoadScreenInput(); break;
 	}
@@ -1417,6 +1420,21 @@ void cLuxInputHandler::UpdateDemoEndInput()
 
 //-----------------------------------------------------------------------
 
+void cLuxInputHandler::UpdateRankScreenInput()
+{
+	if (ShowMouseOnMouseInput())
+	{
+		gpBase->mpRankScreen->GetSet()->SetMouseMovementEnabled(true);
+		gpBase->mpRankScreen->GetSet()->SetDrawMouse(true);
+	}
+	/////////////
+	if (mpInput->BecameTriggerd(eLuxAction_Exit))
+	{
+		gpBase->mpRankScreen->Exit();
+	}
+	
+}
+
 
 void cLuxInputHandler::UpdateLoadScreenInput()
 {
@@ -1446,6 +1464,7 @@ bool cLuxInputHandler::CurrentStateSendsInputToGui()
 	case eLuxInputState_MainMenu: 
 	case eLuxInputState_PreMenu:
 	case eLuxInputState_DemoEnd:
+	case eLuxInputState_RankScreen:
 		return true;	
 	}
 

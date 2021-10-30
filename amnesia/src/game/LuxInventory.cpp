@@ -27,6 +27,7 @@
 #include "LuxEntity.h"
 #include "LuxMessageHandler.h"
 #include "LuxHintHandler.h"
+#include "LuxDebugHandler.h"
 #include "LuxHelpFuncs.h"
 #include "LuxEffectHandler.h"
 #include "LuxJournal.h"
@@ -1044,6 +1045,14 @@ cLuxInventory_Item * cLuxInventory::AddItem(const tString& asName, eLuxItemType 
 	iLuxItemType *pItemType = mvItemTypes[aType];
 
 	if(apRemoveItemProp) *apRemoveItemProp = false;
+	
+	gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName), false);
+
+
+	if (aType == eLuxItemType_Health || aType == eLuxItemType_LampOil)
+	{
+		gpBase->mpPlayer->AddTotalItemCount(1);
+	}
 
 	/////////////
 	// Tinderbox achievemtn
@@ -1076,6 +1085,7 @@ cLuxInventory_Item * cLuxInventory::AddItem(const tString& asName, eLuxItemType 
 	if(pItemType->GetHasMaxAmount())
 	{
 		gpBase->mpMessageHandler->SetMessage(kTranslate("Inventory", "TooManyItemsOfSort"),0); 
+		gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName + "  not added"), false);
 		return NULL;
 	}
 
@@ -1091,11 +1101,13 @@ cLuxInventory_Item * cLuxInventory::AddItem(const tString& asName, eLuxItemType 
 			if(pItem->GetCount() >= pItemType->GetMaxCount())
 			{
 				gpBase->mpMessageHandler->SetMessage(kTranslate("Inventory", "TooManyItemsOfSort"),0); 
+				gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName + "  not added"), false);
 				return NULL;
 			}
 			else
 			{
 				pItem->AddCount(1);
+				gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName + " added to inventory"), false);
 				
 				if(apRemoveItemProp) *apRemoveItemProp = true;
 				return pItem;
@@ -1130,6 +1142,7 @@ cLuxInventory_Item * cLuxInventory::AddItem(const tString& asName, eLuxItemType 
 	if(pItemType->BeforeAddItem(pItem))
 	{
 		if(apRemoveItemProp) *apRemoveItemProp = true;
+		gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName + "  doing beforeadditem"), false);
 		hplDelete(pItem);
 		return NULL;
 	}
@@ -1140,6 +1153,7 @@ cLuxInventory_Item * cLuxInventory::AddItem(const tString& asName, eLuxItemType 
 	if(pImage ==NULL)
 	{
 		Error("Could not create image '%s'! Not adding item '%s'!\n", asImageName.c_str(), asName.c_str());
+		gpBase->mpDebugHandler->AddMessage(cString::To16Char(asName + " image not created"), false);
 		hplDelete(pItem);
 		return NULL;
 	}

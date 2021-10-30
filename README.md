@@ -17,7 +17,80 @@ All code is under the GPL Version 3 license. Read the LICENSE file for terms of 
 
 Script Function Documentation:
 -------------------
-
+## Game:
+```as
+void SetProgLogTimerActive(bool abTimerActive);
+```
+Sets the ending to be in-game timer to be active.
+1. *abTimerActive* -  Sets the in-game timer to be either on or off
+---------------------------------------
+```as
+void DisplayCounterTimer(bool abDisplayTimer);
+```
+Should the in-game timer be displayed on screen.
+1. *abDisplayTimer* -  Enables/disables in-game timer display
+---------------------------------------
+```as
+void DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign);
+```
+Additional settings for the in-game timer display.
+1. *afX* -  The X position of the timer
+2. *afY* -  The Y position of the timer
+3. *afZ* -  The Z position of the timer
+4. *afR* -  The Red color value of the timer text
+5. *afG* -  The Green color value of the timer text
+6. *afB* -  The Blue color value of the timer text
+7. *afTimerSize* -  How big should the timer text should be
+8. *asTimerAlign* -  Which side of the screen should the timer should be displayed at; can  be either "Left","Right" or "Center".
+---------------------------------------
+```as
+void StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName);
+```
+Starts the credits as well as the rank screen at the end of it.
+1. *asMusicCredits* -  The music to play during the credits
+2. *abLoopMusicCredits* -  Whether the credits music should loop
+3. *asTextCat* -  The category to be used in the .lang file for the credits
+4. *asTextEntry* -  The entry in the .lang file for the credits
+5. *abCreditsBackground* -  Should the credits background should be displayed
+6. *asMusicRank* -  The music to play during the rank screen
+7. *abLoopMusicRank* -  Whether the rank screen music should loop
+7. *asImageName* -  What image to display during the rank screen.
+---------------------------------------
+```as
+void StartRankScreen();
+```
+Starts the rank screen. 
+```as
+SetEnding(string& asEnding, bool abCompletedOnHardMode);
+```
+Sets the ending to be writtem as completed in the user_endings.cfg in the player's save folder and if they completed it on Hard Mode or not.
+1. *asEnding* - Which Ending type to use, can be either "DefaultGood", "DefaulBad", "GoodJoke" or "BadJoke".
+2. *abCompletedOnHardMode* - If the game was completed on Hard Mode or not
+---------------------------------------
+```as
+bool GetEndingCompletion(string& asEndingType);
+```
+Returns if the player got a certain ending.
+```as
+string& GetPreviousEnding();
+```
+Returns the most recent ending obtained. 
+```as
+int GetGameClears();
+```
+Returns the amount of times the player has beaten the game.
+```as
+DoHardModeSave();
+```
+Saves the game in Hard Mode. 
+```as
+bool HardModeEnabled();
+```
+Returns if the game is being played in Hard Mode or not. 
+```as
+void ForceExitDirectlyToMenu();
+```
+Forces the game to exit to the main menu. 
 ## Player:
 ```as
 bool GetPlayerCrouching();

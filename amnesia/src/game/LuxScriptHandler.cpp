@@ -41,11 +41,13 @@
 #include "LuxCompletionCountHandler.h"
 #include "LuxGlobalDataHandler.h"
 #include "LuxHintHandler.h"
+#include "LuxEndingsHandler.h"
 #include "LuxProgressLogHandler.h"
 #include "LuxLoadScreenHandler.h"
 #include "LuxInsanityHandler.h"
 #include "LuxCredits.h"
 #include "LuxDemoEnd.h"
+#include "LuxRankScreen.h"
 
 #include "LuxProp_Object.h"
 #include "LuxProp_SwingDoor.h"
@@ -449,7 +451,12 @@ void cLuxScriptHandler::InitScriptFunctions()
 {
 	AddFunc("void Print(string &in asString)", (void *)Print);
 	AddFunc("void AddDebugMessage(string &in asString, bool abCheckForDuplicates)",(void *)AddDebugMessage);
+
 	AddFunc("void ProgLog(string &in asLevel, string &in asMessage)", (void *)ProgLog);
+	AddFunc("void SetProgLogTimerActive(bool abTimerActive)", (void*)SetProgLogTimerActive);
+	AddFunc("void DisplayCounterTimer(bool abDisplayTimer)", (void*)DisplayCounterTimer);
+	AddFunc("void DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign)", (void*)DisplayCounterSettings);
+
 	AddFunc("bool ScriptDebugOn()",(void *)ScriptDebugOn);
 
 	AddFunc("float RandFloat(float afMin, float afMax)",(void *)RandFloat);
@@ -486,11 +493,20 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("string& GetGlobalVarString(string &in asName)",(void *)GetGlobalVarString);
 
 	AddFunc("void StartCredits(string &in asMusic, bool abLoopMusic, string &in asTextCat, string &in asTextEntry, int alEndNum)",(void *)StartCredits);
+	AddFunc("void StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName)", (void*)StartCreditsAndRankScreen);
+	AddFunc("void SetEnding(string& asEnding, bool abCompletedOnHardMode)", (void*)SetEnding);
+	AddFunc("void ForceExitDirectlyToMenu()", (void*)ForceExitDirectlyToMenu);
 	AddFunc("void AddKeyPart(int alKeyPart)", (void *)AddKeyPart);
+	AddFunc("bool HardModeEnabled()", (void*)HardModeEnabled);
+	AddFunc("string& GetPreviousEnding()", (void*)GetPreviousEnding);
+	AddFunc("bool GetEndingCompletion(string& asEndingType)", (void*)GetEndingCompletion);
+	AddFunc("int GetGameClears()", (void*)GetGameClears);
 
 	AddFunc("void StartDemoEnd()",(void *)StartDemoEnd);
+	AddFunc("void StartRankScreen()", (void*)StartRankScreen);
 
 	AddFunc("void AutoSave()", (void *)AutoSave);
+	AddFunc("void DoHardModeSave()", (void*)DoHardModeSave);
 	AddFunc("void CheckPoint(string &in asName,string &in asStartPos ,string &in asCallback, string &in asDeathHintCat, string &in asDeathHintEntry)", (void *)CheckPoint);
 
 	AddFunc("void ChangeMap(string &in asMapName, string &in asStartPos, string &in asStartSound, string &in asEndSound)",(void *)ChangeMap);
@@ -865,6 +881,36 @@ void __stdcall cLuxScriptHandler::ProgLog(string& asLevel, string& asMessage)
     gpBase->mpProgressLogHandler->AddLog(level, asMessage);	
 }
 
+void __stdcall cLuxScriptHandler::SetProgLogTimerActive(bool abTimerActive)
+{
+	gpBase->mpProgressLogHandler->SetProgLogCounterActive(abTimerActive);
+}
+
+void __stdcall cLuxScriptHandler::DisplayCounterTimer(bool abDisplayTimer)
+{
+	gpBase->mpProgressLogHandler->DisplayCounterHUD(abDisplayTimer);
+}
+
+void __stdcall cLuxScriptHandler::DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign)
+{
+	cLuxProgressLogHandler *pProgLog = gpBase->mpProgressLogHandler;
+
+	cVector3f newPos(afX,afY,afZ);
+	cColor newTextColor(afR,afG,afB,afA);
+	cVector2f newSize(afTimerSize);
+	
+	eFontAlign newAlign = eFontAlign_Center;
+	tString sAlignType = cString::ToLowerCase(asTimerAlign);
+	if(sAlignType == "left") newAlign = eFontAlign_Left;
+	if(sAlignType == "right") newAlign = eFontAlign_Right;
+
+	pProgLog->SetCounterHUDPosition(newPos);
+	pProgLog->SetCounterHUDColor(newTextColor);
+	pProgLog->SetCounterHUDSize(newSize);
+	pProgLog->SetCounterHUDAlign(newAlign);
+}
+
+
 //-----------------------------------------------------------------------
 
 bool __stdcall cLuxScriptHandler::ScriptDebugOn()
@@ -1133,6 +1179,71 @@ void __stdcall cLuxScriptHandler::StartCredits(string& asMusic, bool abLoopMusic
 	gpBase->mpEngine->GetUpdater()->SetContainer("Credits");
 }
 
+void __stdcall cLuxScriptHandler::StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName)
+{
+	gpBase->mpCredits->SetupWithRankScreen(asMusicCredits, abLoopMusicCredits, asTextCat, asTextEntry, true, abCreditsBackground);
+	gpBase->mpRankScreen->Setup(asMusicRank, abLoopMusicRank, asImageName);
+	gpBase->mpEngine->GetUpdater()->SetContainer("Credits");
+}
+
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetEnding(string& asEnding, bool abCompletedOnHardMode)
+{
+	eLuxEnding endingType; 
+	if(asEnding == "DefaultGood")
+	{
+		endingType = eLuxEnding_DefaultGood;
+	}
+	else if(asEnding == "DefaultBad")
+	{
+		endingType = eLuxEnding_DefaultBad;
+	}
+	 else if(asEnding == "GoodJoke")
+	{
+		endingType = eLuxEnding_GoodJoke;
+	}
+	else if (asEnding == "BadJoke")
+	{
+		endingType = eLuxEnding_BadJoke;
+	}
+
+	gpBase->mpEndingsHandler->AddEndingLog(endingType, abCompletedOnHardMode);
+}
+
+string& __stdcall cLuxScriptHandler::GetPreviousEnding()
+{
+	return gpBase->mpEndingsHandler->GetPreviousEnding();
+}
+
+bool __stdcall cLuxScriptHandler::GetEndingCompletion(string& asEndingType)
+{
+	return gpBase->mpEndingsHandler->GetEndingCompleted(asEndingType);
+}
+
+int __stdcall cLuxScriptHandler::GetGameClears()
+{
+	return gpBase->mpEndingsHandler->GetTotalGameClears();
+}
+
+//-----------------------------------------------------------------------
+bool __stdcall cLuxScriptHandler::HardModeEnabled()
+{
+	if (gpBase->mbHardMode == true)
+	{
+		return true;
+	}
+	else if (gpBase->mbHardMode == false || gpBase->mpEndingsHandler->mbAllowHardmode == false)
+	return false;
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::ForceExitDirectlyToMenu()
+{
+	gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
+
+	gpBase->mpLoadScreenHandler->DrawMenuScreen();
+	gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
+}
+
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::AddKeyPart(int alKeyPart)
@@ -1148,11 +1259,22 @@ void __stdcall cLuxScriptHandler::StartDemoEnd()
 		gpBase->mpEngine->GetUpdater()->SetContainer("DemoEnd");
 }
 
+void __stdcall cLuxScriptHandler::StartRankScreen()
+{
+	if(gpBase->mpRankScreen)
+		gpBase->mpEngine->GetUpdater()->SetContainer("RankScreen");
+}
+
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::AutoSave()
 {
-	gpBase->mpSaveHandler->AutoSave();
+	gpBase->mpSaveHandler->AutoSave(); 
+} 
+
+void __stdcall cLuxScriptHandler::DoHardModeSave()
+{
+	gpBase->mpSaveHandler->HardModeSave();
 }
 
 //-----------------------------------------------------------------------

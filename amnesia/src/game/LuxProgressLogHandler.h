@@ -28,6 +28,7 @@
 
 class cLuxProgressLogHandler : public iLuxUpdateable
 {
+friend class cLuxProgressLogHandler_SaveData;
 public:	
 	cLuxProgressLogHandler();
 	~cLuxProgressLogHandler();
@@ -37,7 +38,21 @@ public:
 	
 	void OnStart();
 	void Update(float afTimeStep);
+	void DrawHud(float afTimeStep);
 	void Reset();
+
+	tString GetPlayTime(); 
+
+	int GetProgLogCounter() {return mlCounter; }
+
+	bool GetProgLogCounterActive() {return mbCounterActive; }
+	void SetProgLogCounterActive(bool abX) { mbCounterActive = abX; }
+	
+	void DisplayCounterHUD(bool abX) { mbShowCounterHUD = abX; }
+	void SetCounterHUDColor(cColor aColor) { mCounterTextColor = aColor; }
+	void SetCounterHUDPosition(cVector3f aPos) { mvCounterPos = aPos; }
+	void SetCounterHUDSize(cVector2f aSize) { mvCounterSize = aSize; }
+	void SetCounterHUDAlign(eFontAlign aAlign) { mCounterTextAlign = aAlign; }
 
 	void CreateAndResetLogFile();
 
@@ -46,9 +61,22 @@ public:
 private:
 	tString LevelToString(eLuxProgressLogLevel aLevel);
 
+	iFontData* mpCountFont;
+
+	cVector3f mvCounterPos;
+	cVector2f mvCounterSize;
+
+	cColor mCounterTextColor;
+
+	eFontAlign mCounterTextAlign;
+
+	tWString msTimerDisplayText;
 	int mlCounter;
 	int mlFileNameCount;
+
 	bool mbActive;
+	bool mbCounterActive;
+	bool mbShowCounterHUD; 
 
 	FILE *mpFile;
 };

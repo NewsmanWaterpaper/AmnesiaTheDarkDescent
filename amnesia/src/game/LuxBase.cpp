@@ -29,6 +29,7 @@
 #include "LuxSaveHandler.h"
 #include "LuxScriptHandler.h"
 #include "LuxHelpFuncs.h"
+#include "LuxEndingsHandler.h"
 #include "LuxEffectRenderer.h"
 #include "LuxMusicHandler.h"
 #include "LuxMessageHandler.h"
@@ -48,6 +49,8 @@
 #include "LuxCredits.h"
 
 #include "LuxDemoEnd.h"
+
+#include "LuxRankScreen.h"
 
 #include "LuxPreMenu.h"
 
@@ -369,12 +372,14 @@ cLuxBase::cLuxBase()
 	mpMainConfig = NULL;
 	mpUserConfig = NULL;
 	mpUserKeyConfig = NULL;
+	mpUserEndingConfig = NULL;
 
 	mpCustomStory = NULL;
 
 	mpMenuCfg = NULL;
 	mpGameCfg = NULL;
 	mpDemoCfg = NULL;
+	mpRankCfg = NULL;
 
 	mpCurrentMapLoading = NULL;
 
@@ -392,7 +397,7 @@ cLuxBase::cLuxBase()
 	///////////////////////////////
 	// HARDMODE
 	mbHardMode = false;
-	mbAllowHardmode = false;
+	//mbAllowHardmode = false;
 }
 
 //-----------------------------------------------------------------------
@@ -737,6 +742,7 @@ bool cLuxBase::InitApp()
 	
 	//Get the config file paths
 	msDefaultUserConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultUserSettings",_W(""));
+	msDefaultUserEndingConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultUserEndings", _W(""));
 #if USE_SDL2
 	
     msDefaultUserKeyConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultUserKeysSDL2", _W(""));
@@ -797,6 +803,7 @@ bool cLuxBase::InitApp()
 	msMenuConfigPath = pInitCfg->GetStringW("ConfigFiles", "Menu",_W(""));
 	msPreMenuConfigPath = pInitCfg->GetStringW("ConfigFiles", "PreMenu", _W(""));
 	msDemoConfigPath = pInitCfg->GetStringW("ConfigFiles", "Demo", _W(""));
+	msRankConfigPath = pInitCfg->GetStringW("ConfigFiles", "RankScreen", _W(""));
 
 	msResourceConfigPath = pInitCfg->GetString("ConfigFiles", "Resources","");
 	msMaterialConfigPath = pInitCfg->GetString("ConfigFiles", "Materials","");
@@ -812,7 +819,7 @@ bool cLuxBase::InitApp()
 
 	//Various variables
 	msGameName = pInitCfg->GetString("Variables","GameName","");
-	mbAllowHardmode = pInitCfg->GetBool("Variables", "AllowHardMode", false);
+	///mbAllowHardmode = pInitCfg->GetBool("Variables", "AllowHardMode", false);
 	
 	//Start map
 	msStartMapFile = pInitCfg->GetString("StartMap","File","");
@@ -1011,6 +1018,19 @@ bool cLuxBase::InitMainConfig()
 		msErrorMessage = _W("Failed to load menu config file!");
 		return false;
 	}
+	////////////////////////////////////
+	// Load the rank screen config file
+#ifdef USERDIR_RESOURCES
+	mpRankCfg = hplNew(cConfigFile, (msRankConfigPath, msUserResourceDir));
+#else
+	mpRankCfg = hplNew(cConfigFile, (msRankConfigPath));
+#endif
+
+	if (mpRankCfg->Load() == false)
+	{
+		msErrorMessage = _W("Failed to load rank screen config file!");
+		return false;
+	}
 
 	////////////////////////////////////
 	// Load the demo config file
@@ -1049,8 +1069,10 @@ bool cLuxBase::InitUserConfig()
 	// Clear previous config
 	if(mpUserConfig) hplDelete(mpUserConfig);
 	if(mpUserKeyConfig) hplDelete(mpUserKeyConfig);
+	if(mpUserEndingConfig) hplDelete(mpUserEndingConfig);
 	mpUserConfig = NULL;
 	mpUserKeyConfig = NULL;
+	mpUserEndingConfig = NULL;
 
 	////////////////////////////////////////////////
 	// Check if a valid profile is set
@@ -1061,6 +1083,11 @@ bool cLuxBase::InitUserConfig()
 	// Load the user settings
 	mpUserConfig = LoadConfigFile(msDefaultUserConfigPath, msMainProfileSavePath +_W("user_settings.cfg") );
 	if(mpUserConfig==NULL) return false;
+
+	/////////////////////////////////////////////////
+	//	Load user ending data
+	mpUserEndingConfig = LoadConfigFile(msDefaultUserEndingConfigPath, msMainProfileSavePath + _W("user_endings.cfg"));
+	if (mpUserEndingConfig == NULL) return false;
 
 	/////////////////////////
 	//Load user key config
@@ -1093,8 +1120,10 @@ void cLuxBase::ExitConfig()
 	hplDelete(mpMainConfig);
 	if(mpUserConfig) hplDelete(mpUserConfig);
 	if(mpUserKeyConfig) hplDelete(mpUserKeyConfig);
+	if(mpUserEndingConfig) hplDelete(mpUserEndingConfig);
 	hplDelete(mpGameCfg);
 	hplDelete(mpMenuCfg);
+	hplDelete(mpRankCfg);
 	if(mpDemoCfg) hplDelete(mpDemoCfg);
 }
 
@@ -1136,6 +1165,8 @@ void cLuxBase::SaveConfig()
 		mpUserConfig->Save();
 		if(mpUserKeyConfig)
 			mpUserKeyConfig->Save();
+		if(mpUserEndingConfig)
+			mpUserEndingConfig->Save();
 	}
 }	
 
@@ -1302,6 +1333,7 @@ bool cLuxBase::InitGame()
 	mpEngine->GetUpdater()->AddContainer("Journal");
 	mpEngine->GetUpdater()->AddContainer("Credits");
 	mpEngine->GetUpdater()->AddContainer("LoadScreen");
+	mpEngine->GetUpdater()->AddContainer("RankScreen");
 #ifdef LUX_DEMO_VERSION
 	mpEngine->GetUpdater()->AddContainer("DemoEnd");
 #endif
@@ -1315,10 +1347,12 @@ bool cLuxBase::InitGame()
 	mpSaveHandler = CreateGlobalModule( cLuxSaveHandler);
 	mpScriptHandler = CreateGlobalModule( cLuxScriptHandler);
 	mpProgressLogHandler = CreateGlobalModule( cLuxProgressLogHandler);
-	
+	mpEndingsHandler = CreateGlobalModule(cLuxEndingsHandler); 
+
 	//Default
 	mpMapHandler = CreateModule( cLuxMapHandler, "Default");
 	mpMapHelper = CreateModule( cLuxMapHelper, "Default");
+	//mpEndingsHandler = CreateModule(cLuxEndingsHandler, "Default");
 	mpPlayer = CreateModule( cLuxPlayer, "Default");
 	mpInsanityHandler = CreateModule( cLuxInsanityHandler, "Default"); 
 	mpDebugHandler = CreateModule( cLuxDebugHandler, "Default");
@@ -1346,6 +1380,8 @@ bool cLuxBase::InitGame()
 	//Journal
 	mpJournal = CreateModule( cLuxJournal, "Journal");
 
+	//Rank Screen
+	mpRankScreen = CreateModule(cLuxRankScreen, "RankScreen");
 	//Credits
 #ifndef LUX_DEMO_VERSION
 	mpCredits = CreateModule( cLuxCredits, "Credits");
@@ -1478,6 +1514,8 @@ void cLuxBase::SetProfile(const tWString& asName)
 		mpUserConfig->Save();
 		if(mpUserKeyConfig)
 			mpUserKeyConfig->Save();
+		if (mpUserEndingConfig)
+			mpUserEndingConfig->Save();
 	}
 
 	msProfileName = asName;
