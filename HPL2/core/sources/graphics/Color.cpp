@@ -151,6 +151,38 @@ namespace hpl {
 			return false;
 	}
 
+	bool cColor::operator!=(cColor aCol) const
+	{
+		if (r != aCol.r && g != aCol.g && b != aCol.b && a != aCol.a)
+			return true;
+		else
+			return false;
+	}
+
+	cColor cColor::operator+=(const cColor& aCol) const
+	{
+
+		cColor col;
+		col.r = r + aCol.r;
+		col.g = g + aCol.g;
+		col.b = b + aCol.b;
+		col.a = a + aCol.a;
+
+		return col; 
+	}
+
+	cColor cColor::operator-=(const cColor& aCol) const
+	{
+
+		cColor col;
+		col.r = r - aCol.r;
+		col.g = g - aCol.g;
+		col.b = b - aCol.b;
+		col.a = a - aCol.a;
+
+		return col;
+	}
+
 	//-----------------------------------------------------------------------
 	
 	tString cColor::ToString() const

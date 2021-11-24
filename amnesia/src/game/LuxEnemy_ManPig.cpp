@@ -363,6 +363,7 @@ void cLuxEnemy_ManPig::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
 	if (mPatrolMoveSpeed == aSpeedType) return;
 
 	mPatrolMoveSpeed = aSpeedType;
+	mbPatrolMoveSpeedChanged = true;
 
 	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
 	mpMover->UpdateMoveAnimation(0.001f);
@@ -586,7 +587,8 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 		kLuxOnMessage(eLuxEnemyMessage_AnimationOver)
 			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(4, 13), true);
-	
+		//////////////////////////
+		//Sound heard
 		kLuxOnMessage(eLuxEnemyMessage_SoundHeard)
 			if(apMessage->mfCustomValue > mfHearVolume)
 			{
@@ -616,6 +618,11 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 
 		kLuxOnUpdate
+			if (mbPatrolMoveSpeedChanged)
+			{
+				SetMoveSpeed(mPatrolMoveSpeed);
+				mbPatrolMoveSpeedChanged = false;
+			}
 			if(mbStuckAtDoor)// && mpMap->DoorIsClosed(mlStuckDoorID))
 			{
 				iLuxEntity *pDoorEnt = mpMap->GetEntityByID(mlStuckDoorID);
@@ -676,10 +683,11 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 				FinishPatrolEndOfPath(true);
 
 				tString sCallback = msOverCallback;
-				if (PatrolRemoveCallback) msOverCallback = "";
-
+				
 				if (sCallback != "")
 					gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
+
+				if (PatrolRemoveCallback) msOverCallback = "";
 			}
 
 		//////////////////////////

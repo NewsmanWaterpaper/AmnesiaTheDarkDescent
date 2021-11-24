@@ -118,6 +118,8 @@ namespace hpl {
 		cColor mStartColor;
 		cColor mColor;
 
+		float mfBrightness; 
+
 		cVector2f mvStartSize;
 		cVector2f mvSize;
 

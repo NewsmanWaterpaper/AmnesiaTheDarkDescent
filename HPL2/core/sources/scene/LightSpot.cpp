@@ -69,6 +69,8 @@ namespace hpl {
 		mfTanHalfFOV = tan(mfFOV*0.5f);
 		mfCosHalfFOV = cos(mfFOV*0.5f);
 
+		mfFOVFadeTime = 0.0f;
+
 		mbFovUpdated = true;
 		
 		m_mtxView = cMatrixf::Identity;
@@ -115,6 +117,54 @@ namespace hpl {
 
 		mfTanHalfFOV = tan(mfFOV*0.5f);
 		mfCosHalfFOV = cos(mfFOV*0.5f);
+	}
+
+	//-----------------------------------------------------------------------
+
+	//void cLightSpot::UpdateLogic(float afTimeStep)
+	//{
+	//	UpdateSpotLight(afTimeStep);
+	//	
+	//	if (mfFOVFadeTime > 0)
+	//	{
+	//		UpdateBoundingVolume();
+
+	//		//This is so that the render container is updated.
+	//		//SetTransformUpdated();
+	//	}
+	//}
+
+	void cLightSpot::UpdateSpotLight(float afTimeStep)
+	{
+		if (mfFOVFadeTime > 0)
+		{
+			float fNewFOV = mfFOV + mfFOVAdd * afTimeStep;
+			SetFOV(fNewFOV);
+
+			mfFOVFadeTime -= afTimeStep;
+
+			if (mfFOVFadeTime <= 0)
+			{
+				mfFOVFadeTime = 0;
+				mfFOV = mfDestFOV;
+			}
+		}
+	}
+
+	void cLightSpot::FadeFOVTo(float afFOV, float afTime)
+	{
+		if (afTime <= 0) afTime = 0.0001f;
+
+		mfFOVFadeTime = afTime;
+
+		mfFOVAdd = (afFOV - mfFOV) / afTime;
+
+		mfDestFOV = afFOV;
+	}
+
+	void cLightSpot::StopFOVFading()
+	{
+		mfFOVFadeTime = 0;
 	}
 	
 	//-----------------------------------------------------------------------

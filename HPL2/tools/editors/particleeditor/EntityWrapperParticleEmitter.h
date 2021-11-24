@@ -84,6 +84,8 @@ enum ePEFloat
 	ePEFloat_MiddleRelSizeLength,
 	ePEFloat_MiddleRelColorTime,
 	ePEFloat_MiddleRelColorLength,
+	ePEFloat_MinBrightness,
+	ePEFloat_MaxBrightness,
 	ePEFloat_MinCollisionMax,
 	ePEFloat_MaxCollisionMax,
 
@@ -442,6 +444,9 @@ public:
 	void SetMinStartColor(const cColor& aX) { mMinStartColor = aX; }
 	void SetMaxStartColor(const cColor& aX) { mMaxStartColor = aX; }
 
+	void SetMinBrightness(float afX) { mfMinBrightness = afX; }
+	void SetMaxBrightness(float afX) { mfMaxBrightness = afX; }
+
 	void SetStartRelColor(const cColor& aX) { mStartRelColor = aX; }
 	void SetMiddleRelColor(const cColor& aX) { mMiddleRelColor = aX; }
 	void SetEndRelColor(const cColor& aX) { mEndRelColor = aX; }
@@ -549,6 +554,9 @@ public:
 	
 	const cColor& GetMinStartColor() { return mMinStartColor; }
 	const cColor& GetMaxStartColor() { return mMaxStartColor; }
+	float GetMinBrightness() { return mfMinBrightness; }
+	float GetMaxBrightness() { return mfMaxBrightness; }
+
 	const cColor& GetStartRelColor() { return mStartRelColor; }
 	const cColor& GetMiddleRelColor() { return mMiddleRelColor; }
 	const cColor& GetEndRelColor() { return mEndRelColor; }
@@ -664,6 +672,9 @@ protected:
 
 	cColor mMinStartColor;
 	cColor mMaxStartColor;
+
+	float mfMinBrightness;
+	float mfMaxBrightness;
 
 	cColor mStartRelColor;
 	cColor mMiddleRelColor;

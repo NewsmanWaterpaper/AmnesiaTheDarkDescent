@@ -35,6 +35,11 @@ namespace hpl {
 			const tWString& asLabel, const tWString& asText,
 			const tWString& asButton1, const tWString& asButton2,
 			void *apCallbackObject, tGuiCallbackFunc apCallback);
+
+		cGuiPopUpMessageBox(cGuiSet *apSet, 
+			const tWString& asLabel, const tWString& asText,
+			const tWString& asButton1, const tWString& asButton2, const tWString& asButton3,
+			void *apCallbackObject, tGuiCallbackFunc apCallback);
 		virtual ~cGuiPopUpMessageBox();
 		
 	protected:

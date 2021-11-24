@@ -358,6 +358,8 @@ namespace hpl {
 		mMinStartColor = cString::ToColor(apElement->GetAttribute("MinStartColor"),cColor(1,1));
 		mMaxStartColor = cString::ToColor(apElement->GetAttribute("MaxStartColor"),cColor(1,1));
 
+		mfMinBrightness = cString::ToFloat(apElement->GetAttribute("MinBrightness"),1);
+		mfMaxBrightness = cString::ToFloat(apElement->GetAttribute("MaxBrightness"),1);																		 
 		mStartRelColor = cString::ToColor(apElement->GetAttribute("StartRelColor"),cColor(1,1));
 		mMiddleRelColor = cString::ToColor(apElement->GetAttribute("MiddleRelColor"),cColor(1,1));
 		mfMiddleRelColorTime = cString::ToFloat(apElement->GetAttribute("MiddleRelColorTime"),0);
@@ -658,7 +660,9 @@ namespace hpl {
 	{
 		///////////////////////////////////
 		//Start Color
-		apParticle->mStartColor = cMath::RandRectColor(mpData->mMinStartColor,mpData->mMaxStartColor);
+		apParticle->mfBrightness = cMath::RandRectf(mpData->mfMinBrightness, mpData->mfMaxBrightness);
+		cColor mBrightness(apParticle->mfBrightness, 1);
+		apParticle->mStartColor = cMath::RandRectColor(mpData->mMinStartColor*mBrightness,mpData->mMaxStartColor*mBrightness);
 		apParticle->mColor = apParticle->mStartColor * mpData->mStartRelColor;
 
 		

@@ -52,6 +52,9 @@ namespace hpl {
 		cColor operator/(const cColor &aCol) const;
 		
 		bool operator==(cColor aCol) const;
+		bool operator!=(cColor aCol) const;
+		cColor operator+=(const cColor& aCol) const;
+		cColor operator-=(const cColor& aCol) const;
 
 		tString ToString() const;
 

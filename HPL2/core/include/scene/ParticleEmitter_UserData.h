@@ -207,6 +207,8 @@ namespace hpl {
 		cColor mMinStartColor;
 		cColor mMaxStartColor;
 
+		float mfMinBrightness;
+		float mfMaxBrightness;				
 		cColor mStartRelColor;
 		cColor mMiddleRelColor;
 		float mfMiddleRelColorTime;

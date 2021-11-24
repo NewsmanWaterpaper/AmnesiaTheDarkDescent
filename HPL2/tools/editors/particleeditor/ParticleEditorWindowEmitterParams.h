@@ -98,6 +98,8 @@ protected:
 
 	cEditorInputColorFrame* mpInpMinCol;
 	cEditorInputColorFrame* mpInpMaxCol;
+	cEditorInputNumber* mpInpMinBrightness;
+	cEditorInputNumber* mpInpMaxBrightness;
 
 	cEditorInputColorFrame* mpInpStartRelCol;
 	cEditorInputNumber* mpInpMiddleRelColStart;

@@ -516,6 +516,16 @@ private:
 	static void __stdcall SetTeslaPigEasyEscapeDisabled(string& asName, bool abX);
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
+	static void __stdcall SetWraithFlyMode(string& asName, bool abX);
+	static void __stdcall SetWraithStealthDashMode(string& asName, bool abX);
+	static void __stdcall SetWraithCanMeele(string& asName, bool abX);
+	static void __stdcall SetWraithStealthDashModeLength(string& asName, int alNodes);
+	static void __stdcall SetWraithAttackType(string& asName, string& asAttackType);
+
+	static bool __stdcall GetWraithInFlyMode(string& asEnemyName);
+	static bool __stdcall GetWraithInStealthDashMode(string& asEnemyName);
+	static float __stdcall GetWraithStealthDashNodesLeft(string& asEnemyName);
+
 	static string& __stdcall GetEnemyStateName(string& asName);
 	static float __stdcall GetEnemyHealth(string& asName);
 	static void __stdcall SetEnemyHealth(string& asName, float afHealth);

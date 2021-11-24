@@ -378,6 +378,8 @@ static tString PartSpinTypeToString(ePEPartSpinType aType)
 	AddColor(ePECol_StartRelColor, "StartRelColor");
 	AddColor(ePECol_MiddleRelColor, "MiddleRelColor");
 	AddColor(ePECol_EndRelColor, "EndRelColor");
+	AddFloat(ePEFloat_MinBrightness, "MinBrightness");
+	AddFloat(ePEFloat_MaxBrightness, "MaxBrightness");
 	AddFloat(ePEFloat_MiddleRelColorTime, "MiddleRelColorTime");
 	AddFloat(ePEFloat_MiddleRelColorLength, "MiddleRelColorLength");
 
@@ -1058,6 +1060,10 @@ bool cEntityWrapperParticleEmitter::GetProperty(int alPropID, float& afX)
 		afX = GetMiddleRelSizeLength(); break;
 	case ePEFloat_MiddleRelColorTime:
 		afX = GetMiddleRelColorTime(); break;
+	case ePEFloat_MinBrightness:
+		afX = GetMinBrightness(); break;
+	case ePEFloat_MaxBrightness:
+		afX = GetMaxBrightness(); break;
 	case ePEFloat_MiddleRelColorLength:
 		afX = GetMiddleRelColorLength(); break;
 	case ePEFloat_MinCollisionMax:
@@ -1334,6 +1340,10 @@ bool cEntityWrapperParticleEmitter::SetProperty(int alPropID, const float& afX)
 		SetMiddleRelColorTime(afX); break;
 	case ePEFloat_MiddleRelColorLength:
 		SetMiddleRelColorLength(afX); break;
+	case ePEFloat_MinBrightness:
+		SetMinBrightness(afX); break;
+	case ePEFloat_MaxBrightness:
+		SetMaxBrightness(afX); break;
 	case ePEFloat_MinCollisionMax:
 		SetMinCollisionMax(afX); break;
 	case ePEFloat_MaxCollisionMax:

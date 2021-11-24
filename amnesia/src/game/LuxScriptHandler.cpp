@@ -61,6 +61,7 @@
 #include "LuxProp_NPC.h"
 #include "LuxProp_MultiSlider.h"
 #include "LuxEnemy_ManPig.h"
+#include "LuxEnemy_Wraith.h"
 
 #include "LuxArea_Sticky.h"
 
@@ -209,6 +210,10 @@ static iLuxEnemy* ToEnemy(iLuxEntity *apEntity)
 static cLuxEnemy_ManPig* ToManPig(iLuxEntity *apEntity)
 {
 	return dynamic_cast<cLuxEnemy_ManPig*>(apEntity);
+}
+static cLuxEnemy_Wraith* ToWraith(iLuxEntity* apEntity)
+{
+	return dynamic_cast<cLuxEnemy_Wraith*>(apEntity);
 }
 static cLuxProp_LevelDoor* ToLevelDoor(iLuxEntity *apEntity)
 {
@@ -784,6 +789,14 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
+	AddFunc("void SetWraithFlyMode(string&in asName, bool abX)", (void*)SetWraithFlyMode);
+	AddFunc("void SetWraithStealthDashMode(string&in asName, bool abX)", (void*)SetWraithStealthDashMode);
+	AddFunc("void SetWraithCanMeele(string&in asName, bool abX)", (void*)SetWraithCanMeele);
+	AddFunc("void SetWraithStealthDashModeLength(string& asName, int alNodes)", (void*)SetWraithStealthDashModeLength);
+	AddFunc("void SetWraithAttackType(string& asName, string& asAttackType)", (void*)SetWraithAttackType);
+	AddFunc("bool GetWraithInFlyMode(string& asEnemyName)", (void*)GetWraithInFlyMode);
+	AddFunc("bool GetWraithInStealthDashMode(string& asEnemyName)", (void*)GetWraithInStealthDashMode);
+	AddFunc("float GetWraithStealthDashNodesLeft(string& asEnemyName)", (void*)GetWraithStealthDashNodesLeft);
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
 	AddFunc("void SetEnemyBlind(string&in asName, bool abX)", (void*)SetEnemyBlind);
 	AddFunc("void SetEnemyDeaf(string&in asName, bool abX)", (void*)SetEnemyDeaf);
@@ -1854,6 +1867,7 @@ void __stdcall cLuxScriptHandler::GivePlayerDamage(float afAmount, string& asTyp
 	eLuxDamageType type = eLuxDamageType_BloodSplat;
 	if(sLowType == "claws") type = eLuxDamageType_Claws;
 	if(sLowType == "slash") type = eLuxDamageType_Slash;
+	if (sLowType == "blank") type = eLuxDamageType_Blank;
 	
 	gpBase->mpPlayer->GiveDamage(afAmount, 1, type, abSpinHead,abLethal);
 }
@@ -3027,12 +3041,18 @@ void __stdcall cLuxScriptHandler::AttachPropToBone(string& asChildEntityName, st
 	}
 
 	cMeshEntity* pParentMeshEntity = pParentEntity->GetMeshEntity();
+	
 
 	if (pParentMeshEntity == NULL)
 	{
 		Error("Parent entity '%s' does not have a mesh entity\n", asParentEntityName.c_str());
 		return;
 	}
+	
+	/*if (pParentMeshEntity->GetSubMeshEntityNum() >= 1)
+	{
+		pParentMeshEntity = pParentEntity->GetMeshEntity()->GetSubMeshEntity(1);
+	}*/
 
 	cBoneState* pParentBone = pParentMeshEntity->GetBoneStateFromName(asParentBoneName);
 
@@ -4142,6 +4162,120 @@ void __stdcall cLuxScriptHandler::ForceTeslaPigSighting(string& asName)
 	
 	END_SET_PROPERTY
 }
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithFlyMode(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetFlyMode(abX);
+	pEnemy->SetToFlyMode(abX);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithStealthDashMode(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetToStealthMode(abX);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithCanMeele(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetCanMeele(abX);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithStealthDashModeLength(string& asName, int alNodes)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetStealthModeNodesLength(alNodes);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetWraithAttackType(string& asName, string& asAttackType)
+{
+	eLuxAttackType attack = eLuxAttackType_LastEnum;
+	tString sLowAttack = cString::ToLowerCase(asAttackType);
+
+	if (sLowAttack == "archvile")			attack = eLuxAttackType_Archvile;
+	else if (sLowAttack == "heatray")	attack = eLuxAttackType_HeatRay;
+	else if (sLowAttack == "melee")	attack = eLuxAttackType_Melee;
+
+	if (attack == eLuxEnemyMoveSpeed_LastEnum)
+	{
+		Error("Could not set Attack Type '%s' for enemy '%s'.  Attack Type  does not exist!\n", asAttackType.c_str(), asName.c_str());
+		return;
+	}
+
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetAttackType(attack);
+
+	END_SET_PROPERTY
+
+}
+//-----------------------------------------------------------------------
+bool __stdcall cLuxScriptHandler::GetWraithInFlyMode(string& asEnemyName)
+{
+	cLuxEnemy_Wraith* pEnemy = ToWraith(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
+		return false;
+	}
+
+	return pEnemy->GetIsInFlyMode();
+}
+//-----------------------------------------------------------------------
+
+bool __stdcall cLuxScriptHandler::GetWraithInStealthDashMode(string& asEnemyName)
+{
+	cLuxEnemy_Wraith* pEnemy = ToWraith(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
+		return false;
+	}
+
+	return pEnemy->GetIsInStealthMode();
+}
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetWraithStealthDashNodesLeft(string& asEnemyName)
+{
+	cLuxEnemy_Wraith* pEnemy = ToWraith(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetStealthModeNodesLeft();
+}
+
 
 //-----------------------------------------------------------------------
 

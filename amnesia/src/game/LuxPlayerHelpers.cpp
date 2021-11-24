@@ -2619,6 +2619,7 @@ cLuxPlayerHudEffect::cLuxPlayerHudEffect(cLuxPlayer *apPlayer) : iLuxPlayerHelpe
 	LoadDamageData(&mvDamageTypes[eLuxDamageType_BloodSplat], "bloodsplat");
 	LoadDamageData(&mvDamageTypes[eLuxDamageType_Claws], "claws");
 	LoadDamageData(&mvDamageTypes[eLuxDamageType_Slash], "slash");
+	LoadDamageData(&mvDamageTypes[eLuxDamageType_Blank], "blank");
 
 	//////////////////////////////////
 	// Create flash gfx

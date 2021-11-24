@@ -258,6 +258,11 @@ void cParticleEditorWindowEmitterParams::OnInitLayout()
 		vPos.x += mpInpMinCol->GetSize().x + 10;
 		mpInpMaxCol = CreateInputColorFrame(vPos, _W("Max Color"), "InputMaxCol", pGroup);
 
+		mpInpMinBrightness = CreateInputNumber(vPos + cVector3f(mpInpMaxCol->GetSize().x + 50,0,0), _W("Min Brightness"), "InputMinBrightness", pGroup);
+		mpInpMinBrightness->SetLayoutStyle(eEditorInputLayoutStyle_RowLabelOnLeft);
+		mpInpMaxBrightness = CreateInputNumber(vPos + cVector3f(mpInpMinBrightness->GetSize().x + 0,10,0), _W("Max Brightness"), "InputMaxBrightness", pGroup);
+		mpInpMaxBrightness->SetLayoutStyle(eEditorInputLayoutStyle_RowLabelOnLeft);
+
 		pGroup = mpSet->CreateWidgetGroup(cVector3f(10, 145, 0.1f), cVector2f(480,120), _W("Fading"), pTab);
 		vPos = cVector3f(10,10,0.1f);
 		mpInpStartRelCol = CreateInputColorFrame(vPos, _W("Start Relative Color"), "InputStartRelCol", pGroup);
@@ -456,6 +461,9 @@ void cParticleEditorWindowEmitterParams::OnUpdate(float afTimeStep)
 	// Tab Color - Group General
 	mpInpMinCol->SetValue(mpEmitter->GetMinStartColor(), false);
 	mpInpMaxCol->SetValue(mpEmitter->GetMaxStartColor(), false);
+
+	mpInpMinBrightness->SetValue(mpEmitter->GetMinBrightness(), false);
+	mpInpMaxBrightness->SetValue(mpEmitter->GetMaxBrightness(), false);
 
 	///////////////////////////////////////////////////////////////////////
 	// Tab Color - Group Fading
@@ -683,6 +691,12 @@ bool cParticleEditorWindowEmitterParams::WindowSpecificInputCallback(iEditorInpu
 
 	else if(apInput==mpInpEndRelCol)
 		mpEmitter->SetEndRelColor(mpInpEndRelCol->GetValue());
+	
+	else if(apInput==mpInpMinBrightness)
+		mpEmitter->SetMinBrightness(mpInpMinBrightness->GetValue());
+	
+	else if(apInput==mpInpMaxBrightness)
+		mpEmitter->SetMinBrightness(mpInpMaxBrightness->GetValue());
 
 	else if(apInput==mpInpMiddleRelColStart)
 		mpEmitter->SetMiddleRelColorTime(mpInpMiddleRelColStart->GetValue());

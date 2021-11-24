@@ -94,6 +94,7 @@ namespace hpl {
 		mfFlickerStateLength = 0;
 
 		mfFadeTime =0;
+		mfBrightnessFadeTime = 0;
 
 		///////////////////////////////
 		//Data init
@@ -304,6 +305,41 @@ namespace hpl {
 		return mfFadeTime != 0;
 	}
 
+	void iLight::FadeBrightnessTo(float afBrightness, float afTime)
+	{
+		if (afTime <= 0) afTime = 0.0001f;
+
+		mfBrightnessFadeTime = afTime;
+
+		mfBrightnessAdd = (afBrightness - mfBrightness)/afTime;
+
+		mfDestBrightness = afBrightness;
+	
+	}
+
+	void iLight::UpdateBrightness(float afTimeStep)
+	{
+		/////////////////////////////////////////////
+		// Fade
+		if (mfBrightnessFadeTime > 0)
+		{
+			//Log("Fading: %f / %f\n",afTimeStep,mfFadeTime);
+
+			mfBrightness += mfBrightnessAdd*afTimeStep;
+
+			SetBrightness(mfBrightness);
+
+			mfBrightnessFadeTime -= afTimeStep;
+
+			//Set the dest values.
+			if (mfBrightnessFadeTime <= 0)
+			{
+				mfBrightnessFadeTime = 0;
+				SetBrightness(mfDestBrightness);  
+			}
+		}
+	}
+
 	//-----------------------------------------------------------------------
 
 	void iLight::SetFlickerActive(bool abX)
@@ -391,6 +427,7 @@ namespace hpl {
 	void iLight::UpdateLogic(float afTimeStep)
 	{
 		UpdateLight(afTimeStep);
+		UpdateBrightness(afTimeStep);
 		if(mfFadeTime>0 || mbFlickering)
 		{
 			mbUpdateBoundingVolume = true;

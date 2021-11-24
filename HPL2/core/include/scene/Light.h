@@ -138,6 +138,7 @@ namespace hpl {
         //////////////////////////
 		//Fading
 		void FadeTo(const cColor& aCol, float afRadius, float afTime);
+		void FadeBrightnessTo(float afBrightness, float afTime);
 		void StopFading();
 		bool IsFading();
 		float GetFadeProgress() { return 1.0f - mfFadeTime / mfFadeDuration; }
@@ -224,6 +225,7 @@ namespace hpl {
 		void SetSourceRadius(float afX){ mfSourceRadius = afX;}
 
 		void UpdateLight(float afTimeStep);
+		void UpdateBrightness(float afTimeStep);
 
 		void SetWorld(cWorld *apWorld){ mpWorld = apWorld;}
 
@@ -282,6 +284,9 @@ namespace hpl {
 		float mfDestRadius;
 		float mfFadeTime;
 		float mfFadeDuration;
+		float mfBrightnessFadeTime;
+		float mfDestBrightness;
+		float mfBrightnessAdd;
 
 		///////////////////////////
 		//Flicker

@@ -93,6 +93,7 @@ public:
 	////////////////////
 	// Actions
 	void GiveDamage(float afAmount, int alStrength, eLuxDamageType aType, bool abSpinHead, bool abLethal);
+	void GiveDamageAlt(float afAmount, int alStrength, eLuxDamageType aType, bool abSpinHead, bool abLethal);
 	
 	void GiveSanityDamage(float afAmount);
 	void LowerSanity(float afAmount, bool abUseEffect);

@@ -625,6 +625,27 @@ void cLuxPlayer::GiveDamage(float afAmount, int alStrength, eLuxDamageType aType
 	}
 }
 
+void cLuxPlayer::GiveDamageAlt(float afAmount, int alStrength, eLuxDamageType aType, bool abSpinHead, bool abLethal)
+{
+	if (mfHealth <= 0) return;
+
+	mfHealth -= afAmount;
+	mfTotalDamageTaken += afAmount;
+
+	mpHudEffect->AddDamageSplash(aType);
+	if (abSpinHead) SpinHead(mfHeadSpinDamageSpeed);
+
+	if (abLethal == false && mfHealth < 10)
+	{
+		mfHealth = 10;
+	}
+
+	if (mfHealth <= 0)
+	{
+		mpDeath->Start();
+	}
+}
+
 //-----------------------------------------------------------------------
 
 void cLuxPlayer::GiveSanityDamage(float afAmount)

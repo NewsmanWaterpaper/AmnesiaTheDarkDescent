@@ -151,7 +151,7 @@ void cLuxEnemy_Grunt::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
 	if (mPatrolMoveSpeed == aSpeedType) return;
 
 	mPatrolMoveSpeed = aSpeedType;
-
+	mbPatrolMoveSpeedChanged = true;
 	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
 	mpMover->UpdateMoveAnimation(0.001f);
 }
@@ -314,6 +314,11 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 
 
 		kLuxOnUpdate
+			if (mbPatrolMoveSpeedChanged)
+			{
+				SetMoveSpeed(mPatrolMoveSpeed);
+				mbPatrolMoveSpeedChanged = false;
+			}
 			if(mbStuckAtDoor)// && mpMap->DoorIsClosed(mlStuckDoorID))
 			{
 				iLuxEntity *pDoorEnt = mpMap->GetEntityByID(mlStuckDoorID);

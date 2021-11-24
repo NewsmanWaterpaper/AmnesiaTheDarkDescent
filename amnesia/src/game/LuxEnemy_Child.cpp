@@ -1,20 +1,20 @@
 /*
  * Copyright © 2011-2020 Frictional Games
  * 
- * This file is part of Amnesia: A Machine For Pigs.
+ * This file is part of Amnesia: The Dark Descent.
  * 
- * Amnesia: A Machine For Pigs is free software: you can redistribute it and/or modify
+ * Amnesia: The Dark Descent is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version. 
 
- * Amnesia: A Machine For Pigs is distributed in the hope that it will be useful,
+ * Amnesia: The Dark Descent is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Amnesia: A Machine For Pigs.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Amnesia: The Dark Descent.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "LuxEnemy_Child.h"
@@ -134,6 +134,7 @@ void cLuxEnemy_Child::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
 	if (mPatrolMoveSpeed == aSpeedType) return;
 
 	mPatrolMoveSpeed = aSpeedType;
+	mbPatrolMoveSpeedChanged = true;
 
 	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
 	mpMover->UpdateMoveAnimation(0.001f);
@@ -302,6 +303,12 @@ bool cLuxEnemy_Child::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			
 			PatrolUpdateGoal();
 
+		kLuxOnUpdate
+			if (mbPatrolMoveSpeedChanged)
+			{
+				SetMoveSpeed(mPatrolMoveSpeed);
+				mbPatrolMoveSpeedChanged = false;
+			}
 
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
 			

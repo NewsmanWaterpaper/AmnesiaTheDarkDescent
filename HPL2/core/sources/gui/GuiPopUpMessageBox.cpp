@@ -114,13 +114,15 @@ namespace hpl {
 
 		SetUpDefaultFocus(mvButtons[0]);
 	}
-
+	//-----------------------------------------------------------------------
+	
 	//-----------------------------------------------------------------------
 
 	cGuiPopUpMessageBox::~cGuiPopUpMessageBox()
 	{
 		if(mvButtons[0]) mpSet->DestroyWidget(mvButtons[0]);
 		if(mvButtons[1]) mpSet->DestroyWidget(mvButtons[1]);
+		//if(mvButtons[2]) mpSet->DestroyWidget(mvButtons[2]);
 		if(mpLabel) mpSet->DestroyWidget(mpLabel);
 	}
 

@@ -249,6 +249,7 @@ enum eLuxEnemyState
 	eLuxEnemyState_Flee,
 	eLuxEnemyState_Stalk,
 	eLuxEnemyState_Track,
+	
 
 	eLuxEnemyState_LastEnum
 };
@@ -411,6 +412,8 @@ public:
 	void AlertOfPlayerPresence();
 	void SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType);
 
+	void SetUpAttachmentEntity();
+
 	void ChangeState(eLuxEnemyState aState);
 
 	void SendMessage(eLuxEnemyMessage aType, float afTime=0, bool abLocalScope=false, const cVector3f& avX=0,float afX=0, int alX=0);
@@ -426,6 +429,7 @@ public:
 	float ConvertAnimToAbsoluteTime(float afRelativeTimePostion);
     
 	cSoundEntity* PlaySound(const tString &asName);
+	cSoundEntity* PlayLoopingSound(const tString& asName);
 
 	void SetPositionAtStartPos();
 
@@ -671,6 +675,8 @@ protected:
 	bool mbBlind;
 	bool mbDeaf;
 
+	bool mbPatrolMoveSpeedChanged;
+
 	tString msOverCallback;
 	bool PatrolRemoveCallback;
 
@@ -749,6 +755,11 @@ protected:
 	bool mbInWater;
 	float mfWaterSurfaceY;
 	cSurfaceData* mpWaterSurfaceData;
+
+	tString msAttachEntity;
+	tString msAttachmentBone;
+	cVector3f mvAttachEntityPos;
+	cVector3f mvAttachEntityRot;
 
 	eLuxEnemyPoseType mCurrentPose;
 	eLuxEnemyMoveSpeed mPatrolMoveSpeed;
@@ -834,6 +845,8 @@ protected:
 	cEnemyAttackSizeData mNormalAttackSize;
 	
 	iCharacterBody *mpCharBody;
+
+	iLuxEntity* mpAttachEntity; 
 
 	cMeshEntity *mpMeshEntity;
 

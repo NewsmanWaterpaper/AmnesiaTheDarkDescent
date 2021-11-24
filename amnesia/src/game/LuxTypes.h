@@ -167,6 +167,7 @@ enum eLuxEnemyType
 	eLuxEnemyType_WaterLurker,
 	eLuxEnemyType_ManPig,
 	eLuxEnemyType_Child,
+	eLuxEnemyType_Wraith,
 
 	eLuxEnemyType_LastEnum
 };
@@ -480,6 +481,7 @@ enum eLuxDamageType
 	eLuxDamageType_BloodSplat,
 	eLuxDamageType_Claws,
 	eLuxDamageType_Slash,
+	eLuxDamageType_Blank,
 
 	eLuxDamageType_LastEnum
 };

@@ -74,6 +74,7 @@ tWString gsLuxEnemyStates[] =
 	_W("Flee"),
 	_W("Stalk"),
 	_W("Track"),
+
 	
 	_W("NULL")
 };
@@ -370,6 +371,10 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
 		pEnemy->mbDeaf = apInstanceVars->GetVarBool("Deaf", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
+		//pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
+		//pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
+		//pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
+		//pEnemy->mvAttachEntityRot = apInstanceVars->GetVarVector3f("AttachEntityRotation", 0);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
 		LoadInstanceVariables(pEnemy, apInstanceVars);
@@ -385,6 +390,7 @@ eLuxDamageType iLuxEnemyLoader::ToDamageType(const tString& asType)
 	if(sLowType == "bloodsplat") return eLuxDamageType_BloodSplat;
 	if(sLowType == "claws") return eLuxDamageType_Claws;
 	if(sLowType == "slash") return eLuxDamageType_Slash;
+	if (sLowType == "blank") return eLuxDamageType_Blank;
 
 	Error("Damage type '%s' does not exist!\n", asType.c_str());
 	return eLuxDamageType_BloodSplat;
@@ -501,6 +507,9 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 	mfHallucinationEndDist = 3.0f;
 
 	mfRunSpeedMul = 1.0f;
+
+	mbPatrolMoveSpeedChanged = false;
+
 	
 	mfEnemyDarknessGlowMaxDistance = gpBase->mpGameCfg->GetFloat("Enemy", "EnemyDarknessGlowMaxDistance",0);
 
@@ -611,6 +620,8 @@ void iLuxEnemy::SetupAfterLoad(cWorld *apWorld)
 	SetMoveSpeed(eLuxEnemyMoveSpeed_Walk);
 
 	if (mpMeshEntity) mpMeshEntity->SetUpdateBonesWhenCulled(true);
+
+	
 }
 
 //-----------------------------------------------------------------------
@@ -618,7 +629,7 @@ void iLuxEnemy::SetupAfterLoad(cWorld *apWorld)
 void iLuxEnemy::AfterWorldLoad()
 {
 	mpPathfinder->AfterWorldLoad();
-
+	
 	OnAfterWorldLoad();
 }
 
@@ -627,6 +638,7 @@ void iLuxEnemy::AfterWorldLoad()
 void iLuxEnemy::OnMapEnter()
 {
 	mvStartPosition = mpCharBody->GetFeetPosition() + cVector3f(0,0.1f, 0);
+	//SetUpAttachmentEntity();
 }
 
 //-----------------------------------------------------------------------
@@ -1045,6 +1057,20 @@ cSoundEntity* iLuxEnemy::PlaySound(const tString &asName)
 	{
 		//pSound->SetPosition(mpCharBody->GetPosition());
 		if(mpMeshEntity) mpMeshEntity->AddChild(pSound);
+	}
+
+	return pSound;
+}
+
+cSoundEntity* iLuxEnemy::PlayLoopingSound(const tString& asName)
+{
+	if (asName == "") return NULL;
+
+	cSoundEntity* pSound = mpMap->GetWorld()->CreateSoundEntity("EnemyLoopingSound", asName, false);
+	if (pSound)
+	{
+		//pSound->SetPosition(mpCharBody->GetPosition());
+		if (mpMeshEntity) mpMeshEntity->AddChild(pSound);
 	}
 
 	return pSound;
@@ -1991,6 +2017,9 @@ void iLuxEnemy::SetPatrolSpeed(eLuxEnemyMoveSpeed aSpeedType)
 
 	mPatrolMoveSpeed = aSpeedType;
 
+	mbPatrolMoveSpeedChanged = true;
+
+
 	SetMoveSpeed(mPatrolMoveSpeed);
 	mpMover->mMoveState = eLuxEnemyMoveState_LastEnum;
 	mpMover->UpdateMoveAnimation(0.001f);
@@ -2461,6 +2490,46 @@ bool iLuxEnemy::PlayerInFOV()
 
 //-----------------------------------------------------------------------
 
+void iLuxEnemy::SetUpAttachmentEntity()
+{
+
+	if (msAttachEntity != "")
+	{
+		cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+		iLuxEntity* pEntity = pMap->GetEntityByName(msAttachEntity);
+
+		//mpAttachEntity = mpMap->GetEntityByName(msAttachEntity);
+
+		//iLuxProp* pProp = static_cast<iLuxProp*>(mpAttachEntity);
+		iLuxProp* pProp = static_cast<iLuxProp*>(pEntity);
+
+		cMeshEntity* pPropMesh = pProp->GetMeshEntity();
+
+		cBoneState* pParentBone = mpMeshEntity->GetBoneStateFromName(msAttachmentBone);
+
+		if (pParentBone == NULL)
+		{
+			Error("Did not find bone '%s' in parent entity '%s'\n", msAttachmentBone.c_str(), msName.c_str());
+			return;
+		}
+
+		//mpMap->CreateEntity(msName + "_AttachEntity", msAttachEntity, mtxTransform, 1);
+
+		if (pPropMesh == NULL)
+		{
+			Error("Attachment entity '%s' does not have a mesh entity\n", mpAttachEntity->GetName().c_str());
+			return;
+		}
+
+		cMatrixf mtxTransform = cMath::MatrixRotate(cMath::Vector3ToRad(mvAttachEntityRot), eEulerRotationOrder_XYZ);
+		mtxTransform.SetTranslation(mvAttachEntityPos);
+
+		pProp->SetParentBone(pParentBone, mtxTransform, msName, msAttachmentBone);
+	}
+}
+
+//-----------------------------------------------------------------------
+
 void iLuxEnemy::OnSetActive(bool abX)
 {	
 	if(mpCharBody)
@@ -2485,6 +2554,14 @@ void iLuxEnemy::OnSetActive(bool abX)
 
 		ChangeState(eLuxEnemyState_Idle);
 	}
+
+	///////////////////
+	//Attachment Entity
+	/*if (mpAttachEntity)
+	{
+		mpAttachEntity->SetActive(abX);
+	}*/
+
 	
 	OnSetActiveEnemySpecific(abX);
 }

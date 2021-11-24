@@ -87,7 +87,7 @@ public:
 	void SetBehaviorType(eLuxIdleBehavior aBehaviorType);
 	void SetToFlee(bool abX);
 	void ThreatenOnAlertEnabled(bool abX);
-	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
+	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage* apMessage);
 	void SetFleeHealth(float abX) { mfFleeHealth = abX; }
 	float GetFleeHealth() { return mfFleeHealth; }
 	void SetTrackTeleport(bool abX) { mbCanTrackTeleport = abX; }

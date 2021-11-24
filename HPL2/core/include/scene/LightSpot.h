@@ -43,8 +43,14 @@ namespace hpl {
 		const cMatrixf& GetProjectionMatrix();
 		const cMatrixf& GetViewProjMatrix();
 
+		//void UpdateLogic(float afTimeStep);
+		void UpdateSpotLight(float afTimeStep);
+
 		void SetFOV(float afAngle);
 		inline float GetFOV() const { return mfFOV;}
+
+		void FadeFOVTo(float afFOV, float afTime);
+		void StopFOVFading();
 		
 		inline float GetTanHalfFOV() const{return mfTanHalfFOV; }
 		inline float GetCosHalfFOV() const{return mfCosHalfFOV;}
@@ -81,6 +87,9 @@ namespace hpl {
 		float mfFOV;
 		float mfAspect;
 		float mfNearClipPlane;
+		float mfFOVFadeTime;
+		float mfFOVAdd;
+		float mfDestFOV;
 
 		bool mbFovUpdated;
 		float mfTanHalfFOV;

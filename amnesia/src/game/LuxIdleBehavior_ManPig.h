@@ -29,4 +29,5 @@ enum eLuxIdleBehavior
 	eLuxIdleBehavior_LastEnum
 };
 
+
 #endif
