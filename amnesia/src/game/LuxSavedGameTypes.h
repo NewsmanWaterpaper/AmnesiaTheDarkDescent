@@ -30,6 +30,7 @@
 
 class cLuxPlayer;
 class cLuxPlayerHands;
+class cLuxPlayerModel;
 class cLuxInventory;
 class cLuxInventory_Item;
 class cLuxMap;
@@ -321,6 +322,19 @@ public:
 	float mfHandObjectAlpha;
 };
 
+class cLuxPlayerModel_SaveData : public iSerializable
+{
+	kSerializableClassInit(cLuxPlayerModel_SaveData)
+public:
+	void FromPlayerModel(cLuxPlayerModel *apPlayerModel);
+	void ToPlayerModel(cLuxMap* apMap, cLuxPlayerModel *apPlayerModel);
+
+	int mlState;
+	tString msCurrentAnim;
+	cEngineMeshEntity_SaveData mMesh;
+
+};
+
 //----------------------------------------------
 
 class cLuxFlashbackData_SaveData : public iSerializable
@@ -460,6 +474,7 @@ public:
 	cContainerVec<int> mvTerrorEnemyIDs;
 	
 	cLuxPlayerHands_SaveData mPlayerHands;
+	cLuxPlayerModel_SaveData mPlayerModel;
 	cContainerList<cLuxCollideCallback_SaveData> mlstCollideCallbacks;
 };
 

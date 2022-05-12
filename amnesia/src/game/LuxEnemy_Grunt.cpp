@@ -546,17 +546,32 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 
 		//At node
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				SetSpecialSearchNodeActive(false);
+			}
 			mpPathfinder->Stop();
 			SendMessage(eLuxEnemyMessage_TimeOut_2,cMath::RandRectf(1,3), true);
 		
 		//Wait a few secs
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
 			//cAINode * pNode = GetSearchForPlayerNode();
-			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 4, 12,false, false, true, NULL);
-			if(pNode)
-				mpPathfinder->MoveTo(pNode->GetPosition());
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(GetSpecialSearchNode(), 4, 12, false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 			else
-				ChangeState(eLuxEnemyState_Patrol);
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 		
 		//End of searching
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)

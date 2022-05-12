@@ -66,6 +66,7 @@ private:
 	 */
 	static void __stdcall ProgLog(string& asLevel, string& asMessage);
 	static void __stdcall SetProgLogTimerActive(bool abTimerActive);
+	static void __stdcall ResetProgLogTimer();
 	static void __stdcall DisplayCounterTimer(bool abDisplayTimer);
 	static void __stdcall DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign);
 
@@ -487,6 +488,7 @@ private:
 	static void __stdcall ShowEnemyPlayerPosition(string& asName);
 	static void __stdcall SetEnemyEndOfPatrolCallback(string& asName, string& asFunc, bool abRemoveWhenCalled);
 	static void __stdcall AlertEnemyOfPlayerPresence(string& asName);
+	static void __stdcall MakeEnemySearchPosition(string& asName, float afX, float afY, float afZ);
 	static void __stdcall ForceEnemyWaitState(string& asName);
 	static void __stdcall SetEnemyDisableTriggers(string& asName, bool abX);
 	static void __stdcall AddEnemyPatrolNode(string& asName, string& asNodeName, float afWaitTime, string& asAnimation);
@@ -527,6 +529,7 @@ private:
 	static float __stdcall GetWraithStealthDashNodesLeft(string& asEnemyName);
 
 	static string& __stdcall GetEnemyStateName(string& asName);
+	static string& __stdcall GetEnemyPreviousState(string& asName);
 	static float __stdcall GetEnemyHealth(string& asName);
 	static void __stdcall SetEnemyHealth(string& asName, float afHealth);
 	static float __stdcall GetEnemyHearVolume(string& asName);

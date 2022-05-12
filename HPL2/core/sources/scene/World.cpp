@@ -1384,7 +1384,15 @@ namespace hpl {
 		{
 			iLight *pLight = *it;
 
-			if(pLight->IsActive()) pLight->UpdateLogic(afTimeStep);
+			if (pLight->IsActive())
+			{
+				pLight->UpdateLogic(afTimeStep);
+				if (pLight->GetLightType() == eLightType_Spot)
+				{
+					cLightSpot* pSpotLight = static_cast<cLightSpot*>(pLight);
+					pSpotLight->UpdateSpotLight(afTimeStep);
+				}
+			}
 
 			++it;
 		}

@@ -459,6 +459,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void ProgLog(string &in asLevel, string &in asMessage)", (void *)ProgLog);
 	AddFunc("void SetProgLogTimerActive(bool abTimerActive)", (void*)SetProgLogTimerActive);
+	AddFunc("void ResetProgLogTimer()", (void*)ResetProgLogTimer);
 	AddFunc("void DisplayCounterTimer(bool abDisplayTimer)", (void*)DisplayCounterTimer);
 	AddFunc("void DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign)", (void*)DisplayCounterSettings);
 
@@ -770,6 +771,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEnemyEndOfPatrolCallback(string& asName, string &in asFunc, bool abRemoveWhenCalled)", (void*)SetEnemyEndOfPatrolCallback);
 	AddFunc("void ForceEnemyWaitState(string &in asName)", (void*)ForceEnemyWaitState);
 	AddFunc("void AlertEnemyOfPlayerPresence(string &in asName)",(void *)AlertEnemyOfPlayerPresence);
+	AddFunc("void MakeEnemySearchPosition(string& asName, float afX, float afY, float afZ)", (void*)MakeEnemySearchPosition);
 	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation)",(void *)AddEnemyPatrolNode);
 	AddFunc("void PlayEnemyAnimation(string &in asEnemyName, string &in asAnimName, bool abLoop, float afFadeTime)", (void*)PlayEnemyAnimation);
 	AddFunc("void ClearEnemyPatrolNodes(string &in asEnemyName)",(void *)ClearEnemyPatrolNodes);
@@ -798,6 +800,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("bool GetWraithInStealthDashMode(string& asEnemyName)", (void*)GetWraithInStealthDashMode);
 	AddFunc("float GetWraithStealthDashNodesLeft(string& asEnemyName)", (void*)GetWraithStealthDashNodesLeft);
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
+	AddFunc("string& GetEnemyPreviousState(string &in asName)", (void*)GetEnemyPreviousState);
 	AddFunc("void SetEnemyBlind(string&in asName, bool abX)", (void*)SetEnemyBlind);
 	AddFunc("void SetEnemyDeaf(string&in asName, bool abX)", (void*)SetEnemyDeaf);
 	AddFunc("float GetEnemyHealth(string& asName)", (void*) GetEnemyHealth);
@@ -897,6 +900,11 @@ void __stdcall cLuxScriptHandler::ProgLog(string& asLevel, string& asMessage)
 void __stdcall cLuxScriptHandler::SetProgLogTimerActive(bool abTimerActive)
 {
 	gpBase->mpProgressLogHandler->SetProgLogCounterActive(abTimerActive);
+}
+
+void __stdcall cLuxScriptHandler::ResetProgLogTimer()
+{
+	gpBase->mpProgressLogHandler->ResetProgLogCounter();
 }
 
 void __stdcall cLuxScriptHandler::DisplayCounterTimer(bool abDisplayTimer)
@@ -3782,6 +3790,27 @@ void __stdcall cLuxScriptHandler::AlertEnemyOfPlayerPresence(string& asName)
 	
 	END_SET_PROPERTY
 }
+void __stdcall cLuxScriptHandler::MakeEnemySearchPosition(string& asName, float afX, float afY, float afZ)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+
+	cVector3f searchPos(afX, afY, afZ);
+
+	eLuxEnemyState state = pEnemy->GetCurrentEnemyState();
+	if (state != eLuxEnemyState_Hunt &&
+		state != eLuxEnemyState_AttackMeleeLong &&
+		state != eLuxEnemyState_AttackMeleeShort &&
+		state != eLuxEnemyState_BreakDoor)
+	{
+		pEnemy->ChangeState(eLuxEnemyState_Search);
+		pEnemy->SetSpecialSearchNode(searchPos);
+		pEnemy->SetSpecialSearchNodeActive(true);
+	}
+
+	END_SET_PROPERTY
+}
 
 //-----------------------------------------------------------------------
 
@@ -4289,6 +4318,18 @@ string& __stdcall cLuxScriptHandler::GetEnemyStateName(string& asName)
 	}
 
 	return pEnemy->GetCurrentEnemyStateName();
+}
+
+string& __stdcall cLuxScriptHandler::GetEnemyPreviousState(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return gsScriptNull;
+	}
+
+	return pEnemy->GetPreviousEnemyStateName();
 }
 //-----------------------------------------------------------------------
 float __stdcall cLuxScriptHandler::GetEnemyHealth(string& asName)

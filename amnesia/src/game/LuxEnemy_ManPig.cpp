@@ -682,12 +682,21 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 				}
 				FinishPatrolEndOfPath(true);
 
-				tString sCallback = msOverCallback;
-				
-				if (sCallback != "")
-					gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
+				if (!mbAutoReverseAtPathEnd || mbAutoReverseAtPathEnd && mbPathEndCallbackDelay == false)
+				{
+					tString sCallback = msOverCallback;
 
-				if (PatrolRemoveCallback) msOverCallback = "";
+					if (sCallback != "")
+						gpBase->mpMapHandler->GetCurrentMap()->RunScript(sCallback + "()");
+
+					if (PatrolRemoveCallback) msOverCallback = "";
+
+					if (mbAutoReverseAtPathEnd) mbPathEndCallbackDelay = true;
+				}
+				else
+				{
+					mbPathEndCallbackDelay = false;
+				}
 			}
 
 		//////////////////////////
@@ -1135,17 +1144,32 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 		//At node
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				SetSpecialSearchNodeActive(false);
+			}
 			mpPathfinder->Stop();
 			SendMessage(eLuxEnemyMessage_TimeOut_2,cMath::RandRectf(1,3), true);
 		
 		//Wait a few secs
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
 			//cAINode * pNode = GetSearchForPlayerNode();
-			cAINode * pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30,false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
-			if(pNode)
-				mpPathfinder->MoveTo(pNode->GetPosition());
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(GetSpecialSearchNode(), 4, 12, false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 			else
-				ChangeState(eLuxEnemyState_Patrol);
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 		
 		//End of searching
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)

@@ -23,6 +23,7 @@
 #include "LuxPlayer.h"
 #include "LuxPlayerHelpers.h"
 #include "LuxPlayerHands.h"
+//#include "LuxPlayerModel.h"
 #include "LuxHandObject.h"
 #include "LuxPlayerState.h"
 #include "LuxInventory.h"
@@ -1025,6 +1026,25 @@ kSerializeVar(mbHandObjectInteractDown, eSerializeType_Bool)
 kSerializeVar(mfHandObjectAlpha, eSerializeType_Float32)
 kEndSerialize()
 
+//-----------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////
+// PLAYER MODEL
+//////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------
+void cLuxPlayerModel_SaveData::FromPlayerModel(cLuxPlayerModel *apPlayerModel)
+{
+	
+}
+
+void cLuxPlayerModel_SaveData::ToPlayerModel(cLuxMap* apMap, cLuxPlayerModel *apPlayerModel)
+{
+	
+}
+
+kBeginSerializeBase(cLuxPlayerModel_SaveData)
+kEndSerialize()
 //-----------------------------------------------------------------------
 
 

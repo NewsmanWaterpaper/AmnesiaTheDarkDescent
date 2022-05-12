@@ -47,6 +47,7 @@ public:
 
 	bool GetProgLogCounterActive() {return mbCounterActive; }
 	void SetProgLogCounterActive(bool abX) { mbCounterActive = abX; }
+	void ResetProgLogCounter(); 
 	
 	void DisplayCounterHUD(bool abX) { mbShowCounterHUD = abX; }
 	void SetCounterHUDColor(cColor aColor) { mCounterTextColor = aColor; }

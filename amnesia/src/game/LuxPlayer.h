@@ -46,6 +46,8 @@ class cLuxNode_PlayerStart;
 
 class cLuxPlayerHands;
 
+class cLuxPlayerModel;
+
 //----------------------------------------------
 
 enum eLuxFocusIconStyle
@@ -166,6 +168,7 @@ public:
 	int GetHealthLevelForHealth(float afHealth);
 	
 	void SetTerror(float afX){ mfTerror=afX; }
+	void AddTerror(float afX) { mfTerror += afX; }
 	void AddTerrorEnemy(iLuxEnemy *apEnemy);
 	void RemoveTerrorEnemy(iLuxEnemy *apEnemy);
 	void ClearTerrorEnemies();
@@ -471,6 +474,7 @@ private:
 	cVector2f mvHeadSpeed;
 
 	tString msTerrorSound;
+	tString msHardTerrorSound;
 
 	iFontData *mpFocusFont;
 

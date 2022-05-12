@@ -68,6 +68,11 @@ public:
 	float mfFlameLightFadeTime;
 	bool mbFlameLightFadeStarted;
 
+	bool mbStealthDashSetup;
+	bool mbHeatRayLightConnectionSetup;
+
+	
+
 	int mPrevPatrolSpeed;
 	//float  mfFleeHealth;
 	float mfDamageMul;
@@ -283,6 +288,8 @@ private:
 	float mfPlayerHeatRayLightLevel;
 	float mfStartHeatRayDamage;
 	float mfUpdateCount;
+
+	float mfDefaultMass;
 
 	bool mbFlyMode;
 	bool mbFlyModeSetup;

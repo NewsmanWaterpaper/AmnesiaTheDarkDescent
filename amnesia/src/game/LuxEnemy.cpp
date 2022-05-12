@@ -371,10 +371,10 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
 		pEnemy->mbDeaf = apInstanceVars->GetVarBool("Deaf", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
-		//pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
-		//pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
-		//pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
-		//pEnemy->mvAttachEntityRot = apInstanceVars->GetVarVector3f("AttachEntityRotation", 0);
+		pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
+		pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
+		pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
+		pEnemy->mvAttachEntityRot = apInstanceVars->GetVarVector3f("AttachEntityRotation", 0);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
 		LoadInstanceVariables(pEnemy, apInstanceVars);
@@ -488,10 +488,13 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 
 	mpLastSearchNode = NULL;
 
+	mpAttachEntity = NULL;
+
 	mfDamageCount =0;
 
 	mvLastKnownPlayerPos =0;
 	mfLastPlayerPosCount =0;
+	mvSpecialSearchNodePos = 0;
 
 	mlCurrentPatrolNode = 0;
 
@@ -509,6 +512,7 @@ iLuxEnemy::iLuxEnemy(const tString &asName, int alID, cLuxMap *apMap, eLuxEnemyT
 	mfRunSpeedMul = 1.0f;
 
 	mbPatrolMoveSpeedChanged = false;
+	mbPathEndCallbackDelay = true; //For enemies with Auto-Reverse so the callback is only called when thet finished reversing their inital path
 
 	
 	mfEnemyDarknessGlowMaxDistance = gpBase->mpGameCfg->GetFloat("Enemy", "EnemyDarknessGlowMaxDistance",0);
@@ -631,6 +635,7 @@ void iLuxEnemy::AfterWorldLoad()
 	mpPathfinder->AfterWorldLoad();
 	
 	OnAfterWorldLoad();
+	
 }
 
 //-----------------------------------------------------------------------
@@ -638,7 +643,7 @@ void iLuxEnemy::AfterWorldLoad()
 void iLuxEnemy::OnMapEnter()
 {
 	mvStartPosition = mpCharBody->GetFeetPosition() + cVector3f(0,0.1f, 0);
-	//SetUpAttachmentEntity();
+	SetUpAttachmentEntity();
 }
 
 //-----------------------------------------------------------------------
@@ -1252,6 +1257,16 @@ void iLuxEnemy::DecCurrentPatrolNode(bool abLoopIfAtStart)
 	}
 }
 
+void iLuxEnemy::SetSpecialSearchNode(const cVector3f& avPos)
+{
+	mvSpecialSearchNodePos = avPos;
+}
+
+cVector3f iLuxEnemy::GetSpecialSearchNode()
+{
+	return mvSpecialSearchNodePos;
+}
+
 //-----------------------------------------------------------------------
 
 void iLuxEnemy::SetDisableTriggers(bool abX)
@@ -1289,6 +1304,12 @@ bool iLuxEnemy::InRangeOfFood(iPhysicsBody *apFoodBody)
 string& iLuxEnemy::GetCurrentEnemyStateName()
 {
 	msPolledEnemyStateName = cString::To8Char(gsLuxEnemyStates[mCurrentState]);
+	return msPolledEnemyStateName;
+}
+
+string& iLuxEnemy::GetPreviousEnemyStateName()
+{
+	msPolledEnemyStateName = cString::To8Char(gsLuxEnemyStates[mPreviousState]);
 	return msPolledEnemyStateName;
 }
 
@@ -2498,7 +2519,7 @@ void iLuxEnemy::SetUpAttachmentEntity()
 		cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
 		iLuxEntity* pEntity = pMap->GetEntityByName(msAttachEntity);
 
-		//mpAttachEntity = mpMap->GetEntityByName(msAttachEntity);
+		mpAttachEntity = pEntity;
 
 		//iLuxProp* pProp = static_cast<iLuxProp*>(mpAttachEntity);
 		iLuxProp* pProp = static_cast<iLuxProp*>(pEntity);
@@ -2557,10 +2578,10 @@ void iLuxEnemy::OnSetActive(bool abX)
 
 	///////////////////
 	//Attachment Entity
-	/*if (mpAttachEntity)
+	if(mpAttachEntity)
 	{
 		mpAttachEntity->SetActive(abX);
-	}*/
+	}
 
 	
 	OnSetActiveEnemySpecific(abX);
@@ -2659,6 +2680,7 @@ kSerializeVar(mbNextAnimOverideMoveState, eSerializeType_Bool)
 kSerializeVar(mvStartPosition, eSerializeType_Vector3f)
 
 kSerializeVar(mvLastKnownPlayerPos, eSerializeType_Vector3f)
+kSerializeVar(mvSpecialSearchNodePos, eSerializeType_Vector3f)
 kSerializeVar(mfLastPlayerPosCount, eSerializeType_Float32)
 
 kSerializeVar(mvTempPos, eSerializeType_Vector3f)
@@ -2784,6 +2806,7 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mvStartPosition);
 
 	kCopyToVar(pData, mvLastKnownPlayerPos);
+	kCopyToVar(pData, mvSpecialSearchNodePos);
 	kCopyToVar(pData, mfLastPlayerPosCount);
 
 	kCopyToVar(pData, mvTempPos);
@@ -2943,7 +2966,8 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 
 	kCopyFromVar(pData, mvStartPosition);
 
-	kCopyFromVar(pData, mvLastKnownPlayerPos);
+	kCopyFromVar(pData, mvLastKnownPlayerPos); 
+	kCopyFromVar(pData, mvSpecialSearchNodePos);
 	kCopyFromVar(pData, mfLastPlayerPosCount);
 
 	kCopyFromVar(pData, mvTempPos);

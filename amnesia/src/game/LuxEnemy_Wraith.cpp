@@ -237,11 +237,15 @@ cLuxEnemy_Wraith::cLuxEnemy_Wraith(const tString& asName, int alID, cLuxMap* apM
 	mfDamageMul = 1.0f;
 	mfRunSpeedMul = 1.0f;
 
+	mfDefaultMass = 50.0f;
+
 	mlStealthDashNodesLengthStart = 0;
 	mlStealthDashNodesLength = 0;
 	mlEnterStealthDashNodeDistance = 15.5f;
 	mlExitStealthDashNodeDistance = 5.0f;
 	
+	mpTeleportLight = NULL;
+
 	mpHeatRayLight = NULL; 
 	mpHeatRayBurnSound = NULL;
 	mfHeatRayRadius = 0;
@@ -249,8 +253,8 @@ cLuxEnemy_Wraith::cLuxEnemy_Wraith(const tString& asName, int alID, cLuxMap* apM
 	mfHeatRaySpotlightAspect = 0;
 	mfStartHeatRayDamage = 3.0f;
 
-	mfHRSpotlightFOVAlert = cMath::ToRad(120.0f);
-	mfHRSpotlightFOVPatrol = cMath::ToRad(60.0f);
+	mfHRSpotlightFOVAlert = 120.0f;
+	mfHRSpotlightFOVPatrol = 60.0f;
 
 	mCurrentSpotColor = cColor(0, 0);
 	mPrevSpotColor = cColor(0, 0);
@@ -341,10 +345,10 @@ void cLuxEnemy_Wraith::UpdateEnemySpecific(float afTimeStep)
 	}
 
 
-	/*if (mpTeleportLight == NULL)
+	if (mpTeleportLight == NULL)
 	{
 		TeleportLightCommand("CreateTeleportLight");
-	}*/
+	}
 	/*else if (mpTeleportLight)
 	{
 		if (mpTeleportLight->GetBrightness() == 17)
@@ -377,21 +381,16 @@ void cLuxEnemy_Wraith::SetToFlyMode(bool abX)
 	if (mbFlyMode == true)
 	{
 
+		
 		mpCharBody->SetGravityActive(false);
-		mpCharBody->SetPosition(cVector3f(mvFlyModeCharOffset), true);
-		m_mtxCharMeshOffset.SetTranslation(cMath::Vector3ToRad(mvFlyModeCharOffset) - cVector3f(0, mpCharBody->GetSize().y / 2, 0));
-		mpCharBody->SetEntityOffset(m_mtxCharMeshOffset);
-		//mpCharBody->SetFeetPosition(mvFlyModeCharOffset);
+		mpCharBody->SetForceVelocity(cVector3f(0));
 		mpCharBody->SetDeaccelerateMoveSpeedInAir(true);
 		SetupFlyWallAvoidance();
 	}
 	else
 	{
-		mpCharBody->SetPosition(cVector3f(mvDefaultCharOffset), true);
+		
 		mpCharBody->SetGravityActive(true);
-		m_mtxCharMeshOffset.SetTranslation(cMath::Vector3ToRad(mvDefaultCharOffset) - cVector3f(0, mpCharBody->GetSize().y / 2, 0));
-		mpCharBody->SetEntityOffset(m_mtxCharMeshOffset);
-		//mpCharBody->SetFeetPosition(mvDefaultCharOffset);
 		mpCharBody->SetDeaccelerateMoveSpeedInAir(false);
 		SetupGroundWallAvoidance();
 	}
@@ -547,7 +546,7 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		kLuxOnEnter
 			 SetHeatRaySpotlightColor(mHeatRaySpotlightColorIdle);
 			
-		//SetHeatRaySpotlightFOV(mfHRSpotlightFOVPatrol);
+			SetHeatRaySpotlightFOV(mfHRSpotlightFOVPatrol);
 			if (mfWaitTime <= 0)
 			{
 				//gpBase->mpDebugHandler->AddMessage(_W("wait time=0"), false);
@@ -632,7 +631,7 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 			}
 			else if (mbIsInStealthDashMode)
 			{
-				//mfForwardSpeed *= mfForwardSpeed * 2;
+				mfForwardSpeed *= mfForwardSpeed * mfRunSpeedMul * 2;
 			}
 			PatrolUpdateGoal();
 
@@ -1139,17 +1138,32 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 
 		//At node
 		kLuxOnMessage(eLuxEnemyMessage_EndOfPath)
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				SetSpecialSearchNodeActive(false);
+			}
 			mpPathfinder->Stop();
 			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(1, 3), true);
 
 	//Wait a few secs
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut_2)
 			//cAINode * pNode = GetSearchForPlayerNode();
-			cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
-			if (pNode)
-				mpPathfinder->MoveTo(pNode->GetPosition());
+			if (GetSpecialSearchNodeActive() == true)
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(GetSpecialSearchNode(), 4, 12, false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 			else
-				ChangeState(eLuxEnemyState_Patrol);
+			{
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
+				if (pNode)
+					mpPathfinder->MoveTo(pNode->GetPosition());
+				else
+					ChangeState(eLuxEnemyState_Patrol);
+			}
 
 		//End of searching
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)
@@ -1241,33 +1255,19 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 			}
 			if (CanUseRangedAttacks() && fDistToPlayer >= mfRangedAttackDistance && !mbIsInStealthDashMode)
 			{
-				//if (fDistToPlayer < mfRangedAttackDistance)
-				//{
-					//if (mbForceLongRangeAttack)
-					//{
 						ChangeState(eLuxEnemyState_AttackRange);
-						//mbForceLongRangeAttack = false;
-					//}
-					//else
-					//{
-						//ChangeState(eLuxEnemyState_AttackShortRange);
-					//}
-				//}
 			}
 			else if (mbCanMeele && fDistToPlayer < mfNormalAttackDistance && !mbIsInStealthDashMode)
 			{
-				//if (fDistToPlayer < mfNormalAttackDistance)
-				//{
-					if (mbForceChargeAttack)
-					{
-						ChangeState(eLuxEnemyState_AttackMeleeLong);
-						mbForceChargeAttack = false;
-					}
-					else
-					{
-						ChangeState(eLuxEnemyState_AttackMeleeShort);
-					}
-				//}
+				if (mbForceChargeAttack)
+				{
+					ChangeState(eLuxEnemyState_AttackMeleeLong);
+					mbForceChargeAttack = false;
+				}
+				else
+				{
+					ChangeState(eLuxEnemyState_AttackMeleeShort);
+				}
 			}
 			else if (fDistToPlayer >= mlEnterStealthDashNodeDistance && mbAllowedToDashAtWill && mbIsInStealthDashMode == false)
 			{
@@ -1507,6 +1507,15 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 		kLuxOnMessage(eLuxEnemyMessage_AnimationOver)
 			//SendMessage(eLuxEnemyMessage_TimeOut, 0.2f, true);
 			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(mfHuntPauseMinTime, mfHuntPauseMaxTime) * mfHuntPauseTimeMul, true);
+
+		
+		kLuxOnMessage(eLuxEnemyMessage_SoundHeard)
+			if (apMessage->mfCustomValue > mfHearVolume)
+			{
+				ChangeState(eLuxEnemyState_Search);
+				mvTempPos = apMessage->mvCustomValue;
+				mfTempVal = apMessage->mfCustomValue;
+			}
 
 		////////////////////////
 		// Overload global
@@ -2248,7 +2257,7 @@ void cLuxEnemy_Wraith::StartTeleportDash()
 	{
 		mvLights[i]->SetVisible(false);
 	}
-	//TeleportLightCommand("InitalTeleportFlash");
+	TeleportLightCommand("InitalTeleportFlash");
 
 	/////Actions
 	PlayTeleportSound();
@@ -2294,7 +2303,8 @@ void cLuxEnemy_Wraith::StopTeleportDash()
 	mbIsInStealthDashMode = false;
 	mbStealthDashMode = false;
 	mpCharBody->StopMovement();
-	mpPathfinder->Stop();
+	mpCharBody->SetMoveDelay(0.5);
+	//mpPathfinder->Stop();
 
 	///States///
 	if (mCurrentState == eLuxEnemyState_Hunt)
@@ -2307,7 +2317,7 @@ void cLuxEnemy_Wraith::StopTeleportDash()
 	{
 		mvLights[i]->SetVisible(true);
 	}
-	//TeleportLightCommand("ExitTeleportFlash");
+	TeleportLightCommand("ExitTeleportFlash");
 
 	////Actions
 	PlayTeleportSound();
@@ -2334,18 +2344,14 @@ void cLuxEnemy_Wraith::StopTeleportDash()
 
 void cLuxEnemy_Wraith::TeleportLightCommand(string asCommand)
 {
-	if (!mpTeleportLight)
-	{
-		TeleportLightCommand("CreateTeleportLight");
-		return;
-	}
+	
 	if (asCommand == "CreateTeleportLight")
 	{
 		mpTeleportLight = mpWorld->CreateLightPoint("WraithTeleportLight", "", false);
 
 		mpTeleportLight->SetDiffuseColor(cColor(0.4, 0.9, 1.0));
 		mpTeleportLight->SetBrightness(0);
-		mpTeleportLight->SetRadius(17.5);
+		mpTeleportLight->SetRadius(6.5);
 
 		mpTeleportLight->SetCastShadows(false);
 		mpTeleportLight->SetIsSaved(false);
@@ -2354,17 +2360,20 @@ void cLuxEnemy_Wraith::TeleportLightCommand(string asCommand)
 	}
 	else if (asCommand == "InitalTeleportFlash")
 	{
-		//if (!mpTeleportLight) TeleportLightCommand("CreateTeleportLight");
+		if (!mpTeleportLight)
+		{
+			TeleportLightCommand("CreateTeleportLight");
+		}
 
 		//mpTeleportLight->SetDiffuseColor(cColor(0.4, 0.9, 1.0));
 		mpTeleportLight->SetBrightness(17);
-		mpTeleportLight->FadeBrightnessTo(0, 0.15);
+		mpTeleportLight->FadeBrightnessTo(0, 0.15f);
 	}
 	else if (asCommand == "ExitTeleportFlash")
 	{
 		//mpTeleportLight->SetDiffuseColor(cColor(0.4, 0.9, 1.0));
-		mpTeleportLight->SetBrightness(17);
-		mpTeleportLight->FadeBrightnessTo(0, 0.3);
+		mpTeleportLight->SetBrightness(17.0f);
+		mpTeleportLight->FadeBrightnessTo(0, 0.3f);
 	}
 }
 
@@ -2778,7 +2787,7 @@ void cLuxEnemy_Wraith::PlayHeatRaySounds(bool abX)
 	
 	if (abX == true)
 	{
-		if (mpHeatRayBurnSound == NULL || pSoundHandler->IsValid(mpHeatRayBurnSound, mlHeatRayBurnSoundId) == false)
+		if (mpHeatRayBurnSound == NULL)
 		{
 			if (msHeatRayBurnLoop != "")
 			{
@@ -2857,7 +2866,7 @@ void cLuxEnemy_Wraith::SetHeatRaySpotlightFOV(float afFOV)
 	float fFOV = cMath::ToRad(afFOV);
 	//if (mpHeatRayLight->IsVisible() == false) mpHeatRaySpotLight->SetVisible(true);
 
-	//mpHeatRaySpotLight->FadeFOVTo(fFOV,1.0f);
+	//mpHeatRaySpotLight->SetFOV(fFOV);
 }
 
 //-----------------------------------------------------------------------
@@ -3029,6 +3038,9 @@ kSerializeVar(mfStartHeatRayDamage, eSerializeType_Float32)
 kSerializeVar(mbIsInStealthDashMode, eSerializeType_Bool) 
 kSerializeVar(mbAllowedToDashAtWill, eSerializeType_Bool)
 kSerializeVar(mbPrevTriggers, eSerializeType_Bool)
+kSerializeVar(mbStealthDashSetup, eSerializeType_Bool)
+kSerializeVar(mbHeatRayLightConnectionSetup, eSerializeType_Bool)
+kSerializeVar(mbIsInArchvileAttack, eSerializeType_Bool)
 
 kEndSerialize()
 //-----------------------------------------------------------------------
@@ -3068,6 +3080,9 @@ void cLuxEnemy_Wraith::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mbIsInStealthDashMode);
 	kCopyToVar(pData, mfHRSpotlightLightLevel);
 	kCopyToVar(pData, mfStartHeatRayDamage);
+	kCopyToVar(pData, mbIsInArchvileAttack);
+	kCopyToVar(pData, mbStealthDashSetup);
+	kCopyToVar(pData, mbHeatRayLightConnectionSetup);
 
 	pData->mlAttackType = mAttackType;
 
@@ -3105,6 +3120,9 @@ void cLuxEnemy_Wraith::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mbIsInStealthDashMode);
 	kCopyFromVar(pData, mfHRSpotlightLightLevel);
 	kCopyFromVar(pData, mfStartHeatRayDamage);
+	kCopyFromVar(pData, mbIsInArchvileAttack);
+	kCopyFromVar(pData, mbStealthDashSetup);
+	kCopyFromVar(pData, mbHeatRayLightConnectionSetup);
 
 	mAttackType = (eLuxAttackType)pData->mlAttackType;
 

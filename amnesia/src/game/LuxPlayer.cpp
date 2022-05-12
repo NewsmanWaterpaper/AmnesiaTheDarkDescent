@@ -86,6 +86,7 @@ cLuxPlayer::cLuxPlayer() : iLuxUpdateable("LuxPlayer"), iLuxCollideCallbackConta
 	mfHeadSpinDeacc = gpBase->mpGameCfg->GetFloat("Player_General","HeadSpinDeacc",0);
 
 	msTerrorSound = gpBase->mpGameCfg->GetString("Player_General","TerrorSound","");
+	msHardTerrorSound = gpBase->mpGameCfg->GetString("Player_General", "HardModeTerrorSound", "");
 
 	mfTerrorIncSpeed = gpBase->mpGameCfg->GetFloat("Player_General","TerrorIncSpeed",0);
 	mfTerrorDecSpeed = gpBase->mpGameCfg->GetFloat("Player_General","TerrorDecSpeed",0);
@@ -1391,6 +1392,7 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 		if(mfTerror < 0) mfTerror =0;
 		//mfFOVMulGoal = 1.0f;
 		//mfFOVMulSpeed = 1.0f;
+		
 	}
 	else
 	{
@@ -1407,7 +1409,15 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 	{
 		if(mpTerrorSound == NULL)
 		{
-			mpTerrorSound = pSoundHandler->PlayGui(msTerrorSound,true,1.0f);
+			if (gpBase->mbHardMode)
+			{
+				
+				mpTerrorSound = pSoundHandler->PlayGui(msHardTerrorSound, true, 1.0f);
+			}
+			else
+			{
+				mpTerrorSound = pSoundHandler->PlayGui(msTerrorSound, true, 1.0f);
+			}
 			//mfFOVMulGoal = 1.15f;
 			//mfFOVMulSpeed = 1.0f;
 			if(mpTerrorSound)
@@ -1419,7 +1429,7 @@ void cLuxPlayer::UpdateTerror(float afTimeStep)
 	}
 	if(mpTerrorSound && pSoundHandler->IsValid(mpTerrorSound, mlTerrorSoundID))
 	{
-		mpTerrorSound->SetVolumeMul(mfTerror);
+		mpTerrorSound->SetVolumeMul(mfTerror * (int)m_setTerrorEnemies.size());
 		if(mfTerror <= 0)
 		{
 			mpTerrorSound->GetChannel()->Stop();

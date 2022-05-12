@@ -218,8 +218,11 @@ void cLuxProgressLogHandler::AddLog(eLuxProgressLogLevel aLevel, const tString& 
 	fprintf(mpFile, "%s", sFinalMess.c_str());
 	fflush(mpFile);
 }
-
-
+//-----------------------------------------------------------------------
+void cLuxProgressLogHandler::ResetProgLogCounter()
+{
+	mlCounter = 0;
+}
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////

@@ -209,11 +209,27 @@ Sets the function to be called when an enemy reaches the end of it's patrol.
 3. *abRemoveWhenCalled*-  determines whether the callback should be removed when the enemy reaches the end of it's path. 
 ---------------------------------------
 ```as
+void MakeEnemySearchPosition(string& asName, float afX, float afY, float afZ);
+```
+Gets an enemy to search a position without searching where the player exactly is. Make
+sure that nodes are placed in the level!
+1. *asName* - Internal name of the enemy
+2. *afX* - X axis of the position
+3. *afY*-  Y axis of the position
+3. *afZ*-  Z axis of the position.
+---------------------------------------
+```as
 void  ChangeEnemyState(string& asName, string& asState);
 ```
 Changes the AI state of a specified enemy.
 1. *asName* - Internal name of the enemy
 2. *asState* - desired state, can be: Patrol, Investigate Idle, Wait, Alert, Hunt, HuntPause, HuntWander and Hurt
+---------------------------------------
+```as
+void  GetEnemyPreviousState(string& asName);
+```
+Gets the last state that the enemy was in
+1. *asName* - Internal name of the enemy
 ---------------------------------------
 ```as
 void ForceEnemyWaitState(string& asName);

@@ -150,6 +150,9 @@ public:
 	bool mbPlayerDetected;
 	bool mbPlayerInRange;
 
+	bool mbPatrolMoveSpeedChanged;
+	bool mbSpecialSearchNode;
+
 	float mfCheckAtDoorCount;
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
@@ -186,6 +189,8 @@ public:
 
 	cVector3f mvLastKnownPlayerPos;
 	float mfLastPlayerPosCount;
+
+	cVector3f mvSpecialSearchNodePos;
 
 	cVector3f mvTempPos;
 	float mfTempVal;
@@ -456,6 +461,11 @@ public:
 	void IncCurrentPatrolNode(bool abLoopIfAtEnd);
 	void DecCurrentPatrolNode(bool abLoopIfAtStart);
 
+	void SetSpecialSearchNodeActive(bool abX) { mbSpecialSearchNode = abX; }
+	bool GetSpecialSearchNodeActive() { return  mbSpecialSearchNode; }
+	void SetSpecialSearchNode(const cVector3f& avPos);
+	cVector3f GetSpecialSearchNode();
+
 	cLuxEnemyPatrolNode* GetPatrolNode(int alIdx){ return &mvPatrolNodes[alIdx];}
 	int GetPatrolNodeNum(){ return (int)mvPatrolNodes.size();}
 
@@ -486,6 +496,7 @@ public:
 
 	eLuxEnemyState GetCurrentEnemyState(){ return mCurrentState;}
 	string& GetCurrentEnemyStateName();
+	string& GetPreviousEnemyStateName();
 
 	bool CanSeePlayer(){ return mbCanSeePlayer;}
 	bool GetPlayerDetected(){ return mbPlayerDetected;}
@@ -525,6 +536,8 @@ public:
 
 	void SetIsSeenByPlayer(bool abX){ mbIsSeenByPlayer = abX;}
 	bool GetIsSeenByPlayer(){ return mbIsSeenByPlayer;}
+
+	
 
 	bool CausesSanityDecrease(){ return mbCausesSanityDecrease;}
 	void SetSanityDecreaseActive(bool abX){ mbCausesSanityDecrease = abX;}
@@ -677,6 +690,8 @@ protected:
 
 	bool mbPatrolMoveSpeedChanged;
 
+	bool mbSpecialSearchNode;
+
 	tString msOverCallback;
 	bool PatrolRemoveCallback;
 
@@ -743,6 +758,9 @@ protected:
 	float mlTempVal;
 	float mfDamageCount;
 
+	cVector3f mvSpecialSearchNodePos;
+
+
 	std::vector<cLuxEnemyPatrolNode> mvPatrolNodes;
 	int mlCurrentPatrolNode;
 
@@ -776,6 +794,7 @@ protected:
 
 	bool mbAutoRemoveAtPathEnd;
 	bool mbAutoReverseAtPathEnd;
+	bool mbPathEndCallbackDelay;
 
 	float mfSightRange;
 	float mfDarknessSightRange;
