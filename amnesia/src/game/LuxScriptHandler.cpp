@@ -679,8 +679,11 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void FadeGlobalSoundVolume(float afDestVolume, float afTime)",(void *)FadeGlobalSoundVolume);
 	AddFunc("void FadeGlobalSoundSpeed(float afDestSpeed, float afTime)",(void *)FadeGlobalSoundSpeed);
 	
+	AddFunc("void SetFogAreaVisible(string& asFogAreaName, bool abVisible)", (void*)SetFogAreaVisible);
 	AddFunc("void SetLightVisible(string &in asLightName, bool abVisible)",(void *)SetLightVisible);
 	AddFunc("void FadeLightTo(string &in asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",(void *)FadeLightTo);
+	AddFunc("void FadeLightToExt(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afBrightness, float afTime)", (void*)FadeLightToExt);
+	AddFunc("void FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime)", (void*)FadeLightBrightnessTo);
 	AddFunc("void SetLightFlickerActive(string& asLightName, bool abActive)", (void *)SetLightFlickerActive);
 	AddFunc("void SetLampFlickerActive(string &in asName, bool abActive)", (void*)SetLampFlickerActive);
 
@@ -793,8 +796,10 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
 	AddFunc("void SetWraithFlyMode(string&in asName, bool abX)", (void*)SetWraithFlyMode);
 	AddFunc("void SetWraithStealthDashMode(string&in asName, bool abX)", (void*)SetWraithStealthDashMode);
-	AddFunc("void SetWraithCanMeele(string&in asName, bool abX)", (void*)SetWraithCanMeele);
-	AddFunc("void SetWraithStealthDashModeLength(string& asName, int alNodes)", (void*)SetWraithStealthDashModeLength);
+	AddFunc("void SetWraithStealthDashAtWill(string&in asName, bool abX)", (void*)SetWraithStealthDashAtWill);
+	AddFunc("void SetWraithCanMelee(string&in asName, bool abX)", (void*)SetWraithCanMelee);
+	AddFunc("void SetWraithStealthDashExitDistance(string& asName, float afNodeDistance)", (void*)SetWraithStealthDashExitDistance);
+	AddFunc("void SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance)", (void*)SetWraithStealthDashEnterDistance);
 	AddFunc("void SetWraithAttackType(string& asName, string& asAttackType)", (void*)SetWraithAttackType);
 	AddFunc("bool GetWraithInFlyMode(string& asEnemyName)", (void*)GetWraithInFlyMode);
 	AddFunc("bool GetWraithInStealthDashMode(string& asEnemyName)", (void*)GetWraithInStealthDashMode);
@@ -2388,6 +2393,7 @@ void __stdcall cLuxScriptHandler::DestroyParticleSystem(string& asName)
 void __stdcall cLuxScriptHandler::SetParticleSystemActive(string& asName, bool bActive)
 {
 	BEGIN_ITERATE_PARTICLESYSTEM()
+		pParticleSystem->SetVisible(bActive);
 		pParticleSystem->SetActive(bActive);
 	END_ITERATE_PARTICLESYSTEM
 }
@@ -2515,6 +2521,20 @@ void __stdcall cLuxScriptHandler::StopSound(string& asSoundName, float afFadeTim
 
 
 //-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetFogAreaVisible(string& asFogAreaName, bool abVisible)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return;
+
+	cFogArea* pFog = pMap->GetWorld()->GetFogArea(asFogAreaName);
+	if (pFog == NULL)
+	{
+		Error("Could not find fog area '%s'\n", asFogAreaName.c_str());
+		return;
+	}
+
+	pFog->SetVisible(abVisible);
+}
 
 void __stdcall cLuxScriptHandler::SetLightVisible(string& asLightName, bool abVisible)
 {
@@ -2557,6 +2577,54 @@ void __stdcall cLuxScriptHandler::FadeLightTo(string& asLightName, float afR, fl
 
 	pLight->SetVisible(true);
     pLight->FadeTo(newColor, fNewRadius, afTime);
+}
+
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::FadeLightToExt(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afBrightness, float afTime)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return;
+	}
+
+	pLight->SetFlickerActive(false);
+
+	cColor newColor(
+		afR >= 0 ? afR : pLight->GetDiffuseColor().r,
+		afG >= 0 ? afG : pLight->GetDiffuseColor().g,
+		afB >= 0 ? afB : pLight->GetDiffuseColor().b,
+		afA >= 0 ? afA : pLight->GetDiffuseColor().a);
+
+	float fNewRadius = afRadius >= 0 ? afRadius : pLight->GetRadius();
+
+	pLight->SetVisible(true);
+	pLight->FadeTo(newColor, fNewRadius, afTime);
+	pLight->FadeBrightnessTo(afBrightness, afTime);
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return;
+	}
+
+	//pLight->SetFlickerActive(false);
+
+	pLight->SetVisible(true);
+	pLight->FadeBrightnessTo(afBrightness, afTime);
 }
 
 //-----------------------------------------------------------------------
@@ -4219,7 +4287,20 @@ void __stdcall cLuxScriptHandler::SetWraithStealthDashMode(string& asName, bool 
 
 //-----------------------------------------------------------------------
 
-void __stdcall cLuxScriptHandler::SetWraithCanMeele(string& asName, bool abX)
+void __stdcall cLuxScriptHandler::SetWraithStealthDashAtWill(string& asName, bool abX)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetCanStealthDashAtWill(abX);
+
+	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithCanMelee(string& asName, bool abX)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
@@ -4238,6 +4319,30 @@ void __stdcall cLuxScriptHandler::SetWraithStealthDashModeLength(string& asName,
 		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
 	if (!pEnemy) continue;
 	pEnemy->SetStealthModeNodesLength(alNodes);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetEnterStealthModeNodeDistance(afNodeDistance);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::SetWraithStealthDashExitDistance(string& asName, float afNodeDistance)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetExitStealthModeNodeDistance(afNodeDistance);
 
 	END_SET_PROPERTY
 }

@@ -357,10 +357,13 @@ private:
 	static void __stdcall FadeGlobalSoundSpeed(float afDestSpeed, float afTime);
 	
 	static void __stdcall SetLightVisible(string& asLightName, bool abVisible);
+	static void __stdcall SetFogAreaVisible(string& asFogAreaName, bool abVisible);
 	/**
 	 * -1 for color or radius means keeping the value.
 	 */
 	static void __stdcall FadeLightTo(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime);
+	static void __stdcall FadeLightToExt(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afBrightness, float afTime);
+	static void __stdcall FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime);
 	static void __stdcall SetLightFlickerActive(string& asLightName, bool abActive);
 	static void __stdcall SetLampFlickerActive(string& asName, bool abActive);
 
@@ -520,7 +523,10 @@ private:
 
 	static void __stdcall SetWraithFlyMode(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashMode(string& asName, bool abX);
-	static void __stdcall SetWraithCanMeele(string& asName, bool abX);
+	static void __stdcall SetWraithStealthDashAtWill(string& asName, bool abX);
+	static void __stdcall SetWraithStealthDashExitDistance(string& asName, float afNodeDistance);
+	static void __stdcall SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance);
+	static void __stdcall SetWraithCanMelee(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashModeLength(string& asName, int alNodes);
 	static void __stdcall SetWraithAttackType(string& asName, string& asAttackType);
 

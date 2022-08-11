@@ -62,6 +62,8 @@ namespace hpl {
 		bool GetShowBacksideWhenOutside(){ return mbShowBacksideWhenOutside; }
 		bool GetShowBacksideWhenInside(){ return mbShowBacksideWhenInside; }
 
+		//virtual bool IsVisible();
+
 		//////////////////////////////
 		//iEntity implementation
 		tString GetEntityType(){ return "cFogArea";}

@@ -280,7 +280,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 	{
 		pEnemy->mfSightRange *= 1.15f;
 		pEnemy->mfDarknessSightRange *= 1.15f;
-		//pEnemy->mfHearVolume *= 0.6f;
+		pEnemy->mfHearVolume *= 0.6f;
 
 		pEnemy->mfFOV *= 1.1f;
 		pEnemy->mfFOVXMul *= 1.1f;

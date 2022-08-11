@@ -54,8 +54,8 @@ public:
 	
 	int mlStealthDashNodesLength;
 	int mlStealthDashNodesLengthStart;
-	float mlEnterStealthDashNodeDistance;
-	float mlExitStealthDashNodeDistance;
+	float mfEnterStealthDashNodeDistance;
+	float mfExitStealthDashNodeDistance;
 
 	float mfInLanternLightCount;
 	float mfHuntPauseTimeMul;
@@ -102,8 +102,11 @@ public:
 	bool GetIsInFlyMode() { return mbFlyMode; }
 	void SetToStealthMode(bool abX);
 	bool GetIsInStealthMode() { return mbIsInStealthDashMode; }
+	void SetCanStealthDashAtWill(bool abX) { mbAllowedToDashAtWill = abX; }
 	void SetStealthModeNodesLength(int alNodes) {mlStealthDashNodesLengthStart = alNodes;}
 	int  GetStealthModeNodesLeft() { return mlStealthDashNodesLength; }
+	void SetEnterStealthModeNodeDistance(float afNodeDistance) { mfEnterStealthDashNodeDistance = afNodeDistance; }
+	void SetExitStealthModeNodeDistance(float afNodeDistance) { mfExitStealthDashNodeDistance = afNodeDistance; }
 	void SetCanMeele(bool abX) { mbCanMeele = abX; }
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage* apMessage);
 	void SetAttackType(eLuxAttackType aAttackType);
@@ -301,8 +304,8 @@ private:
 
 	int mlStealthDashNodesLength;
 	int mlStealthDashNodesLengthStart;
-	float mlEnterStealthDashNodeDistance;
-	float mlExitStealthDashNodeDistance;
+	float mfEnterStealthDashNodeDistance;
+	float mfExitStealthDashNodeDistance;
 
 	bool mbPathReversed;
 	bool mbAllowZeroWaitTime;

@@ -86,6 +86,7 @@ namespace hpl {
 			pFog->SetFalloffExp(apElement->GetAttributeFloat("FalloffExp", 0));
 			pFog->SetShowBacksideWhenInside(apElement->GetAttributeBool("ShownBacksideWhenInside", true));
 			pFog->SetShowBacksideWhenOutside(apElement->GetAttributeBool("ShownBacksideWhenOutside", true));
+			pFog->SetActive(apElement->GetAttributeBool("Active", true));
 		}
 
 		kEndWorldEntityLoad(pFog);

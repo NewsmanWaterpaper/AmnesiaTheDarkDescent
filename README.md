@@ -63,7 +63,7 @@ Starts the rank screen.
 ```as
 SetEnding(string& asEnding, bool abCompletedOnHardMode);
 ```
-Sets the ending to be writtem as completed in the user_endings.cfg in the player's save folder and if they completed it on Hard Mode or not.
+Sets the ending to be written as completed in the user_endings.cfg in the player's save folder and if they completed it on Hard Mode or not.
 1. *asEnding* - Which Ending type to use, can be either "DefaultGood", "DefaulBad", "GoodJoke" or "BadJoke".
 2. *abCompletedOnHardMode* - If the game was completed on Hard Mode or not
 ---------------------------------------
@@ -333,17 +333,97 @@ Modifies/returns the amount of health a specific Manpig has to be under to enter
 1. *asName* - Internal name of the enemy
 2. *afFleeHealth* - The amount of health where the enemy should start fleeing from the player
 ---------------------------------------
+```as
+void  SetWraithStealthDashMode (string& asName, bool abX);
+```
+Sets if a specific Wraith is to be in Stealth Dash mode/state.
+1. *asName* - Internal name of the enemy
+2. *abX* - Enabled/disabled
+---------------------------------------
+```as
+void  SetWraithStealthDashAtWill(string&in asName, bool abX);
+```
+Enables/disables if a Wraith is allowed to enter it's Stealth Dash mode/state automatically.
+1. *asName* - Internal name of the enemy
+2. *abX* -  Enabled/disabled
+---------------------------------------
+```as
+void  SetWraithStealthDashModeLength(string& asName, int alNodes);
+```
+Sets how many nodes will a specific Wraith stay in it's Stealth Dash mode/state before exiting.
+1. *asName* - Internal name of the enemy
+2. *alNodes* - Amount of nodes (Default: 0)
+---------------------------------------
+```as
+void  SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance);
+```
+How far away/close does a path node have to be for a Wraith to enter it's Stealth Dash mode/state.
+1. *asName* - Internal name of the enemy
+2. *afNodeDistance* - The distance from the node (Default: 15.5)
+---------------------------------------
+```as
+void  SetWraithStealthDashExitDistance(string& asName, float afNodeDistance);
+```
+How far away/close does a path node have to be for a Wraith to exit it's Stealth Dash mode/state.
+1. *asName* - Internal name of the enemy
+2. *afNodeDistance* - The distance from the node (Default: 5.0)
+---------------------------------------
+```as
+void   SetWraithAttackType(string& asName, string& asAttackType);
+```
+Sets the Attack Type for a Wraith to use.
+1. *asName* - Internal name of the enemy
+2. *asAttackType* - Name of the Attack Type to use. Can be "Melee", "Archvile" or "HeatRay"
+---------------------------------------
+```as
+void  SetWraithCanMeele (string& asName, bool abX);
+```
+Allows a specific Wraith to meele attack the Player if close enough.
+1. *asName* - Internal name of the enemy
+2. *abX* - Enabled/disabled
+---------------------------------------
 ## Particles:
 ```as
 void   SetParticleSystemActive(string& asName, bool abActive);
 ```
-Pauses a particle system in its current frame. The paused particle system remains frozen at this frame until reactivated or destroyed.
+Sets a particle system visible or active. The paused particle system remains frozen at this frame until reactivated or destroyed.
 1. *asParticleSystem* - The name of the particle system
-2. *abActive* - False to pause, true to unpause
+2. *abActive* - False to invisible/inactive, true to visible/active
 ---------------------------------------
 ```as
 void    DestroyParticleSystemInstantly(string& asName);
 ```
 Destroys a particle system and any existing particles already emitted from it. Similar to DestroyParticleSystem, except that one will not destroy the existing particles and rather let them live out their lives. This function will cut all particles' lives short.
 1. *asParticleSystem* - The name of the particle system
+---------------------------------------
+## Lights:
+```as
+void   FadeLightToExt(string& asLightName, float afR, float afG, float afB, float afA, float afRadius, float afBrightness, float afTime);
+```
+Changes the properties of a light. Includes a brightness option.
+1. *asLightName* - Interal name
+2. *afR* - red value
+3. *afG* - green value
+4. *afB* - blue value
+5. *afA* - alpha value
+6. *afRadius* - radius of the light. -1 means keeping the radius
+7. *afBrightness* - brightness of the light
+8. *afTime* time in seconds until change is done
+---------------------------------------
+```as
+void   FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime);
+```
+Changes the brightness of a light.
+1. *asLightName* - Interal name
+2. *afBrightness* - brightness of the light
+3. *afTime*  time in seconds until change is done
+---------------------------------------
+
+## Fog Area:
+```as
+void   SetFogAreaVisible(string& asFogAreaName, bool abVisible);
+```
+Sets a Fog Area visible or not.
+1. *asFogAreaName* - The name of the Fog Area
+2. *abVisible* - False to invisible, true to visible
 ---------------------------------------

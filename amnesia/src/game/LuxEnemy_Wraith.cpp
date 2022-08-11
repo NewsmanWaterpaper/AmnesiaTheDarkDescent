@@ -176,8 +176,8 @@ void cLuxEnemyLoader_Wraith::LoadInstanceVariables(iLuxEnemy* apEnemy, cResource
 	pWraith->mbStealthDashMode = apInstanceVars->GetVarBool("StealthDashMode", false);
 	pWraith->mbAllowedToDashAtWill = apInstanceVars->GetVarBool("StealthDashAtWill", false);
 	pWraith->mlStealthDashNodesLengthStart = apInstanceVars->GetVarInt("StealthDashNodesLength", 0);
-	pWraith->mlEnterStealthDashNodeDistance = apInstanceVars->GetVarFloat("EnterStealthDashDistance", 15.5f);
-	pWraith->mlExitStealthDashNodeDistance = apInstanceVars->GetVarFloat("ExitStealthDashDistance", 5.0f);
+	pWraith->mfEnterStealthDashNodeDistance = apInstanceVars->GetVarFloat("EnterStealthDashDistance", 15.5f);
+	pWraith->mfExitStealthDashNodeDistance = apInstanceVars->GetVarFloat("ExitStealthDashDistance", 5.0f);
 	pWraith->mPatrolMoveSpeed = ToMoveSpeed(apInstanceVars->GetVarString("PatrolMoveSpeed", "Walk"));
 	pWraith->mbAllowZeroWaitTime = apInstanceVars->GetVarBool("AllowZeroNodeWaitTimes", false);
 	pWraith->mfDamageMul = apInstanceVars->GetVarFloat("DamageMul", 1.0f);
@@ -241,8 +241,8 @@ cLuxEnemy_Wraith::cLuxEnemy_Wraith(const tString& asName, int alID, cLuxMap* apM
 
 	mlStealthDashNodesLengthStart = 0;
 	mlStealthDashNodesLength = 0;
-	mlEnterStealthDashNodeDistance = 15.5f;
-	mlExitStealthDashNodeDistance = 5.0f;
+	mfEnterStealthDashNodeDistance = 15.5f;
+	mfExitStealthDashNodeDistance = 5.0f;
 	
 	mpTeleportLight = NULL;
 
@@ -661,11 +661,11 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 			cVector3f pNode = pPatrolNode->mpNode->GetPosition();
 			float fNodeDis = gpBase->mpMapHelper->CheckDistance(mpCharBody->GetFeetPosition(), pNode);
 
-			if (fNodeDis >= mlEnterStealthDashNodeDistance && mbAllowedToDashAtWill && mbIsInStealthDashMode == false)
+			if (fNodeDis >= mfEnterStealthDashNodeDistance && mbAllowedToDashAtWill && mbIsInStealthDashMode == false)
 			{
 				StartTeleportDash();
 			}
-			else if (fNodeDis <= mlExitStealthDashNodeDistance && mbIsInStealthDashMode == true)
+			else if (fNodeDis <= mfExitStealthDashNodeDistance && mbIsInStealthDashMode == true)
 			{
 				StopTeleportDash();
 			}
@@ -1269,11 +1269,11 @@ bool cLuxEnemy_Wraith::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 					ChangeState(eLuxEnemyState_AttackMeleeShort);
 				}
 			}
-			else if (fDistToPlayer >= mlEnterStealthDashNodeDistance && mbAllowedToDashAtWill && mbIsInStealthDashMode == false)
+			else if (fDistToPlayer >= mfEnterStealthDashNodeDistance && mbAllowedToDashAtWill && mbIsInStealthDashMode == false)
 			{
 				StartTeleportDash();
 			}
-			else if (fDistToPlayer <= mlExitStealthDashNodeDistance && mbIsInStealthDashMode == true)
+			else if (fDistToPlayer <= mfExitStealthDashNodeDistance && mbIsInStealthDashMode == true)
 			{
 				StopTeleportDash();
 			}
@@ -3022,7 +3022,8 @@ kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kSerializeVar(mPrevPatrolSpeed, eSerializeType_Int32)
 kSerializeVar(mlStealthDashNodesLength, eSerializeType_Int32)
 kSerializeVar(mlStealthDashNodesLengthStart, eSerializeType_Int32)
-kSerializeVar(mlEnterStealthDashNodeDistance, eSerializeType_Float32)
+kSerializeVar(mfEnterStealthDashNodeDistance, eSerializeType_Float32)
+kSerializeVar(mfExitStealthDashNodeDistance, eSerializeType_Float32)
 kSerializeVar(mfDamageMul, eSerializeType_Float32)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
 kSerializeVar(mfInLanternLightCount, eSerializeType_Float32)
@@ -3064,7 +3065,8 @@ void cLuxEnemy_Wraith::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mPrevPatrolSpeed);
 	kCopyToVar(pData, mlStealthDashNodesLength);
 	kCopyToVar(pData, mlStealthDashNodesLengthStart);
-	kCopyToVar(pData, mlEnterStealthDashNodeDistance);
+	kCopyToVar(pData, mfEnterStealthDashNodeDistance);
+	kCopyToVar(pData, mfExitStealthDashNodeDistance);
 	kCopyToVar(pData, mfRunSpeedMul);
 	kCopyToVar(pData, mfDamageMul);
 	kCopyToVar(pData, mfInLanternLightCount);
@@ -3105,7 +3107,8 @@ void cLuxEnemy_Wraith::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	mPrevPatrolSpeed = (eLuxEnemyMoveSpeed)pData->mPrevPatrolSpeed;
 	kCopyFromVar(pData, mlStealthDashNodesLength);
 	kCopyFromVar(pData, mlStealthDashNodesLengthStart);
-	kCopyFromVar(pData, mlEnterStealthDashNodeDistance);
+	kCopyFromVar(pData, mfEnterStealthDashNodeDistance);
+	kCopyFromVar(pData, mfExitStealthDashNodeDistance);
 	kCopyFromVar(pData, mfRunSpeedMul);
 	kCopyFromVar(pData, mfDamageMul);
 	kCopyFromVar(pData, mfInLanternLightCount);
