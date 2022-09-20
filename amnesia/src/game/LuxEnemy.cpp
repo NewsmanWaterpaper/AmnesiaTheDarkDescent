@@ -371,10 +371,10 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
 		pEnemy->mbDeaf = apInstanceVars->GetVarBool("Deaf", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
-		pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
-		pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
-		pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
-		pEnemy->mvAttachEntityRot = apInstanceVars->GetVarVector3f("AttachEntityRotation", 0);
+		//pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
+		//pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
+		//pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
+		//pEnemy->mvAttachEntityRot = apInstanceVars->GetVarVector3f("AttachEntityRotation", 0);
 		pEnemy->mCurrentPose = ToPoseType(apInstanceVars->GetVarString("Pose", "biped"));
 
 		LoadInstanceVariables(pEnemy, apInstanceVars);

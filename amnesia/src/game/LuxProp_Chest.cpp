@@ -143,12 +143,12 @@ bool cLuxProp_Chest::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 	if(gpBase->mpPlayer->GetCoins() < mlCoinsNeeded)
 	{
 		sText += kTranslate("Game", "InteractChest03_NoCoins")+_W("\n");
-		gpBase->mpMessageHandler->StartPauseMessage(sText,false, NULL);
+		//gpBase->mpMessageHandler->StartPauseMessage(sText,false, NULL);
 	}
 	else
 	{
 		sText += kTranslate("Game", "InteractChest03_Question")+_W("\n");
-		gpBase->mpMessageHandler->StartPauseMessage(sText,true, mpMessageCallback);
+		//gpBase->mpMessageHandler->StartPauseMessage(sText,true, mpMessageCallback);
 	}
 	
 	

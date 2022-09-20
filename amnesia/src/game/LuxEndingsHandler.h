@@ -39,6 +39,7 @@ public:
 	int GetTotalGameClears() {return mlTotalGameClears;}
 
 	bool mbAllowHardmode;
+	bool mbAllowBonusFeatures;
 
 private:
 	int mlTotalGameClears;

@@ -70,6 +70,7 @@ public:
 
 	bool mbStealthDashSetup;
 	bool mbHeatRayLightConnectionSetup;
+	float mfSpotlightDefaultBrightness;
 
 	
 
@@ -77,6 +78,14 @@ public:
 	//float  mfFleeHealth;
 	float mfDamageMul;
 	int mlAttackType;
+
+	float mfHeatRayDamageSpeed;
+	float mfBurnDamageMinTime;
+	float mfBurnDamageMaxTime;
+	float mfMinBurnDamage;
+	float mfMaxBurnDamage;
+	float mfBurnDamageCountdown;
+	float mfLightLevelDamageStart;
 
 };
 //----------------------------------------------
@@ -107,6 +116,12 @@ public:
 	int  GetStealthModeNodesLeft() { return mlStealthDashNodesLength; }
 	void SetEnterStealthModeNodeDistance(float afNodeDistance) { mfEnterStealthDashNodeDistance = afNodeDistance; }
 	void SetExitStealthModeNodeDistance(float afNodeDistance) { mfExitStealthDashNodeDistance = afNodeDistance; }
+	void SetHeatRayDamageLightAmount(float afLightAmount) { mfLightLevelDamageStart = afLightAmount; }
+	void SetHeatRayDamageSpeed(float afDamageSpeed) { mfHeatRayDamageSpeed = afDamageSpeed; }
+	void SetBurnDamageMinTime(float afMinTime) { mfBurnDamageMinTime = afMinTime; }
+	void SetBurnDamageMaxTime(float afMaxTime) { mfBurnDamageMaxTime = afMaxTime; }
+	void SetBurnDamageMin(float afMinDamage) { mfMinBurnDamage = afMinDamage; }
+	void SetBurnDamageMax(float afMaxDamage) { mfMaxBurnDamage = afMaxDamage; }
 	void SetCanMeele(bool abX) { mbCanMeele = abX; }
 	bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage* apMessage);
 	void SetAttackType(eLuxAttackType aAttackType);
@@ -155,12 +170,15 @@ private:
 	void SetUpHeatRayConnection();
 	void PlayHeatRaySounds(bool abX); 
 	float GetPlayerInHeatRayLightLevel();
+	cVector3f GetPlayerFeetPosition();
 	void ResetPlayerHeatRay();
 	void SetHeatRaySpotlightColor(cColor aColor);
 	void SetHeatRaySpotlightFOV(float afFOV);
-	void UpdatePlayerHeatRayDamage(float afTimeStep);
+	//void UpdatePlayerHeatRayDamage(float afTimeStep);
 
-	void UpdateArchvileAttack(float afTimeStep);
+	void UpdateAttack(float afTimeStep);
+	void ResetAttack();
+	//void UpdateArchvileAttack(float afTimeStep);
 	void CreateArchvileFlameLight();
 	void ResetArchvileAttack();
 	void EnableArchvileAttackParticle(bool abX);
@@ -220,6 +238,9 @@ private:
 	cParticleSystem* pProjectilePS_AttackEnd;
 	bool mbRangedAttackParticleSetup;
 
+	cVector3f mvArchvilePS_AttackStartOffset;
+	cVector3f mvArchvilePS_AttackEndOffset;
+
 	tString msHeatRaySpotlight;
 
 	float mfRangedAttackDistance;
@@ -234,6 +255,8 @@ private:
 
 	tString msRangedAttackHitSound;
 	tString msRangedAttackDisplayType;
+
+	tString msBurnDamageSound;
 
 	float mfIdleExtraTimeMin;
 	float mfIdleExtraTimeMax;
@@ -264,6 +287,27 @@ private:
 	float mfHRSpotlightFOVPatrol;
 	float mfHeatRaySpotlightAspect;
 
+	cColor mAVFlameLightColor;
+	cColor mAVFlameLightColorFlickerOffColor;
+
+	float mfAVFlameLightBrightness;
+
+	float mfAVFlameLightRadius;
+	float mfAVFlameLightFlickerOffRadius;
+	float mfAVFlameLightFlickerOnMinLength;
+	float mfAVFlameLightFlickerOnMaxLength;
+	float mfAVFlameLightFlickerOffMinLength;
+	float mfAVFlameLightFlickerOffMaxLength;
+
+	float mfAVFlameLightFlickerOnFadeMinLength;
+	float mfAVFlameLightFlickerOnFadeMaxLength;
+	float mfAVFlameLightFlickerOffFadeMinLength;
+	float mfAVFlameLightFlickerOffFadeMaxLength;
+
+	
+
+	
+
 	std::vector<cColor> mvDefaultLightColors;
 
 	//////////////
@@ -284,12 +328,21 @@ private:
 	float mfAlertRunTowardsCheckDistance;
 
 	float mfHRSpotlightLightLevel;
+	float mfLightLevelDamageStart;
+
+	float mfSpotlightDefaultBrightness;
 	
 	float mfLanternSensitivity;
 	float mfCheckFlashLightShining;
 
 	float mfPlayerHeatRayLightLevel;
 	float mfStartHeatRayDamage;
+	float mfHeatRayDamageSpeed;
+	float mfBurnDamageMinTime;
+	float mfBurnDamageMaxTime;
+	float mfBurnDamageCountdown;
+	float mfMinBurnDamage;
+	float mfMaxBurnDamage;
 	float mfUpdateCount;
 
 	float mfDefaultMass;
@@ -325,10 +378,15 @@ private:
 	bool mbPrevTriggers;
 
 	cLightPoint* mpTeleportLight;
+	cColor mTeleportLightColor;
+	float mfTeleportLightBrightness;
+	float mfTeleportLightRadius;
 
 	cLightPoint* mpFlameLight;
+	tString msFlameLightName;
 	bool mbFlameLightIsOn;
 	float mfFlameLightFadeTime;
+	float mfFlameLightInitFadeTime;
 	bool mbFlameLightFadeStarted;
 
 	eLuxAttackType mAttackType;
@@ -337,7 +395,8 @@ private:
 	cSoundEntity* mpTeleportSound;
 	cSoundEntity* mpCurrentLoopSound;
 	cSoundEntity* mpSpotlightLoopSound;
-	cSoundEntry* mpHeatRayBurnSound;
+	cSoundEntity* mpHeatRayBurnSound;
+	cSoundEntity* mpHeatRayLoopSound;
 	cSoundEntity* mpTeleportDashLoopSound;
 	int mlTeleportSoundId;
 	int mTeleportDashLoopSoundId;

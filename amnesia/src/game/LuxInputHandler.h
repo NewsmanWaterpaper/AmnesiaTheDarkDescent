@@ -141,6 +141,7 @@ private:
 	void UpdateCreditsInput();
 	void UpdateDemoEndInput();
 	void UpdateRankScreenInput();
+	void UpdatePauseMessageScreenInput();
 	void UpdateLoadScreenInput();
 
 	bool CurrentStateSendsInputToGui();

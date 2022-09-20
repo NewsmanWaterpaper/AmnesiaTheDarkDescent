@@ -1097,7 +1097,7 @@ void cLuxMainMenu::CreateTopMenuGui()
 	// HARDMODE
 	// Save game
 	if (gpBase->mbPTestActivated == false && 
-		gpBase->mbHardMode && 
+		gpBase->mbHardMode == false && 
 		gpBase->mpMapHandler->MapIsLoaded() == true)
 	{
 		////////////////////////////
@@ -1119,7 +1119,7 @@ void cLuxMainMenu::CreateTopMenuGui()
 	
 	#ifndef LUX_DEMO_VERSION
 		if(	gpBase->mbPTestActivated==false &&
-			gpBase->mpMapHandler->MapIsLoaded()==false) 
+			gpBase->mpMapHandler->MapIsLoaded()==false || gpBase->mpMapHandler->MapIsLoaded() == false && gpBase->mpEndingsHandler->mbAllowBonusFeatures == true)
 		{
 			pLabel = mpGuiSet->CreateWidgetLabel(vPos,0,kTranslate("MainMenu","Custom Map"));
 			pLabel->AddCallback(eGuiMessage_MouseDown, this, kGuiCallback(PressCustomStory));

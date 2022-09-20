@@ -46,6 +46,7 @@ void cLuxEndingsHandler::LoadUserConfig()
 	msPreviousEnding = gpBase->mpUserEndingConfig->GetString("Endings", "MostRecentEnding", "None");
 	mbBeatenHardMode = gpBase->mpUserEndingConfig->GetBool("Endings", "BeatenHardMode", false);
 	mbAllowHardmode = gpBase->mpUserEndingConfig->GetBool("Endings", "AllowHardMode", false);
+	mbAllowBonusFeatures = gpBase->mpUserEndingConfig->GetBool("Endings", "AllowBonusFeatures", false);
 	mlTotalGameClears = gpBase->mpUserEndingConfig->GetInt("Endings", "TotalGameClear", 0);
 }
 
@@ -58,6 +59,7 @@ void cLuxEndingsHandler::SaveUserConfig()
 	gpBase->mpUserEndingConfig->SetString("Endings", "MostRecentEnding", msPreviousEnding);
 	gpBase->mpUserEndingConfig->SetBool("Endings", "BeatenHardMode", mbBeatenHardMode);
 	gpBase->mpUserEndingConfig->SetBool("Endings", "AllowHardMode", mbAllowHardmode);
+	gpBase->mpUserEndingConfig->SetBool("Endings", "AllowBonusFeatures", mbAllowBonusFeatures);
 	gpBase->mpUserEndingConfig->SetInt("Endings", "TotalGameClear", mlTotalGameClears);
 }
 //--------------------------------------------------------------------------------------------
@@ -96,6 +98,11 @@ void cLuxEndingsHandler::AddEndingLog(eLuxEnding aEnding, bool mbCompletedOnHard
 		if (mbAllowHardmode == false)
 		{
 			mbAllowHardmode = true;
+		}
+
+		if (mbAllowBonusFeatures == false)
+		{
+			mbAllowBonusFeatures = true;
 		}
 	}
 

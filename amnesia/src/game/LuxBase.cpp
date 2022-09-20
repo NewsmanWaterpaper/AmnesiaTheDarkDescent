@@ -43,7 +43,7 @@
 #include "LuxInsanityHandler.h"
 #include "LuxProgressLogHandler.h"
 #include "LuxLoadScreenHandler.h"
-
+#include "LuxPauseMessageButtonPrompt.h"
 #include "LuxInventory.h"
 
 #include "LuxCredits.h"
@@ -1335,6 +1335,7 @@ bool cLuxBase::InitGame()
 	mpEngine->GetUpdater()->AddContainer("Credits");
 	mpEngine->GetUpdater()->AddContainer("LoadScreen");
 	mpEngine->GetUpdater()->AddContainer("RankScreen");
+	mpEngine->GetUpdater()->AddContainer("PauseScreen");
 #ifdef LUX_DEMO_VERSION
 	mpEngine->GetUpdater()->AddContainer("DemoEnd");
 #endif
@@ -1383,6 +1384,8 @@ bool cLuxBase::InitGame()
 
 	//Rank Screen
 	mpRankScreen = CreateModule(cLuxRankScreen, "RankScreen");
+
+	mpPauseMessageButtonPrompt = CreateModule(cLuxPauseMessageButtonPrompt, "PauseScreen");
 	//Credits
 #ifndef LUX_DEMO_VERSION
 	mpCredits = CreateModule( cLuxCredits, "Credits");

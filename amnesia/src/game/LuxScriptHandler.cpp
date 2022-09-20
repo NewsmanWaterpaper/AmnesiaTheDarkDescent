@@ -43,6 +43,7 @@
 #include "LuxHintHandler.h"
 #include "LuxEndingsHandler.h"
 #include "LuxProgressLogHandler.h"
+#include "LuxPauseMessageButtonPrompt.h"
 #include "LuxLoadScreenHandler.h"
 #include "LuxInsanityHandler.h"
 #include "LuxCredits.h"
@@ -541,6 +542,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetRadialBlurStartDist(float afStartDist)",(void *)SetRadialBlurStartDist);
 
 	AddFunc("void StartEffectFlash(float afFadeIn, float afWhite, float afFadeOut)",(void *)StartEffectFlash);
+	AddFunc("void StartCustomColorEffectFlash(float afR, float afG, float afB, float afA, float afFadeIn, float afFadeOut)", (void*)StartCustomColorEffectFlash);
 	AddFunc("void StartEffectEmotionFlash(string &in asTextCat, string &in asTextEntry, string &in asSound)",(void *)StartEffectEmotionFlash);
 
 	AddFunc("void SetInDarknessEffectsActive(bool abX)",(void *)SetInDarknessEffectsActive);
@@ -626,6 +628,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetLanternFlickerActive(bool abX)", (void*)SetLanternFlickerActive);
 	AddFunc("bool GetLanternFlickerActive()", (void*)GetLanternFlickerActive);
 	AddFunc("void SetMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",(void *)SetMessage);
+	AddFunc("void SetCustomTextMessage(string &in asTextCategory, string &in asTextEntry, float afX, float afY, float afZ, float afR, float afG, float afB, float afTime)", (void*)SetCustomTextMessage);
+	AddFunc("void StartCustomPauseMessage(string &in asMainTextCategory, string &in asMainTextEntry, bool abMultipleButtons, string &in asButton1TextCat, string &in asButton1TextEnt, string &in asButton2TextCat, string &in asButton2TextEnt, string &in asCallback)", (void*)StartCustomPauseMessage);
 	AddFunc("void SetDeathHint(string &in asTextCategory, string &in asTextEntry)",(void *)SetDeathHint);
 	AddFunc("void DisableDeathStartSound()",(void *)DisableDeathStartSound);
 
@@ -686,6 +690,12 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime)", (void*)FadeLightBrightnessTo);
 	AddFunc("void SetLightFlickerActive(string& asLightName, bool abActive)", (void *)SetLightFlickerActive);
 	AddFunc("void SetLampFlickerActive(string &in asName, bool abActive)", (void*)SetLampFlickerActive);
+
+	AddFunc("float GetLightColorR(string& asLightName)", (void*)GetLightColorR);
+	AddFunc("float GetLightColorB(string& asLightName)", (void*)GetLightColorB);
+	AddFunc("float GetLightColorG(string& asLightName)", (void*)GetLightColorG);
+	AddFunc("float GetLightAlpha(string& asLightName)", (void*)GetLightAlpha);
+	AddFunc("float GetLightBrightness(string& asLightName)", (void*)GetLightBrightness);
 
 	AddFunc("void SetEntityActive(string &in asName, bool abActive)",(void *)SetEntityActive);
 	AddFunc("void SetEntityVisible(string &in asName, bool abVisible)",(void *)SetEntityVisible);
@@ -794,16 +804,24 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
 	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
 	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
-	AddFunc("void SetWraithFlyMode(string&in asName, bool abX)", (void*)SetWraithFlyMode);
+
 	AddFunc("void SetWraithStealthDashMode(string&in asName, bool abX)", (void*)SetWraithStealthDashMode);
 	AddFunc("void SetWraithStealthDashAtWill(string&in asName, bool abX)", (void*)SetWraithStealthDashAtWill);
 	AddFunc("void SetWraithCanMelee(string&in asName, bool abX)", (void*)SetWraithCanMelee);
 	AddFunc("void SetWraithStealthDashExitDistance(string& asName, float afNodeDistance)", (void*)SetWraithStealthDashExitDistance);
 	AddFunc("void SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance)", (void*)SetWraithStealthDashEnterDistance);
+	AddFunc("void SetWraithHeatRayDamageLightAmount(string& asName, float afLightAmount)", (void*)SetWraithHeatRayDamageLightAmount);
+	AddFunc("void SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed)", (void*)SetWraithHeatRayDamageSpeed);
+	AddFunc("void SetWraithBurnDamageMinTime(string& asName, float afMinTime)", (void*)SetWraithBurnDamageMinTime);
+	AddFunc("void SetWraithBurnDamageMaxTime(string& asName, float afMaxTime)", (void*)SetWraithBurnDamageMaxTime);
+	AddFunc("void SetWraithBurnDamageTime(string& asName, float afMinTime, float afMaxTime)", (void*)SetWraithBurnDamageTime);
+	AddFunc("void SetWraithMinBurnDamage(string& asName, float afMinDamage)", (void*)SetWraithMinBurnDamage);
+	AddFunc("void SetWraithMaxBurnDamage(string& asName, float afMaxDamage)", (void*)SetWraithMaxBurnDamage);
+	AddFunc("void SetWraithMaxBurnDamage(string& asName, float afMaxDamage)", (void*)SetWraithMaxBurnDamage);
 	AddFunc("void SetWraithAttackType(string& asName, string& asAttackType)", (void*)SetWraithAttackType);
-	AddFunc("bool GetWraithInFlyMode(string& asEnemyName)", (void*)GetWraithInFlyMode);
 	AddFunc("bool GetWraithInStealthDashMode(string& asEnemyName)", (void*)GetWraithInStealthDashMode);
 	AddFunc("float GetWraithStealthDashNodesLeft(string& asEnemyName)", (void*)GetWraithStealthDashNodesLeft);
+	
 	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
 	AddFunc("string& GetEnemyPreviousState(string &in asName)", (void*)GetEnemyPreviousState);
 	AddFunc("void SetEnemyBlind(string&in asName, bool abX)", (void*)SetEnemyBlind);
@@ -1459,6 +1477,12 @@ void __stdcall cLuxScriptHandler::StartEffectFlash(float afFadeIn, float afWhite
 {
 	gpBase->mpEffectHandler->GetFlash()->Start(afFadeOut, afWhite, afFadeOut);
 }
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::StartCustomColorEffectFlash(float afR, float afG, float afB, float afA, float afFadeIn, float afFadeOut)
+{
+	gpBase->mpPlayer->GetHelperHudEffect()->Flash(cColor(afR, afG, afB, afA), eGuiMaterial_Alpha, afFadeIn, afFadeOut);
+}
 
 //-----------------------------------------------------------------------
 
@@ -2048,6 +2072,25 @@ void __stdcall cLuxScriptHandler::SetMessage(string &asTextCategory, string &asT
 {
 	gpBase->mpMessageHandler->SetMessage(kTranslate(asTextCategory, asTextEntry), afTime);
 }
+
+void __stdcall cLuxScriptHandler::SetCustomTextMessage(string& asTextCategory, string& asTextEntry, float afX, float afY, float afZ, float afR, float afG, float afB, float afTime)
+{
+	gpBase->mpMessageHandler->SetCustomMessageActive(true);
+	gpBase->mpMessageHandler->SetCustomMessagePos(cVector3f(afX,afY,afZ));
+	gpBase->mpMessageHandler->SetCustomMessageColor(cColor(afR, afG, afB));
+	gpBase->mpMessageHandler->SetMessage(kTranslate(asTextCategory, asTextEntry), afTime);
+}
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::StartCustomPauseMessage(string &asMainTextCategory, string &asMainTextEntry, bool abMultipleButtons, string &asButton1TextCat, string &asButton1TextEnt, string &asButton2TextCat, string &asButton2TextEnt, string& asCallback)
+{
+	tWString sMainText = kTranslate(asMainTextCategory, asMainTextEntry);
+	tWString sButton1Text = kTranslate(asButton1TextCat, asButton1TextEnt);
+	tWString sButton2Text = kTranslate(asButton2TextCat, asButton2TextEnt);
+
+	gpBase->mpPauseMessageButtonPrompt->StartPauseMessage(sMainText, abMultipleButtons, sButton1Text, sButton2Text, asCallback);
+}
+
 
 //-----------------------------------------------------------------------
 
@@ -2656,6 +2699,83 @@ void __stdcall cLuxScriptHandler::SetLampFlickerActive(string& asName, bool abAc
 	pLamp->SetFlickerActive(abActive);
 
 	END_SET_PROPERTY
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetLightColorR(string& asLightName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return 0;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return 0;
+	}
+
+	return pLight->GetColor().r;
+}
+
+float __stdcall cLuxScriptHandler::GetLightColorB(string& asLightName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return 0;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return 0;
+	}
+
+	return pLight->GetColor().b;
+}
+
+float __stdcall cLuxScriptHandler::GetLightColorG(string& asLightName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return 0;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return 0;
+	}
+
+	return pLight->GetColor().g;
+}
+
+float __stdcall cLuxScriptHandler::GetLightAlpha(string& asLightName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return 0;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return 0;
+	}
+
+	return pLight->GetColor().a;
+}
+
+float __stdcall cLuxScriptHandler::GetLightBrightness(string& asLightName)
+{
+	cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+	if (pMap == NULL) return 0;
+
+	iLight* pLight = pMap->GetWorld()->GetLight(asLightName);
+	if (pLight == NULL)
+	{
+		Error("Could not find light '%s'\n", asLightName.c_str());
+		return 0;
+	}
+
+	return pLight->GetBrightness();
 }
 
 //-----------------------------------------------------------------------
@@ -4261,19 +4381,6 @@ void __stdcall cLuxScriptHandler::ForceTeslaPigSighting(string& asName)
 }
 //-----------------------------------------------------------------------
 
-void __stdcall cLuxScriptHandler::SetWraithFlyMode(string& asName, bool abX)
-{
-	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
-
-		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
-	if (!pEnemy) continue;
-	pEnemy->SetFlyMode(abX);
-	pEnemy->SetToFlyMode(abX);
-
-	END_SET_PROPERTY
-}
-//-----------------------------------------------------------------------
-
 void __stdcall cLuxScriptHandler::SetWraithStealthDashMode(string& asName, bool abX)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
@@ -4347,6 +4454,96 @@ void __stdcall cLuxScriptHandler::SetWraithStealthDashExitDistance(string& asNam
 	END_SET_PROPERTY
 }
 //-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetHeatRayDamageSpeed(afDamageSpeed);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetHeatRayDamageSpeed(afDamageSpeed);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetWraithBurnDamageTime(string& asName, float afMinTime, float afMaxTime)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMinTime(afMinTime);
+	pEnemy->SetBurnDamageMaxTime(afMaxTime);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetWraithBurnDamageMinTime(string& asName, float afMinTime)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMinTime(afMinTime);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetWraithBurnDamageMaxTime(string& asName, float afMaxTime)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMinTime(afMaxTime);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::SetWraithBurnDamage(string& asName, float afMinDamage, float afMaxDamage)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMin(afMinDamage);
+	pEnemy->SetBurnDamageMax(afMaxDamage);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetWraithMinBurnDamage(string& asName, float afMinDamage)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMin(afMinDamage);
+
+	END_SET_PROPERTY
+}
+
+void __stdcall cLuxScriptHandler::SetWraithMaxBurnDamage(string& asName, float afMaxDamage
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
+	if (!pEnemy) continue;
+	pEnemy->SetBurnDamageMax(afMaxDamage);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
 void __stdcall cLuxScriptHandler::SetWraithAttackType(string& asName, string& asAttackType)
 {
 	eLuxAttackType attack = eLuxAttackType_LastEnum;
@@ -4370,18 +4567,6 @@ void __stdcall cLuxScriptHandler::SetWraithAttackType(string& asName, string& as
 
 	END_SET_PROPERTY
 
-}
-//-----------------------------------------------------------------------
-bool __stdcall cLuxScriptHandler::GetWraithInFlyMode(string& asEnemyName)
-{
-	cLuxEnemy_Wraith* pEnemy = ToWraith(GetEntity(asEnemyName, eLuxEntityType_Enemy, -1));
-	if (pEnemy == NULL)
-	{
-		Error("Can't find enemy '%s'!\n", asEnemyName.c_str());
-		return false;
-	}
-
-	return pEnemy->GetIsInFlyMode();
 }
 //-----------------------------------------------------------------------
 

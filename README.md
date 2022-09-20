@@ -96,8 +96,46 @@ Forces the game to exit to the main menu.
 bool GetPlayerCrouching();
 ```
 Returns if the player is crouching or not.
+```as
+void SetCustomTextMessage(string &in asTextCategory, string &in asTextEntry, float afX, float afY, float afZ, float afR, float afG, float afB, float afTime);
+```
+Extended version of the original SetMessage function, displays a message on the screen with custom positions and coloring.
+1. *asTextCategory* - the category in the .lang file
+2. *asTextEntry* - the entry in the .lang file
+3. *afX* - X-axis position of the text on the screen
+4. *afY* - Y-axis position of the text on the screen
+5. *afZ* -  Z-axis position of the text on the screen
+6. *afR* - Red color value of the text on the screen
+7. *afG* - Green color value of the text on the screen
+8. *afB* - Blue color value of the text on the screen
+9. *afTime* - determines how long the message is displayed. If time is < =0 then the life time is calculated based on string length.
+---------------------------------------
+```as
+void StartCustomPauseMessage(string &in asMainTextCategory, string &in asMainTextEntry, bool abMultipleButtons, string &in asButton1TextCat, string &in asButton1TextEnt, string &in asButton2TextCat, string &in asButton2TextEnt, string &in asCallback);
+```
+Starts a custom message prompt on the screen that pauses the game until a button(s) is pressed/selected.
+1. *asMainTextCategory* - The category in the .lang file for the main text of the prompt
+2. *asMainTextEntry* - The entry in the .lang file for the main text of the prompt
+3. *abMultipleButtons* - If set to True - allows up to two buttons to be selected, handy for Yes/No-style prompts. If False - only one button displayed.
+4. *asButton1TextCat* - The category in the .lang file for the text on Button 1 - REQUIRED if abMultipleButtons is set to either True or False.
+5. *asButton1TextEnt* -  The entry in the .lang file for the text on Button 1 - REQUIRED if abMultipleButtons is set to either True or False.
+6. *asButton2TextCat* - The category in the .lang file for the text on Button 2 - REQUIRED if abMultipleButtons is set to True.
+7. *asButton2TextEnt* - The entry in the .lang file for the text on Button 2 - REQUIRED if abMultipleButtons is set to True.
+8. *asCallback* - The function to call when one of the Buttons is pressed.
+---------------------------------------
 
 ## Screen Effects:
+```as
+void StartCustomColorEffectFlash(float afR, float afG, float afB, float afA, float afFadeIn, float afFadeOut);
+```
+Fades the screen to a custom color.
+1. *afR* - Red color value of the screen flash
+2. *afG* - Green color value of the screen flash
+3. *afB* - Blue color value of the screen flash
+4. *afA* - Alpha value of the screen flash
+5. *afFadeIn* -  time in seconds until the effect is started
+6. *afFadeOut* - time in seconds until screen is back to normal again
+---------------------------------------
 ```as
 void ShowScreenImage(string &in asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut);
 ```
@@ -138,6 +176,37 @@ float GetEntitiesDistance(string& asEntityA, string& asEntityB);
 Returns the distance between two entities.
 1. *asEntityA* - The name of the first entity
 2. *asEntityB* - The name of the second entity
+---------------------------------------
+```as
+float GetEntityRotationX(string &in asName, int body);
+float GetEntityRotationY(string &in asName, int body);
+float GetEntityRotationZ(string &in asName, int body);
+```
+Returns the distance between two entities. Function by NB-Nutboi.
+1. *asName* - Name of the entity to get the rotation from
+2. *body* - The body of the entity to get the rotation from (if you're not sure, go with 0)
+---------------------------------------
+```as
+void SetEntityRotation(string &in asName, float afrX, float afrY, float afrZ, int body);
+```
+It will set the world rotation for the entity body selected. Function by NB-Nutboi.
+1. *asName* - name of the entity
+2. *afrX* -  rotation in the X axis that should be set
+3. *afrY* -  rotation in the Y axis that should be set
+4. *afrZ* -  rotation in the Z axis that should be set
+5. *afpX* - position in the X axis that should be set
+6. *afpY* - position in the Y axis that should be set
+7. *afpZ* - position in the Z axis that should be set
+8. *body* - body of the entity that the rotation should be applied to (if you're not sure, go with 0)
+---------------------------------------
+```as
+float GetBonePosX(string &in asEntity, string &in asBone);
+float GetBonePosY(string &in asEntity, string &in asBone);
+float GetBonePosZ(string &in asEntity, string &in asBone);
+```
+You can get the specific location of bones. Function by NB-Nutboi.
+1. *asEntity* -  Name of the entity (must have a skeleton)
+2. *asBone* - name of the bone in the entity (get with the ModelEditor)
 ---------------------------------------
 ```as
 void  SetSwingDoorOpenAmount(string& asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle);
@@ -376,6 +445,40 @@ Sets the Attack Type for a Wraith to use.
 2. *asAttackType* - Name of the Attack Type to use. Can be "Melee", "Archvile" or "HeatRay"
 ---------------------------------------
 ```as
+void   SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed);
+```
+Sets how faster should the Wraith's Heat-Ray attack type should drain the player's health.
+1. *asName* - Internal name of the enemy
+2. *afDamageSpeed* - The  speed of the damage drain (Default: 5.0). 
+---------------------------------------
+```as
+void   SetWraithHeatRayDamageLightAmount(string& asName, float afLightAmount);
+```
+Sets the amount of Light from the Wraith's Heat-Ray spotlight should the player be in before recieving damage.
+1. *asName* - Internal name of the enemy
+2. *afLightAmount* - The amount of Light from (Default: 0.75)
+---------------------------------------
+```as
+void    SetWraithBurnDamageMinTime(string& asName, float afMinTime);
+void    SetWraithBurnDamageMaxTime(string& asName, float afMaxTime);
+void    SetWraithBurnDamageTime(string& asName, float afMinTime, float afMaxTime)l
+```
+Sets the Min and Max Times of the player recieving Burn Damage from the Wraith's attack.
+1. *asName* - Internal name of the enemy
+2. *afMinTime* -  The minimum amount of time before Burn Damage can occur/be applied 
+2. *afMaxTime* -  The maximum amount of time before Burn Damage can occur/be applied 
+---------------------------------------
+```as
+void    SetWraithBurnMinDamage(string& asName, float afMinDamage);
+void    SetWraithBurnMaxDamage(string& asName, float afMaxDamage);
+void    SetWraithBurnDamage(string& asName, float afMinDamage, float afMaxDamage)
+```
+Sets the Min and Max amount of Burn Damage the player recieves from the Wraith's attack.
+1. *asName* - Internal name of the enemy
+2. *afMinDamage* -  The minimum amount of Burn Damage that the Player recieve
+2. *afMaxDamage* -  The maximum amount of Burn Damage that the Player recieve
+---------------------------------------
+```as
 void  SetWraithCanMeele (string& asName, bool abX);
 ```
 Allows a specific Wraith to meele attack the Player if close enough.
@@ -418,6 +521,14 @@ Changes the brightness of a light.
 2. *afBrightness* - brightness of the light
 3. *afTime*  time in seconds until change is done
 ---------------------------------------
+```as
+float   GetLightColorR(string& asLightName);
+float   GetLightColorG(string& asLightName);
+float   GetLightColorB(string& asLightName);
+float GetLightAlpha(string& asLightName);
+float GetLightBrightness(string& asLightName);
+```
+Returns the Red, Green, Blue, Alpha and Brightness value of a Light.
 
 ## Fog Area:
 ```as

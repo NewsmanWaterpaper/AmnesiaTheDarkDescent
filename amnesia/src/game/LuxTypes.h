@@ -105,6 +105,7 @@ enum eLuxInputState
 	eLuxInputState_Credits,
 	eLuxInputState_DemoEnd,
 	eLuxInputState_RankScreen,
+	eLuxInputState_PauseMessage,
 	eLuxInputState_LoadScreen,
 
 	eLuxInputState_LastEnum

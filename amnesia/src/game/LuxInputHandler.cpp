@@ -37,6 +37,8 @@
 #include "LuxEffectHandler.h"
 #include "LuxConfigHandler.h"
 #include "LuxLoadScreenHandler.h"
+#include "LuxPauseMessageButtonPrompt.h"
+
 
 #include "LuxDebugHandler.h"
 
@@ -506,8 +508,10 @@ void cLuxInputHandler::Update(float afTimeStep)
 	case eLuxInputState_Credits: UpdateCreditsInput(); break;
 	//Demo End
 	case eLuxInputState_DemoEnd: UpdateDemoEndInput(); break;
-	//Demo End
+	//Rank Screen
 	case eLuxInputState_RankScreen: UpdateRankScreenInput(); break;
+	//Pause Message
+	case eLuxInputState_PauseMessage: UpdatePauseMessageScreenInput(); break;
 	//Load Screen
 	case eLuxInputState_LoadScreen: UpdateLoadScreenInput(); break;
 	}
@@ -962,7 +966,7 @@ void cLuxInputHandler::UpdateGameInput()
 	{
 		UpdateGameMessageInput();
 	}
-	else if(gpBase->mpEffectHandler->GetPlayerIsPaused())
+	if(gpBase->mpEffectHandler->GetPlayerIsPaused())
 	{
 		UpdateGameEffectInput();
 	}
@@ -1435,6 +1439,22 @@ void cLuxInputHandler::UpdateRankScreenInput()
 	
 }
 
+void cLuxInputHandler::UpdatePauseMessageScreenInput()
+{
+	if (ShowMouseOnMouseInput())
+	{
+		gpBase->mpPauseMessageButtonPrompt->GetSet()->SetMouseMovementEnabled(true);
+		gpBase->mpPauseMessageButtonPrompt->GetSet()->SetDrawMouse(true);
+	}
+
+	////////////////////
+	//Exit
+	if (mpInput->BecameTriggerd(eLuxAction_Exit))
+	{
+		gpBase->mpPauseMessageButtonPrompt->ExitPause();
+	}
+}
+
 
 void cLuxInputHandler::UpdateLoadScreenInput()
 {
@@ -1465,6 +1485,7 @@ bool cLuxInputHandler::CurrentStateSendsInputToGui()
 	case eLuxInputState_PreMenu:
 	case eLuxInputState_DemoEnd:
 	case eLuxInputState_RankScreen:
+	case eLuxInputState_PauseMessage:
 		return true;	
 	}
 

@@ -169,6 +169,7 @@ private:
 	static void __stdcall FadeRadialBlurTo(float afSize, float afSpeed);
 	static void __stdcall SetRadialBlurStartDist(float afStartDist);
 	static void __stdcall StartEffectFlash(float afFadeIn, float afWhite, float afFadeOut);
+	static void __stdcall StartCustomColorEffectFlash(float afR, float afG, float afB, float afA, float afFadeIn, float afFadeOut);
 	static void __stdcall StartEffectEmotionFlash(string &asTextCat, string &asTextEntry, string &asSound);
 	static void __stdcall SetInDarknessEffectsActive(bool abX);
 
@@ -275,6 +276,8 @@ private:
 	* if time is <=0 then the life time is calculated based on string length.
 	*/
 	static void __stdcall SetMessage(string &asTextCategory, string &asTextEntry, float afTime);
+	static void __stdcall StartCustomPauseMessage(string& asMainTextCategory, string& asMainTextEntry, bool abMultipleButtons, string& asButton1TextCat, string& asButton1TextEnt, string& asButton2TextCat, string& asButton2TextEnt, string& asCallback);
+	static void __stdcall SetCustomTextMessage(string& asTextCategory, string& asTextEntry, float afX, float afY, float afZ, float afR, float afG, float afB, float afTime);
 	static void __stdcall SetDeathHint(string &asTextCategory, string &asTextEntry);
 	/**
 	 * This must be called directly before player is killed! The variable as soon as player dies too.
@@ -366,6 +369,12 @@ private:
 	static void __stdcall FadeLightBrightnessTo(string& asLightName, float afBrightness, float afTime);
 	static void __stdcall SetLightFlickerActive(string& asLightName, bool abActive);
 	static void __stdcall SetLampFlickerActive(string& asName, bool abActive);
+
+	static float __stdcall GetLightColorR(string& asLightName);
+	static float __stdcall GetLightColorG(string& asLightName);
+	static float __stdcall GetLightColorB(string& asLightName);
+	static float __stdcall GetLightAlpha(string& asLightName);
+	static float __stdcall GetLightBrightness(string& asLightName);
 
 
 
@@ -521,16 +530,24 @@ private:
 	static void __stdcall SetTeslaPigEasyEscapeDisabled(string& asName, bool abX);
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
-	static void __stdcall SetWraithFlyMode(string& asName, bool abX);
+	//static void __stdcall SetWraithFlyMode(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashMode(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashAtWill(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashExitDistance(string& asName, float afNodeDistance);
 	static void __stdcall SetWraithStealthDashEnterDistance(string& asName, float afNodeDistance);
+	static void __stdcall SetWraithHeatRayDamageLightAmount(string& asName, float afLightAmount);
+	static void __stdcall SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed);
+	static void __stdcall SetWraithBurnDamageMinTime(string& asName, float afMinTime);
+	static void __stdcall SetWraithBurnDamageMaxTime(string& asName, float afMaxTime);
+	static void __stdcall SetWraithBurnDamageTime(string& asName, float afMinTime, float afMaxTime);
+	static void __stdcall SetWraithMinBurnDamage(string& asName, float afMinDamage);
+	static void __stdcall SetWraithMaxBurnDamage(string& asName, float afMaxDamage);
+	static void __stdcall SetWraithBurnDamage(string& asName, float afMinDamage, float afMaxDamage);
 	static void __stdcall SetWraithCanMelee(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashModeLength(string& asName, int alNodes);
 	static void __stdcall SetWraithAttackType(string& asName, string& asAttackType);
 
-	static bool __stdcall GetWraithInFlyMode(string& asEnemyName);
+	//static bool __stdcall GetWraithInFlyMode(string& asEnemyName);
 	static bool __stdcall GetWraithInStealthDashMode(string& asEnemyName);
 	static float __stdcall GetWraithStealthDashNodesLeft(string& asEnemyName);
 

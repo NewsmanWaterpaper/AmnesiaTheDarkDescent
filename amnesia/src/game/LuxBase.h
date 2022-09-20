@@ -60,6 +60,7 @@ class cLuxCredits;
 class cLuxDemoEnd;
 
 class cLuxRankScreen;
+class cLuxPauseMessageButtonPrompt;
 
 class cLuxPreMenu;
 
@@ -235,6 +236,7 @@ public:
 	cLuxPlayer *mpPlayer;
 	cLuxMusicHandler *mpMusicHandler;
 	cLuxMessageHandler *mpMessageHandler;
+	cLuxPauseMessageButtonPrompt* mpPauseMessageButtonPrompt;
 	cLuxJournal *mpJournal;
 	cLuxCompletionCountHandler *mpCompletionCountHandler;
 	cLuxGlobalDataHandler *mpGlobalDataHandler;

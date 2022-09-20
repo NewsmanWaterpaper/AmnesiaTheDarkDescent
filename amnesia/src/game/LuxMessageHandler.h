@@ -42,6 +42,7 @@ public:
 	void LoadUserConfig();
 	void SaveUserConfig();
 
+
 	void OnMapEnter(cLuxMap *apMap);
 	void OnMapLeave(cLuxMap *apMap);
 
@@ -55,6 +56,12 @@ public:
 	void SetMessage(const tWString& asText, float afTime);
 	bool IsMessageActive(){ return mfMessageTime>0; }
 
+	bool IsCustomMessageActive() { return mbCustomMessageActive; }
+	void SetCustomMessageActive(bool abX) { mbCustomMessageActive = abX; }
+
+	void SetCustomMessagePos(cVector3f aPos) { mvCustomMessagePos = aPos; }
+	void SetCustomMessageColor(cColor aColor) { mCustomMessageColor = aColor; }
+
 	void OnDraw(float afFrameTime);
 
 	void DoAction(eLuxPlayerAction aAction, bool abPressed);
@@ -67,11 +74,13 @@ public:
 
 	bool ShowEffectSubtitles(){ return mbShowEffectSubtitles; }
 	void SetShowEffectSubtitles(bool abX){ mbShowEffectSubtitles=abX; }
+
+
 private:
 	void DrawQuestAdded();
 	void DrawMessage();
 	void DrawPauseMessage();
-	
+
 	
 	//////////////////
 	// Data
@@ -88,11 +97,17 @@ private:
 	bool mbShowSubtitles;
 	bool mbShowEffectSubtitles;
 
+	bool mbCustomMessageActive;
+
 	bool mbPauseMessageActive;
 	float mfPauseMessageAlpha;
+	bool mbPressedYes;
+	bool mbExitingPauseFromPress;
 
 	float mfMessageAlpha;
 	float mfMessageTime;
+
+	string msCallback;
 
 	bool mbQuestMessageActive;
 	float mfQuestMessageAlpha;
@@ -105,6 +120,12 @@ private:
 	tWStringVec mvLines;
 	bool mbMessageYesNo;
 	iLuxMessageCallback* mpCallback;
+
+
+	cVector3f mvCustomMessagePos;
+	cColor mCustomMessageColor;
+
+
 };
 
 //----------------------------------------------
