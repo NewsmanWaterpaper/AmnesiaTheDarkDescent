@@ -4470,7 +4470,7 @@ void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageSpeed(string& asName, fl
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
 		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
-	if (!pEnemy) continue;
+	if (!pEnemy) continue; 
 	pEnemy->SetHeatRayDamageSpeed(afDamageSpeed);
 
 	END_SET_PROPERTY

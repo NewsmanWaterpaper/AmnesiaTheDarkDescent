@@ -80,7 +80,7 @@ private:
 
 	//////////////////
 	// Data
-	cGuiGfxElement* mpBlackGfx;
+	cGuiGfxElement* mpBlackGfx; 
 	iFontData* mpFont;
 
 	cGuiGfxElement* mpQuestAddedIcon;
