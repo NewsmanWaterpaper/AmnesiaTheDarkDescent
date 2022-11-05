@@ -463,6 +463,9 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void ResetProgLogTimer()", (void*)ResetProgLogTimer);
 	AddFunc("void DisplayCounterTimer(bool abDisplayTimer)", (void*)DisplayCounterTimer);
 	AddFunc("void DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign)", (void*)DisplayCounterSettings);
+	AddFunc("int GetCurrentInGameHour()", (void*)GetCurrentInGameHour);
+	AddFunc("int GetCurrentInGameMin()", (void*)GetCurrentInGameMin);
+	AddFunc("int GetCurrentInGameSec()", (void*)GetCurrentInGameSec);
 
 	AddFunc("bool ScriptDebugOn()",(void *)ScriptDebugOn);
 
@@ -477,6 +480,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void SetLocalVarInt(string &in asName, int alVal)",(void *)SetLocalVarInt);
 	AddFunc("void SetLocalVarFloat(string &in asName, float afVal)",(void *)SetLocalVarFloat);
+	AddFunc("void SetLocalVarBool(string &in asName, bool abVal)", (void*)SetLocalVarBool);
 	AddFunc("void SetLocalVarString(string &in asName, string &in asVal)",(void *)SetLocalVarString);
 	
 	AddFunc("void AddLocalVarInt(string &in asName, int alVal)",(void *)AddLocalVarInt);
@@ -485,10 +489,12 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("int GetLocalVarInt(string &in asName)",(void *)GetLocalVarInt);
 	AddFunc("float GetLocalVarFloat(string &in asName)",(void *)GetLocalVarFloat);
+	AddFunc("bool GetLocalVarBool(string &in asName)", (void*)GetLocalVarBool);
 	AddFunc("string& GetLocalVarString(string &in asName)",(void *)GetLocalVarString);
 
 	AddFunc("void SetGlobalVarInt(string &in asName, int alVal)",(void *)SetGlobalVarInt);
 	AddFunc("void SetGlobalVarFloat(string &in asName, float afVal)",(void *)SetGlobalVarFloat);
+	AddFunc("void SetGlobalVarBool(string &in asName, bool abVal)", (void*)SetGlobalVarBool);
 	AddFunc("void SetGlobalVarString(string &in asName, string &in asVal)",(void *)SetGlobalVarString);
 
 	AddFunc("void AddGlobalVarInt(string &in asName, int alVal)",(void *)AddGlobalVarInt);
@@ -497,10 +503,11 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("int GetGlobalVarInt(string &in asName)",(void *)GetGlobalVarInt);
 	AddFunc("float GetGlobalVarFloat(string &in asName)",(void *)GetGlobalVarFloat);
+	AddFunc("bool GetGlobalVarBool(string &in asName)", (void*)GetGlobalVarBool);
 	AddFunc("string& GetGlobalVarString(string &in asName)",(void *)GetGlobalVarString);
 
 	AddFunc("void StartCredits(string &in asMusic, bool abLoopMusic, string &in asTextCat, string &in asTextEntry, int alEndNum)",(void *)StartCredits);
-	AddFunc("void StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName)", (void*)StartCreditsAndRankScreen);
+	AddFunc("void StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, float afRankMusicVol, float afRankMusicFade, string& asImageName)", (void*)StartCreditsAndRankScreen);
 	AddFunc("void SetEnding(string& asEnding, bool abCompletedOnHardMode)", (void*)SetEnding);
 	AddFunc("void ForceExitDirectlyToMenu()", (void*)ForceExitDirectlyToMenu);
 	AddFunc("void AddKeyPart(int alKeyPart)", (void *)AddKeyPart);
@@ -510,7 +517,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("int GetGameClears()", (void*)GetGameClears);
 
 	AddFunc("void StartDemoEnd()",(void *)StartDemoEnd);
-	AddFunc("void StartRankScreen()", (void*)StartRankScreen);
+	AddFunc("void StartRankScreen(string& asMusic, bool abLoopMusic, float afRankMusicVol, float afRankMusicFade, string& asImageName)", (void*)StartRankScreen);
 
 	AddFunc("void AutoSave()", (void *)AutoSave);
 	AddFunc("void DoHardModeSave()", (void*)DoHardModeSave);
@@ -953,8 +960,21 @@ void __stdcall cLuxScriptHandler::DisplayCounterSettings(float afX, float afY, f
 	pProgLog->SetCounterHUDSize(newSize);
 	pProgLog->SetCounterHUDAlign(newAlign);
 }
+//-----------------------------------------------------------------------
+int __stdcall cLuxScriptHandler::GetCurrentInGameHour()
+{
+	return gpBase->mpProgressLogHandler->GetCurrentInGameHour();
+}
 
+int __stdcall cLuxScriptHandler::GetCurrentInGameMin()
+{
+	return gpBase->mpProgressLogHandler->GetCurrentInGameMinute();
+}
 
+int __stdcall cLuxScriptHandler::GetCurrentInGameSec()
+{
+	return gpBase->mpProgressLogHandler->GetCurrentInGameSecond();
+}
 //-----------------------------------------------------------------------
 
 bool __stdcall cLuxScriptHandler::ScriptDebugOn()
@@ -1036,6 +1056,11 @@ void __stdcall cLuxScriptHandler::SetLocalVarFloat(string& asName, float afVal)
 	SetLocalVarString(asName, cString::ToString(afVal));
 }
 
+void __stdcall cLuxScriptHandler::SetLocalVarBool(string& asName, bool abVal)
+{
+	SetLocalVarString(asName, cString::ToString(abVal));
+}
+
 void __stdcall cLuxScriptHandler::SetLocalVarString(string& asName, const string& asVal)
 {
 	cLuxMap *pMap = gpBase->mpMapHandler->GetCurrentMap();
@@ -1112,6 +1137,14 @@ float __stdcall cLuxScriptHandler::GetLocalVarFloat(string& asName)
 	return cString::ToFloat(sVal.c_str(),0);
 }
 
+bool __stdcall cLuxScriptHandler::GetLocalVarBool(string& asName)
+{
+	string sVal = GetLocalVarString(asName);
+	if (sVal == "") return false;
+
+	return cString::ToBool(sVal.c_str(), 0);
+}
+
 string gsGetLocalVarNullString = "";
 string& __stdcall cLuxScriptHandler::GetLocalVarString(string& asName)
 {
@@ -1138,6 +1171,11 @@ void __stdcall cLuxScriptHandler::SetGlobalVarFloat(string& asName, float afVal)
 {
 	string t =  cString::ToString(afVal);
 	SetGlobalVarString(asName, t);
+}
+
+void __stdcall cLuxScriptHandler::SetGlobalVarBool(string& asName, bool abVal)
+{
+	SetGlobalVarString(asName, cString::ToString(abVal));
 }
 
 void __stdcall cLuxScriptHandler::SetGlobalVarString(string& asName, const string& asVal)
@@ -1204,6 +1242,14 @@ float __stdcall cLuxScriptHandler::GetGlobalVarFloat(string& asName)
 	return cString::ToFloat(sVal.c_str(),0);
 }
 
+bool __stdcall cLuxScriptHandler::GetGlobalVarBool(string& asName)
+{
+	string sVal = GetGlobalVarString(asName);
+	if (sVal == "") return false;
+
+	return cString::ToBool(sVal.c_str(), 0);
+}
+
 string& __stdcall cLuxScriptHandler::GetGlobalVarString(string& asName)
 {
 	cLuxScriptVar* pVar = gpBase->mpGlobalDataHandler->GetVar(asName);
@@ -1223,35 +1269,17 @@ void __stdcall cLuxScriptHandler::StartCredits(string& asMusic, bool abLoopMusic
 	gpBase->mpEngine->GetUpdater()->SetContainer("Credits");
 }
 
-void __stdcall cLuxScriptHandler::StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName)
+void __stdcall cLuxScriptHandler::StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, float afRankMusicVol, float afRankMusicFade, string& asImageName)
 {
 	gpBase->mpCredits->SetupWithRankScreen(asMusicCredits, abLoopMusicCredits, asTextCat, asTextEntry, true, abCreditsBackground);
-	gpBase->mpRankScreen->Setup(asMusicRank, abLoopMusicRank, asImageName);
+	gpBase->mpRankScreen->Setup(asMusicRank, abLoopMusicRank, afRankMusicVol, afRankMusicFade, asImageName);
 	gpBase->mpEngine->GetUpdater()->SetContainer("Credits");
 }
 
 //-----------------------------------------------------------------------
 void __stdcall cLuxScriptHandler::SetEnding(string& asEnding, bool abCompletedOnHardMode)
 {
-	eLuxEnding endingType; 
-	if(asEnding == "DefaultGood")
-	{
-		endingType = eLuxEnding_DefaultGood;
-	}
-	else if(asEnding == "DefaultBad")
-	{
-		endingType = eLuxEnding_DefaultBad;
-	}
-	 else if(asEnding == "GoodJoke")
-	{
-		endingType = eLuxEnding_GoodJoke;
-	}
-	else if (asEnding == "BadJoke")
-	{
-		endingType = eLuxEnding_BadJoke;
-	}
-
-	gpBase->mpEndingsHandler->AddEndingLog(endingType, abCompletedOnHardMode);
+	gpBase->mpEndingsHandler->AddEndingLog(asEnding, abCompletedOnHardMode);
 }
 
 string& __stdcall cLuxScriptHandler::GetPreviousEnding()
@@ -1303,10 +1331,10 @@ void __stdcall cLuxScriptHandler::StartDemoEnd()
 		gpBase->mpEngine->GetUpdater()->SetContainer("DemoEnd");
 }
 
-void __stdcall cLuxScriptHandler::StartRankScreen()
+void __stdcall cLuxScriptHandler::StartRankScreen(string& asMusic, bool abLoopMusic, float afRankMusicVol, float afRankMusicFade, string& asImageName)
 {
-	if(gpBase->mpRankScreen)
-		gpBase->mpEngine->GetUpdater()->SetContainer("RankScreen");
+	gpBase->mpRankScreen->Setup(asMusic, abLoopMusic,afRankMusicVol, afRankMusicFade, asImageName);
+	gpBase->mpEngine->GetUpdater()->SetContainer("RankScreen");
 }
 
 //-----------------------------------------------------------------------
@@ -4465,13 +4493,13 @@ void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageSpeed(string& asName, fl
 	END_SET_PROPERTY
 }
 
-void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageSpeed(string& asName, float afDamageSpeed)
+void __stdcall cLuxScriptHandler::SetWraithHeatRayDamageLightAmount(string& asName, float afLightAmount)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
 		cLuxEnemy_Wraith* pEnemy = ToWraith(pEntity);
 	if (!pEnemy) continue; 
-	pEnemy->SetHeatRayDamageSpeed(afDamageSpeed);
+	pEnemy->SetHeatRayDamageLightAmount(afLightAmount);
 
 	END_SET_PROPERTY
 }
@@ -4533,7 +4561,7 @@ void __stdcall cLuxScriptHandler::SetWraithMinBurnDamage(string& asName, float a
 	END_SET_PROPERTY
 }
 
-void __stdcall cLuxScriptHandler::SetWraithMaxBurnDamage(string& asName, float afMaxDamage
+void __stdcall cLuxScriptHandler::SetWraithMaxBurnDamage(string& asName, float afMaxDamage)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
 
@@ -4566,7 +4594,7 @@ void __stdcall cLuxScriptHandler::SetWraithAttackType(string& asName, string& as
 	pEnemy->SetAttackType(attack);
 
 	END_SET_PROPERTY
-
+		
 }
 //-----------------------------------------------------------------------
 

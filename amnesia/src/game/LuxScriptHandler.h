@@ -70,6 +70,10 @@ private:
 	static void __stdcall DisplayCounterTimer(bool abDisplayTimer);
 	static void __stdcall DisplayCounterSettings(float afX, float afY, float afZ, float afR, float afG, float afB, float afA, float afTimerSize, string& asTimerAlign);
 
+	static int __stdcall GetCurrentInGameHour();
+	static int __stdcall GetCurrentInGameMin();
+	static int __stdcall GetCurrentInGameSec();
+
 	static bool __stdcall ScriptDebugOn();
 
 
@@ -87,6 +91,7 @@ private:
 
 	static void __stdcall SetLocalVarInt(string& asName, int alVal);
 	static void __stdcall SetLocalVarFloat(string& asName, float afVal);
+	static void __stdcall SetLocalVarBool(string& asName, bool abVal);
 	static void __stdcall SetLocalVarString(string& asName, const string& asVal);
 	
 	static void __stdcall AddLocalVarInt(string& asName, int alVal);
@@ -96,9 +101,11 @@ private:
 	static int __stdcall GetLocalVarInt(string& asName);
 	static float __stdcall GetLocalVarFloat(string& asName);
 	static string& __stdcall GetLocalVarString(string& asName);
+	static bool __stdcall GetLocalVarBool(string& asName);
 
 	static void __stdcall SetGlobalVarInt(string& asName, int alVal);
 	static void __stdcall SetGlobalVarFloat(string& asName, float afVal);
+	static void __stdcall SetGlobalVarBool(string& asName, bool abVal);
 	static void __stdcall SetGlobalVarString(string& asName, const string& asVal);
 
 	static void __stdcall AddGlobalVarInt(string& asName, int alVal);
@@ -108,10 +115,11 @@ private:
 	static int __stdcall GetGlobalVarInt(string& asName);
 	static float __stdcall GetGlobalVarFloat(string& asName);
 	static string& __stdcall GetGlobalVarString(string& asName);
+	static bool __stdcall GetGlobalVarBool(string& asName);
 
 	// Game
 	static void __stdcall StartCredits(string& asMusic, bool abLoopMusic, string& asTextCat, string& asTextEntry, int alEndNum);
-	static void __stdcall StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName);
+	static void __stdcall StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank,float afRankMusicVol, float afRankMusicFade, string& asImageName);
 	static void __stdcall SetEnding(string& asEnding, bool abCompletedOnHardMode);
 	static string& __stdcall GetPreviousEnding();
 	static bool __stdcall GetEndingCompletion(string& asEndingType);
@@ -121,7 +129,7 @@ private:
 	static void __stdcall AddKeyPart(int alKeyPart);
 
 	static void __stdcall StartDemoEnd();
-	static void __stdcall StartRankScreen();
+	static void __stdcall StartRankScreen(string& asMusic, bool abLoopMusic, float afRankMusicVol, float afRankMusicFade, string& asImageName);
 
 	// Saving
 	static void __stdcall AutoSave();

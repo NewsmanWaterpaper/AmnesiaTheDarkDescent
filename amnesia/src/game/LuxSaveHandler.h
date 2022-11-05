@@ -64,7 +64,7 @@ public:
 	void Update(float afTimeStep);
 	void Reset();
 
-	void SaveGameToFile(const tWString& asFile, bool abSaveSnapshot=false);
+	void SaveGameToFile(const tWString& asFile, bool abSaveSnapshot);
 	void LoadGameFromFile(const tWString& asFile);
 
 	bool AutoSave();

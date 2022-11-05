@@ -45,6 +45,10 @@ public:
 
 	int GetProgLogCounter() {return mlCounter; }
 
+	int GetCurrentInGameHour();
+	int GetCurrentInGameMinute();
+	int GetCurrentInGameSecond();
+
 	bool GetProgLogCounterActive() {return mbCounterActive; }
 	void SetProgLogCounterActive(bool abX) { mbCounterActive = abX; }
 	void ResetProgLogCounter(); 

@@ -251,6 +251,8 @@ void cLuxMainMenu::OnQuit()
         //Reset game
         gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
         gpBase->SetCustomStory(NULL);
+		gpBase->SetCurrentCustomStoryName(NULL);
+		gpBase->SetIsInCustomStory(false);
     }
     
     //Quit Game
@@ -684,6 +686,7 @@ void cLuxMainMenu::OnMenuExit()
 			}
 			
 			gpBase->mpEngine->GetUpdater()->SetContainer("Default");
+			gpBase->mpProgressLogHandler->ResetProgLogCounter();
 
 			gpBase->StartGame("", "", ""); //""= using user config values.
 		}
@@ -718,6 +721,8 @@ void cLuxMainMenu::OnMenuExit()
 			//Reset game
 			gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 			gpBase->SetCustomStory(NULL);
+			gpBase->SetCurrentCustomStoryName(NULL);
+			gpBase->SetIsInCustomStory(false);
 
 			//Start up menu again
 			OnLeaveContainer("");
@@ -748,6 +753,8 @@ void cLuxMainMenu::OnMenuExit()
 			//Reset game
 			gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 			gpBase->SetCustomStory(NULL);
+			gpBase->SetCurrentCustomStoryName(NULL);
+			gpBase->SetIsInCustomStory(false);
 
 			//Start up menu again
 			OnLeaveContainer("");
@@ -1119,7 +1126,7 @@ void cLuxMainMenu::CreateTopMenuGui()
 	
 	#ifndef LUX_DEMO_VERSION
 		if(	gpBase->mbPTestActivated==false &&
-			gpBase->mpMapHandler->MapIsLoaded()==false || gpBase->mpMapHandler->MapIsLoaded() == false && gpBase->mpEndingsHandler->mbAllowBonusFeatures == true)
+			gpBase->mpMapHandler->MapIsLoaded()== false && gpBase->mpEndingsHandler->mbAllowBonusFeatures == true)
 		{
 			pLabel = mpGuiSet->CreateWidgetLabel(vPos,0,kTranslate("MainMenu","Custom Map"));
 			pLabel->AddCallback(eGuiMessage_MouseDown, this, kGuiCallback(PressCustomStory));
@@ -1527,7 +1534,10 @@ bool cLuxMainMenu::ClickedStartGamePopup(iWidget* apWidget, const cGuiMessageDat
 	
 	if(bStartGame)
 	{
+		
 		gpBase->SetCustomStory(NULL);
+		//gpBase->SetCurrentCustomStoryName("Main");
+		gpBase->SetIsInCustomStory(false);
 		ExitMenu(eLuxMainMenuExit_StartGame);
 	}
 	else

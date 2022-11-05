@@ -29,29 +29,45 @@
 #include "LuxEndingsHandler.h"
 #include "LuxPlayer.h"
 #include "LuxGlobalDataHandler.h"
+#include "LuxMainMenu_CustomStory.h"
 
-#include <sstream>
+//#include <sstream>
+//#include <vector>
 
  //-----------------------------------------------------------------------
 
-const int glTotalItems_Num = 98;
+//int glTotalItems_Num = 100;
+//
+//#if MAC_OS || LINUX
+//std::wstring LongToWString(const long long& l)
+//{
+//	std::string s;
+//	std::stringstream strstream;
+//	strstream << l;
+//	strstream >> s;
+//	std::wstring temp(s.length(), L' ');
+//	std::copy(s.begin(), s.end(), temp.begin());
+//	return temp;
+//}
+//
+//tWString gsTotalItems_String = tWString(LongToWString((static_cast<long long>(glTotalItems_Num))));
+//#else
+//tWString gsTotalItems_String = tWString(to_wstring(static_cast<long long>(glTotalItems_Num)));
+//#endif
 
-#if MAC_OS || LINUX
-std::wstring LongToWString(const long long& l)
+static eFontAlign ToFontAlign(const tString& asX)
 {
-	std::string s;
-	std::stringstream strstream;
-	strstream << l;
-	strstream >> s;
-	std::wstring temp(s.length(), L' ');
-	std::copy(s.begin(), s.end(), temp.begin());
-	return temp;
-}
+	tString sLowerCase = cString::ToLowerCase(asX);
+	if (sLowerCase == "center")
+		return eFontAlign_Center;
+	else if (sLowerCase == "right")
+		return eFontAlign_Right;
+	else if (sLowerCase == "left")
+		return eFontAlign_Left;
 
-const tWString gsTotalItems_String = tWString(LongToWString((static_cast<long long>(glTotalItems_Num))));
-#else
-const tWString gsTotalItems_String = tWString(to_wstring(static_cast<long long>(glTotalItems_Num)));
-#endif
+	Error("The font alignment '%s' does not exist!\n", asX.c_str());
+	return eFontAlign_Left;
+}
 
 //-----------------------------------------------------------------------
 
@@ -101,28 +117,65 @@ cLuxRankScreen::cLuxRankScreen() : iLuxUpdateable("LuxRankScreen")
 
 	mvTitleFontSize = cVector2f(50, 50);
 	mTitleColor = cColor(0.7, 0.7, 0.9, 0.9);
-	mGoldStatusColor = cColor(232.0f/255.0f, 201.0f/255.0f, 28.0f/255.0f);
+	//mGoldStatusColor = cColor(232.0f/255.0f, 201.0f/255.0f, 28.0f/255.0f);
 
 	///////////////////////////////
-	//Load Data
-	tString sSkinFile = gpBase->mpRankCfg->GetString("RankScreen", "Skin", "gui_default.skin");
+	//Load GUI Data
+	tString sSkinFile = gpBase->mpRankCfg->GetString("RankScreen", "Skin", "gui_main_menu.skin");
 	mpGuiSet->SetSkin(mpGui->CreateSkin(sSkinFile));
 
-	msBackgroundFile = gpBase->mpRankCfg->GetString("RankScreen", "BackgroundImage", "");
+	msBackgroundFile = gpBase->mpRankCfg->GetString("RankScreen", "BackgroundImage", "demo_end_image.jpg");
 
-	mvMessageFontSize = gpBase->mpRankCfg->GetVector2f("RankScreen", "MessageFontSize", 0);
+	mvMessageFontSize = gpBase->mpRankCfg->GetVector2f("RankScreen", "MessageFontSize", cVector2f(25,25));
 	mMessageFontColor = gpBase->mpRankCfg->GetColor("RankScreen", "MessageFontColor", cColor(1, 1));
+	mGoldStatusColor = gpBase->mpRankCfg->GetColor("RankScreen", "RankedFontColor", cColor(232.0f / 255.0f, 201.0f / 255.0f, 28.0f / 255.0f));
 
-	mfTextWidth = gpBase->mpRankCfg->GetFloat("RankScreen", "TextWidth", 0);
-	mfTextY = gpBase->mpRankCfg->GetFloat("RankScreen", "TextY", 0);
+	mfTextWidth = gpBase->mpRankCfg->GetFloat("RankScreen", "TextWidth", 500);
+	mfTextY = gpBase->mpRankCfg->GetFloat("RankScreen", "TextY", 120);
 
-	mfExitButtonY = gpBase->mpRankCfg->GetFloat("RankScreen", "ExitButtonY", 0);
+
+	mvButtonPos = gpBase->mpRankCfg->GetVector3f("RankScreen", "ExitButtonPos", cVector3f(355, 550, 10));
+	mvButtonSize = gpBase->mpRankCfg->GetVector2f("RankScreen", "MessageFontSize", cVector2f(90, 45));
+	mButtonFontColor = gpBase->mpRankCfg->GetColor("RankScreen", "ButtonFontColor", cColor(1, 0.9,0.9,1));
 
 	mpBlackGfx = mpGui->CreateGfxFilledRect(cColor(0, 1), eGuiMaterial_Alpha);
 
 	mfFadeSpeed = gpBase->mpRankCfg->GetFloat("RankScreen", "FadeSpeed", 0);
 
-	mbShowOnAllExit = gpBase->mpRankCfg->GetBool("RankScreen", "ShowOnAllExit", false);
+
+	///////////////////////////////
+	//Load Rank Data
+
+	mlTimeHourRank = gpBase->mpRankCfg->GetInt("RankScreen", "TimeHourRank", 1);
+	mlTimeMinRank = gpBase->mpRankCfg->GetInt("RankScreen", "TimeMinRank", 30);
+	mlTimeSecRank = gpBase->mpRankCfg->GetInt("RankScreen", "TimeSecRank", 15);
+	mbDisplayTimeRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayTimeRank", true);
+	msTimeRankOperator = gpBase->mpRankCfg->GetString("RankScreen", "TimeRank_Operator", "<=");
+
+
+	mbDisplayEndingRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayEndingRank", true);
+	msEndingRank = gpBase->mpRankCfg->GetString("RankScreen", "EndingRank", "Good");
+
+	mbDisplayGameClearRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayGameClearRank", true);
+	mbDisplayGameModeRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayGameModeRank", true);
+
+	mfMinDeathCountRank = gpBase->mpRankCfg->GetInt("RankScreen", "MinDeathRank", 0);
+	mbDisplayDeathRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayDeathRank", true);
+
+	mfMinDamageRank = gpBase->mpRankCfg->GetInt("RankScreen", "MinDamageRank", 250);
+	mbDisplayDamageRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayDamageRank", true);
+
+	mlItemAmount = gpBase->mpRankCfg->GetInt("RankScreen", "TotalItemAmount", 100);
+	mbDisplayItemRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayItemRank", true);
+
+	mfMinHealthItemUsedRank = gpBase->mpRankCfg->GetInt("RankScreen", "HealthItemUsedRank", 5);
+	mbDisplayHealthRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayHealthRank", true);
+
+	mfMinOilItemUsedRank = gpBase->mpRankCfg->GetInt("RankScreen", "OilItemUsedRank", 5);
+	mbDisplayOilRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayOilRank", true);
+
+	mlCustomGlobalVarRankAmount = gpBase->mpRankCfg->GetInt("RankScreen", "CustomGlobalVarRankAmount", 0);
+	mlRewardSlideAmount = gpBase->mpRankCfg->GetInt("RankScreen", "RewardSlideAmount", 0);
 
 	///////////////////////////////////////
 
@@ -131,8 +184,8 @@ cLuxRankScreen::cLuxRankScreen() : iLuxUpdateable("LuxRankScreen")
 	float fButtonWidth = 20.0f;
 	float fButtonHeight = 30.0f;
 
-	mvButtonSize = cVector2f(fButtonWidth+60, fButtonHeight+5) + 10;
-	mvButtonPos = cVector3f(355,550,10);
+	//mvButtonSize = cVector2f(fButtonWidth+60, fButtonHeight+5) + 10;
+	//mvButtonPos = cVector3f(355,550,10);
 
 	mpBExit = mpGuiSet->CreateWidgetButton(mvButtonPos, mvButtonSize, sButtonLabel, NULL);
 
@@ -150,6 +203,7 @@ cLuxRankScreen::cLuxRankScreen() : iLuxUpdateable("LuxRankScreen")
 
 	Reset();
 }
+
 //-----------------------------------------------------------------------
 cLuxRankScreen::~cLuxRankScreen()
 {
@@ -162,7 +216,44 @@ void cLuxRankScreen::Reset()
 {
 	mbExiting = false;
 	msMusic = "";
+	mfMusicVolume = 1.0f;
+	mfMusicFade = 1.0f;
 	mbLoopMusic = false;
+	mbShowRankScreen = true;
+	mlCurrentRewardSlide = -1;
+	mbRewardSlideSoundPlayed = false;
+	
+
+	vCustomGlobalVarRankNames.clear();
+	vCustomGlobalVarRankType.clear();
+	vCustomGlobalVarRankOper.clear();
+	vCustomGlobalVarRankCurrentValueString.clear();
+	vCustomGlobalVarRankFinalTextData.clear();
+
+	vCustomGlobalVarRankBool.clear();
+	vCustomGlobalVarCurrentBool.clear();
+
+	vCustomGlobalVarRankNum.clear();
+	vCustomGlobalVarRankCurrentValueInt.clear();
+	
+	vCustomGlobalVarRankNumFloat.clear();
+	vCustomGlobalVarRankCurrentValueFloat.clear();
+
+	vRewardSlideConditions.clear();
+	vRewardSlideSounds.clear();
+	vRewardSlideBackgroundImage.clear();
+	//vRewardSlideTextCategories.clear();
+	vRewardSlideTextEntries.clear();
+	vRewardSlideTextAlign.clear();
+	vRewardSlideTitleSize.clear();
+	vRewardSlideTitlePos.clear();
+	vRewardSlideDescSize.clear();
+	vRewardSlideDescPos.clear();
+
+	vRewardSlideGameClearAmount.clear();
+	vRewardSlideTextColors.clear();
+	vRewardSlideTextPos.clear();
+	vRewardSlideTextSize.clear();
 }
 
 //-----------------------------------------------------------------------
@@ -171,6 +262,118 @@ void cLuxRankScreen::LoadData()
 {
 	cLuxHelpFuncs *pHelpFuncs = gpBase->mpHelpFuncs;
 
+	//glTotalItems_Num = mlItemAmount;
+
+	////////////////////////////////////////////
+	//Get Custom Story Rank Data///////////////
+	//////////////////////////////////////////
+
+	tWString sPath = cString::AddSlashAtEndW(cString::To16Char(gpBase->msCustomStoryPath));
+
+	tWStringList lstStoryDirs;
+	cPlatform::FindFoldersInDir(lstStoryDirs, sPath, false);
+
+	cConfigFile* pCustomStoryCfg;
+	tWString sFile;
+
+	if (gpBase->GetIsInCustomStory() == true)
+	{
+		tString sErrorMsg;
+		tWString sStoryName = gpBase->GetCurrentCustomStoryName();
+
+		tWStringListIt it = lstStoryDirs.begin();
+
+		for (; it != lstStoryDirs.end(); ++it)
+		{
+			const tWString& sStoryPath = sPath + *it;
+			cLuxCustomStorySettings* pStory = hplNew(cLuxCustomStorySettings, ());
+
+			sFile = cString::AddSlashAtEndW(sStoryPath) + _W("custom_story_settings.cfg");
+
+			pCustomStoryCfg = hplNew(cConfigFile, (sFile));
+			bool bValid = pCustomStoryCfg->Load();
+			if (bValid)
+			{
+				tWString sTempName = cString::To16Char(pCustomStoryCfg->GetString("Main", "Name", ""));
+				if (sTempName == _W(""))
+				{
+					sErrorMsg = "custom story has no name!";
+				}
+
+				if (sTempName == sStoryName)
+				{
+					//Custom GUI
+					msBackgroundFile = pCustomStoryCfg->GetString("RankScreen", "BackgroundImage", "demo_end_image.jpg");
+
+					mvMessageFontSize = pCustomStoryCfg->GetVector2f("RankScreen", "MessageFontSize", cVector2f(25, 25));
+					mMessageFontColor = pCustomStoryCfg->GetColor("RankScreen", "MessageFontColor", cColor(1, 1));
+					mGoldStatusColor = pCustomStoryCfg->GetColor("RankScreen", "RankedFontColor", cColor(232.0f / 255.0f, 201.0f / 255.0f, 28.0f / 255.0f));
+
+					mfTextWidth = pCustomStoryCfg->GetFloat("RankScreen", "TextWidth", 500);
+					mfTextY = pCustomStoryCfg->GetFloat("RankScreen", "TextY", 120);
+
+					mvButtonPos = pCustomStoryCfg->GetVector3f("RankScreen", "ExitButtonPos", cVector3f(355, 550, 10));
+					mvButtonSize = pCustomStoryCfg->GetVector2f("RankScreen", "ButtonFontSize", cVector2f(90, 45));
+					mButtonFontColor = pCustomStoryCfg->GetColor("RankScreen", "ButtonFontColor", cColor(1, 0.9, 0.9, 1));
+
+
+					//Custom Rank
+					mlTimeHourRank = pCustomStoryCfg->GetInt("RankScreen", "TimeHourRank", 1);
+					mlTimeMinRank = pCustomStoryCfg->GetInt("RankScreen", "TimeMinRank", 30);
+					mlTimeSecRank = pCustomStoryCfg->GetInt("RankScreen", "TimeSecRank", 15);
+					msTimeRankOperator = pCustomStoryCfg->GetString("RankScreen", "TimeRank_Operator", "<=");
+					mbDisplayTimeRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayTimeRank", true);
+
+
+					mbDisplayEndingRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayEndingRank", false);
+					msEndingRank = pCustomStoryCfg->GetString("RankScreen", "EndingRank", "Good");
+
+					mbDisplayGameClearRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayGameClearRank", false);
+					mbDisplayGameModeRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayGameModeRank", false);
+
+					mfMinDeathCountRank = pCustomStoryCfg->GetInt("RankScreen", "MinDeathRank", 0);
+					mbDisplayDeathRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayDeathRank", true);
+
+					mfMinDamageRank = pCustomStoryCfg->GetInt("RankScreen", "MinDamageRank", 250);
+					mbDisplayDamageRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayDamageRank", true);
+
+					mlItemAmount = pCustomStoryCfg->GetInt("RankScreen", "TotalItemAmount", 100);
+					mbDisplayItemRank = gpBase->mpRankCfg->GetBool("RankScreen", "DisplayItemRank", true);
+
+					mfMinHealthItemUsedRank = pCustomStoryCfg->GetInt("RankScreen", "HealthItemUsedRank", 5);
+					mbDisplayHealthRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayHealthRank", true);
+
+					mfMinOilItemUsedRank = pCustomStoryCfg->GetInt("RankScreen", "OilItemUsedRank", 5);
+					mbDisplayOilRank = pCustomStoryCfg->GetBool("RankScreen", "DisplayOilRank", true);
+
+					mlCustomGlobalVarRankAmount = pCustomStoryCfg->GetInt("RankScreen", "CustomGlobalVarRankAmount", 0);
+
+					//Reward Slides
+
+
+					sErrorMsg = "smh";
+					Log("Found current custom story from path \"%ls\" : %s.\n", sStoryPath.c_str(), sErrorMsg.c_str());
+
+					break;
+					//return;
+				}
+				else
+				{
+					sErrorMsg = "smh";
+					Log("Error finding current custom story from path \"%ls\" : %s.\n", sStoryPath.c_str(), sErrorMsg.c_str());
+				}
+			}
+			else
+			{
+				sErrorMsg = "could not find custom_story_settings.cfg file or it was invalid";
+			}
+
+			if (bValid == false)
+				Log("Error creating custom story from path \"%ls\" : %s.\n", sStoryPath.c_str(), sErrorMsg.c_str());
+		}
+	}
+	
+	////////////////////////////////////////////
 #if MAC_OS || LINUX
 	msGameMode = cString::To16Char(gpBase->mbHardMode == true ? "Hard" : "Default");
 	
@@ -185,11 +388,17 @@ void cLuxRankScreen::LoadData()
 	tWString sTemp2 = tWString(LongToWString(static_cast<long long>((gpBase->mpPlayer->GetTotalItemCount())))); //msPlayerItemAmount
 	msHealthItemsUsed = tWString(LongToWString(static_cast<long long>((gpBase->mpPlayer->GetHealthItemsUsed()))));
 	msOilItemsUsed = tWString(LongToWString(static_cast<long long>((gpBase->mpPlayer->GetOilItemsUsed()))));
+
+	gsTotalItems_String = tWString(LongToWString((static_cast<long long>(mlItemAmount))));
 #else
 	 ////////////////////////////////////////////////////////
 	 // Data
 	 msGameMode = gpBase->mbHardMode == true ? kTranslate("MainMenu", "HardMode") : kTranslate("MainMenu", "NormalMode");
 
+	 tWString gsTotalItems_String = tWString(to_wstring(static_cast<long long>(mlItemAmount)));
+
+	 /////////////////////////////
+	 /// Game Time
 	 int mlCounter = gpBase->mpProgressLogHandler->GetProgLogCounter();
 	 lSec = (mlCounter / 60) % 60;
 	 lMin = (mlCounter / (60 * 60)) % 60;
@@ -198,26 +407,40 @@ void cLuxRankScreen::LoadData()
 	 sprintf(sTemp, "%02d:%02d:%02d", lHour, lMin, lSec);
 	 tWString sTotalTimeTemp = cString::To16Char(sTemp);
 	 msTotalTime = sTotalTimeTemp;
+	 //vRankingVariableStrings.push_back(msTotalTime);
 
+	 //Ending
 	 string sEndingTemp = gpBase->mpEndingsHandler->GetPreviousEnding();
 	 msEndingReceived = kTranslate("RankScreen", sEndingTemp);
+	 //vRankingVariableStrings.push_back(msEndingReceived);
 
+	 //Game Clear
 	 tWString sClearTemp = tWString(std::to_wstring(static_cast<long long>(gpBase->mpEndingsHandler->GetTotalGameClears())));
 	 msGameClear = sClearTemp;
+	 //vRankingVariableStrings.push_back(msGameClear);
 
+	 //Damage Taken
 	 tWString sDamageTemp = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetTotalDamageTaken())));
 	 msTotalDamageTaken = sDamageTemp;
+	 //vRankingVariableStrings.push_back(msTotalDamageTaken);
 
+	 //Death Amount 
 	 tWString sDeathTemp = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetTotalDeaths())));
 	 msTotalDeath = sDeathTemp;
+	 //vRankingVariableStrings.push_back(msTotalDeath);
 
+	 //Items Collected
 	 tWString sTemp2 = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetTotalItemCount())));  //msPlayerItemAmount
 
+	 //Health Items Used
 	 tWString sHealthTemp = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetHealthItemsUsed())));
 	 msHealthItemsUsed = sHealthTemp;
+	 //vRankingVariableStrings.push_back(msHealthItemsUsed);
 
+	 //Oil Items Used
 	 tWString sOilTemp = tWString(std::to_wstring(static_cast<long long>(gpBase->mpPlayer->GetOilItemsUsed())));
 	 msOilItemsUsed = sOilTemp;
+	 //vRankingVariableStrings.push_back(msOilItemsUsed);
 
 #endif
 	
@@ -226,31 +449,172 @@ void cLuxRankScreen::LoadData()
 	 size_t lNumIndex = sItemText.find(L"#");
 
 	 sItemText.replace(lNumIndexAlt, sTemp2.size(), sTemp2);
+
+
 	 sItemText.replace(lNumIndex, gsTotalItems_String.size(), gsTotalItems_String);
 	 
 
 	 msPlayerItemAmount = sItemText;
+	 //vRankingVariableStrings.push_back(msPlayerItemAmount);
 
-	 cLuxScriptVar* pVar = gpBase->mpGlobalDataHandler->GetVar("AlienEnding");
-	 msStatuesVal = pVar->msVal;
-	 mlStatuesVal = 0;
-	 if (msStatuesVal != "0")
+	 /////////////////////
+	 /// Custom Vars
+
+	 cConfigFile* pCfg;
+
+	 if (gpBase->GetIsInCustomStory() == true)
 	 {
-		 mlStatuesVal = cString::ToInt(msStatuesVal.c_str(), 0);
-		 //mlStatuesVal += 1;
+		 pCfg = pCustomStoryCfg;
+
+	 }
+	 else
+	 {
+		 pCfg = gpBase->mpRankCfg;
 	 }
 
-	 if (mlStatuesVal >= 1)
+	 if (mlCustomGlobalVarRankAmount != 0)
 	 {
-		 tWString sStatueTemp = tWString(std::to_wstring(static_cast<long long>(mlStatuesVal)));
-		 msStatuesFound = sStatueTemp;
+
+		 for (int i = 0; i <= mlCustomGlobalVarRankAmount; ++i)
+		 {
+			 string tempName1 = "CustomGlobalVarRank_" + cString::ToString(i+1) + "_Name";
+			 string tempType1 = "CustomGlobalVarRank_" + cString::ToString(i+1) + "_Type";
+
+			 const tString tempName2 = pCfg->GetString("RankScreen", tempName1, "");
+			 const tString tempType2 = pCfg->GetString("RankScreen", tempType1, "");
+			 
+			 vCustomGlobalVarRankNames.push_back(tempName2);
+			 vCustomGlobalVarRankType.push_back(tempType2);
+
+			 const tString &tempVar = vCustomGlobalVarRankNames[i];
+
+			 cLuxScriptVar* pVar = gpBase->mpGlobalDataHandler->GetVar(tempVar);
+
+			 if (vCustomGlobalVarRankType[i] == "Int" || vCustomGlobalVarRankType[i] == "Float")
+			 {
+				 tString tempOper = "CustomGlobalVarRank_" + cString::ToString(i + 1) + "_Operator";
+
+				 vCustomGlobalVarRankOper.push_back(pCfg->GetString("RankScreen", tempOper, "=="));
+
+				 vCustomGlobalVarRankCurrentValueString.push_back(pVar->msVal);
+
+				 string sNumValue = pVar->msVal;
+
+				 if (vCustomGlobalVarRankType[i] == "Int")
+				 {
+					 tString tempInt = "CustomGlobalVarRank_" + cString::ToString(i + 1) + "_Num";
+					 vCustomGlobalVarRankNum.push_back(pCfg->GetInt("RankScreen", tempInt, 0));
+
+					 int tempCurrentInt = cString::ToInt(sNumValue.c_str(), 0);
+					 vCustomGlobalVarRankCurrentValueInt.push_back(tempCurrentInt);
+
+					#if MAC_OS || LINUX
+					 tWString sDataTemp = tWString(LongToWString((static_cast<long long>(tempCurrentInt))));
+					#else
+					 tWString sDataTemp = tWString(std::to_wstring(static_cast<long long>(tempCurrentInt)));
+					#endif
+					 vCustomGlobalVarRankFinalTextData.push_back(sDataTemp);
+
+					 //vRankingVariableStrings.push_back(vCustomGlobalVarRankFinalTextData[i]);
+				 }
+				 else if (vCustomGlobalVarRankType[i] == "Float")
+				 {
+					 tString tempFloat = "CustomGlobalVarRank_" + cString::ToString(i + 1) + "_Num";
+					 vCustomGlobalVarRankNumFloat.push_back(pCfg->GetFloat("RankScreen", tempFloat, 0));
+
+					 float tempCurrentFloat = cString::ToFloat(sNumValue.c_str(), 0);
+					 vCustomGlobalVarRankCurrentValueFloat.push_back(tempCurrentFloat);
+
+					#if MAC_OS || LINUX
+					 tWString sDataTemp = tWString(LongToWString((static_cast<long long>(tempCurrentFloat))));
+					#else
+					 tWString sDataTemp = tWString(std::to_wstring(static_cast<long long>(tempCurrentFloat)));
+					#endif
+					 vCustomGlobalVarRankFinalTextData.push_back(sDataTemp);
+
+					 //vRankingVariableStrings.push_back(vCustomGlobalVarRankFinalTextData[i]);
+				 }
+				 
+			 }
+			 else if (vCustomGlobalVarRankType[i] == "Bool")
+			 {
+				 tString tempBool = "CustomGlobalVarRank_" + cString::ToString(i+1) + "_RankBool";
+				 //tempBoolVec[i] = tempBool;
+
+				 vCustomGlobalVarRankBool.push_back(pCfg->GetBool("RankScreen", tempBool, true));
+
+				 tString stempBool = cString::ToLowerCase(pVar->msVal);
+				 vCustomGlobalVarRankCurrentValueString.push_back(stempBool);
+
+				 if (vCustomGlobalVarRankCurrentValueString[i] == "true")
+				 {
+					 vCustomGlobalVarCurrentBool.push_back(true);
+				 }
+				 else
+				 {
+					 vCustomGlobalVarCurrentBool.push_back(false);
+				 }
+
+				 if (vCustomGlobalVarCurrentBool[i] == true) vCustomGlobalVarRankFinalTextData.push_back(kTranslate("RankScreen", "CustomGlobalVarRank_" + cString::ToString(i+1) + "_True"));
+				 else if (vCustomGlobalVarCurrentBool[i] == false)  vCustomGlobalVarRankFinalTextData.push_back(kTranslate("RankScreen", "CustomGlobalVarRank_" + cString::ToString(i+1) + "_False"));
+
+				 //vRankingVariableStrings.push_back(vCustomGlobalVarRankFinalTextData[i]);
+			 }
+
+			 
+		 }
 	 }
+
+	 /////////////////////
+	 /// Reward Slides
+	 //if (mlRewardSlideAmount != 0)
+	 //{
+		// int lGameClears = gpBase->mpEndingsHandler->GetTotalGameClears();
+		// string sMode = "HardMode";
+		// bool bHardMode = gpBase->mpEndingsHandler->GetEndingCompleted(sMode);
+
+		// for (int i = 0; i <= mlRewardSlideAmount; ++i)
+		// {
+		//	 tStringVec tempConditon;
+		//	 tString tGCLR = "GameClear";
+		//	 tString tHRDM = "HardMode";
+		//	 std::vector<int>  tempGameClear;
+		//	 tempConditon.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_RewardCondition", "GameClear"));
+
+		//	 if (tempConditon[i] == tGCLR)
+		//	 {
+		//		 tempGameClear.push_back(pCfg->GetInt("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_GameClearAmount", 1));
+		//	 }
+
+		//	 if (tempConditon[i] == tGCLR && tempGameClear[i] == lGameClears || tempConditon[i] == tHRDM && bHardMode == true)
+		//	 {
+		//		 vRewardSlideConditions.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_RewardCondition", "GameClear"));
+
+		//		 vRewardSlideGameClearAmount.push_back(pCfg->GetInt("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_GameClearAmount", 1));
+
+		//		 vRewardSlideSounds.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_Sound", ""));
+		//		 vRewardSlideBackgroundImage.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_BackgroundImage", ""));
+
+		//		 //vRewardSlideTextCategories.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TextCat", ""));
+		//		 vRewardSlideTextEntries.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TextEntry", ""));
+		//		 vRewardSlideTitleSize.push_back(pCfg->GetVector2f("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TitleSize", cVector2f(24, 24)));
+		//		 vRewardSlideTitlePos.push_back(pCfg->GetVector3f("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TitlePos", cVector3f(80, 210, 0)));
+		//		 vRewardSlideDescSize.push_back(pCfg->GetVector2f("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TitleSize", cVector2f(18, 18)));
+		//		 vRewardSlideDescPos.push_back(pCfg->GetVector3f("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TitlePos", cVector3f(80, 450, 0)));
+		//		 vRewardSlideTextColors.push_back(pCfg->GetColor("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TextColor", cColor(1, 1, 1)));
+		//		 vRewardSlideTextAlign.push_back(pCfg->GetString("RankScreen", "RewardSlide_" + cString::ToString(i + 1) + "_TextAlign", "Center"));
+		//	 }
+		// }
+
+		// mlValidSlideAmount = vRewardSlideConditions.size(); 
+	 //}
+ 
 }
 
 void cLuxRankScreen::LoadFonts()
 {
 	tString sFontMessage = gpBase->mpRankCfg->GetString("RankScreen", "MessageFont", "");
-	//tString sFontButton = gpBase->mpDemoCfg->GetString("DemoEnd", "ButtonFont", "");
+	tString sFontButton = gpBase->mpRankCfg->GetString("RankScreen", "ButtonFont", "");
 	mpFontMessage = LoadFont(sFontMessage);
 	//mpFontButton = LoadFont(sFontButton);
 
@@ -264,6 +628,7 @@ void cLuxRankScreen::LoadFonts()
 
 void cLuxRankScreen::OnEnterContainer(const tString& asOldContainer)
 {
+	LoadData();
 	//Unlock input if not in window
 	if (gpBase->mpConfigHandler->mbFullscreen == false) {
 		gpBase->mpEngine->GetInput()->GetLowLevel()->LockInput(false);
@@ -288,6 +653,10 @@ void cLuxRankScreen::OnEnterContainer(const tString& asOldContainer)
 
 	gpBase->mpProgressLogHandler->SetProgLogCounterActive(false);
 
+	mbShowRankScreen = true;
+	mlCurrentRewardSlide = -1;
+	mbRewardSlideSoundPlayed = false;
+
 	// Load background
 	iTexture* pTex = gpBase->mpEngine->GetResources()->GetTextureManager()->Create2D(msBackgroundFile, false, eTextureType_Rect);
 	if (pTex) mpGfxBackground = mpGui->CreateGfxTexture(pTex, true, eGuiMaterial_Alpha);
@@ -297,7 +666,7 @@ void cLuxRankScreen::OnEnterContainer(const tString& asOldContainer)
 	if (msMusic != "")
 	{
 		cMusicHandler* pMusHandler = gpBase->mpEngine->GetSound()->GetMusicHandler();
-		pMusHandler->Play(msMusic, 1.0f, 1.0f, mbLoopMusic, false);
+		pMusHandler->Play(msMusic, mfMusicVolume, mfMusicFade, mbLoopMusic, false);
 	}
 }
 //-----------------------------------------------------------------------
@@ -336,12 +705,32 @@ void cLuxRankScreen::Update(float afTimeStep)
 		if (mfFadeAlpha > 1)
 		{
 			mfFadeAlpha = 1;
-			gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 
-			gpBase->mpLoadScreenHandler->DrawMenuScreen();
-			gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
-			
+			//if (mbExiting)
+			//
+				gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
+				gpBase->mpLoadScreenHandler->DrawMenuScreen();
+				gpBase->mpEngine->GetUpdater()->SetContainer("MainMenu");
+
 				//cPlatform::OpenBrowserWindow(cString::To16Char(msDestinationURL));
+			//}
+			/*else
+			{
+				mbStartFading = false;
+				gpBase->mpInputHandler->ChangeState(eLuxInputState_RankScreen);
+				mpGuiSet->SetDrawMouse(true);
+
+				if (mlValidSlideAmount != 0 && mlCurrentRewardSlide <= mlValidSlideAmount)
+				{
+					mlCurrentRewardSlide += 1;
+					if (mbRewardSlideSoundPlayed == false && vRewardSlideSounds[mlCurrentRewardSlide] != "")
+					{
+						cSoundHandler* pSoundHandler = gpBase->mpEngine->GetSound()->GetSoundHandler();
+						pSoundHandler->PlayGui(vRewardSlideSounds[mlCurrentRewardSlide], false, 1);
+						mbRewardSlideSoundPlayed = true;
+					}
+				}
+			}*/
 		}
 	}
 	else
@@ -364,12 +753,15 @@ void cLuxRankScreen::Exit()
 }
 //-----------------------------------------------------------------------
 
-void cLuxRankScreen::Setup(const tString& asMusic, bool abLoopMusic, string& asImageName)
+void cLuxRankScreen::Setup(const tString& asMusic, bool abLoopMusic, float afMusicVol, float afMusicFade, string& asImageName)
 {
 	msMusic = asMusic;
 	mbLoopMusic = abLoopMusic;
+	mfMusicVolume = afMusicVol;
+	mfMusicFade = afMusicFade;
 	
 	msBackgroundFile = asImageName; 
+
 }
 //-----------------------------------------------------------------------
 
@@ -378,6 +770,7 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 	//////////////////////////////////////////////
 	// Background
 	mpGuiSet->DrawGfx(mpBlackGfx, mvGuiSetStartPos, mvGuiSetSize);
+	LoadData();
 
 	if (mpGfxBackground)
 	{
@@ -394,7 +787,7 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 	mpBExit->SetVisible(true);
 	mpBExit->SetEnabled(true);
 	
-	LoadData();
+	//LoadData();
 
 
 	//////////////////////////////////////////////
@@ -407,17 +800,44 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 
 		cColor mGameModeColor = gpBase->mbHardMode == true ? mGoldStatusColor : mMessageFontColor;
 		cColor mTotalTimeColor;
-		if (lHour <= 1 && lMin <= 30)
+
+		///Time
+		if (msTimeRankOperator == "<=")
 		{
-			mTotalTimeColor = mGoldStatusColor;
+			if (lHour <= mlTimeHourRank && lMin <= mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
 		}
-		else
+		else if (msTimeRankOperator == ">=")
 		{
-			mTotalTimeColor = mMessageFontColor;
+			if (lHour >= mlTimeHourRank && lMin >= mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
 		}
+		else if (msTimeRankOperator == ">")
+		{
+			if (lHour > mlTimeHourRank && lMin > mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
+		}
+		else if (msTimeRankOperator == "<")
+		{
+			if (lHour < mlTimeHourRank && lMin < mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
+		}
+		else if (msTimeRankOperator == "==")
+		{
+			if (lHour == mlTimeHourRank && lMin == mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
+		}
+		else if (msTimeRankOperator == "!=")
+		{
+			if (lHour != mlTimeHourRank && lMin != mlTimeMinRank) mTotalTimeColor = mGoldStatusColor;
+			else mTotalTimeColor = mMessageFontColor;
+		}
+
+		//Ending
 		cColor mEndingColor;
 		string sEnding = gpBase->mpEndingsHandler->GetPreviousEnding(); 
-		if (sEnding == "Default" || sEnding == "GoodJoke")
+		
+		if (sEnding == msEndingRank)
 		{
 			mEndingColor = mGoldStatusColor;
 		}
@@ -426,11 +846,11 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 			mEndingColor = mMessageFontColor;
 		}
 	
-		cColor mTotalDeathsColor = gpBase->mpPlayer->GetTotalDeaths() <= 0 ? mGoldStatusColor : mMessageFontColor;
-		cColor mTotalDamageColor = gpBase->mpPlayer->GetTotalDamageTaken() <= 250 ? mGoldStatusColor : mMessageFontColor;
+		cColor mTotalDeathsColor = gpBase->mpPlayer->GetTotalDeaths() <= mfMinDeathCountRank ? mGoldStatusColor : mMessageFontColor;
+		cColor mTotalDamageColor = gpBase->mpPlayer->GetTotalDamageTaken() <= mfMinDamageRank ? mGoldStatusColor : mMessageFontColor;
 		cColor mTotalItemsColor = gpBase->mpPlayer->GetTotalItemCount() >= 69 ? mGoldStatusColor : mMessageFontColor;
-		cColor mHealthItemsColor = gpBase->mpPlayer->GetHealthItemsUsed() <= 5 ? mGoldStatusColor : mMessageFontColor;
-		cColor mOilItemsColor = gpBase->mpPlayer->GetOilItemsUsed() <= 5 ? mGoldStatusColor : mMessageFontColor;
+		cColor mHealthItemsColor = gpBase->mpPlayer->GetHealthItemsUsed() <= mfMinHealthItemUsedRank ? mGoldStatusColor : mMessageFontColor;
+		cColor mOilItemsColor = gpBase->mpPlayer->GetOilItemsUsed() <= mfMinOilItemUsedRank ? mGoldStatusColor : mMessageFontColor;
 		cColor mStatuesColor = mlStatuesVal == 12 ? mGoldStatusColor : mMessageFontColor;
 		
 		//Heading
@@ -439,54 +859,136 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 		fY += 75.0f;
 
 		//Game Mode
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "GameMode"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msGameMode, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mGameModeColor, eFontAlign_Right);
+		if (mbDisplayGameModeRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "GameMode"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msGameMode, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mGameModeColor, eFontAlign_Right);
+			fY += 35;
+		}
 
-		fY += 35;
+		
 		//Game Clear
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalGameClear"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msGameClear, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Right);
+		if (mbDisplayGameClearRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalGameClear"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msGameClear, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Right);
+			fY += 35;
+		}
 
-		fY += 35;
+		
 		//Timer
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalTime"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msTotalTime, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalTimeColor, eFontAlign_Right);
+		if (mbDisplayTimeRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalTime"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msTotalTime, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalTimeColor, eFontAlign_Right);
+			fY += 35;
+		}
 
-		fY += 35;
+		
 		//Ending
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "Ending"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msEndingReceived, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mEndingColor, eFontAlign_Right);
+		if (mbDisplayEndingRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "Ending"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msEndingReceived, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mEndingColor, eFontAlign_Right);
+			fY += 35;
+		}
 
-		fY += 35;
 		//Death & Damage
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalDamage"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msTotalDamageTaken, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalDamageColor, eFontAlign_Right);
-		fY += 35;
+		if (mbDisplayDamageRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalDamage"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msTotalDamageTaken, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalDamageColor, eFontAlign_Right);
+			fY += 35;
+		}
 
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalDeaths"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msTotalDeath, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalDeathsColor, eFontAlign_Right);
-		fY += 35;
+		if (mbDisplayDeathRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "TotalDeaths"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msTotalDeath, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalDeathsColor, eFontAlign_Right);
+			fY += 35;
+		}
 
 		//Items
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "ItemsFoundByPlayer"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msPlayerItemAmount, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalItemsColor, eFontAlign_Right);
-
-		fY += 35;
-
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "HealthUsed"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msHealthItemsUsed, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mHealthItemsColor, eFontAlign_Right);
-		fY += 35;
-
-		mpGuiSet->DrawFont(kTranslate("RankScreen", "OilUsed"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-		mpGuiSet->DrawFont(msOilItemsUsed, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mOilItemsColor, eFontAlign_Right);
-		fY += 35;
-
-		if (mlStatuesVal >= 1)
+		if (mbDisplayItemRank)
 		{
-			mpGuiSet->DrawFont(kTranslate("RankScreen", "StatuesFound"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
-			mpGuiSet->DrawFont(msStatuesFound, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mStatuesColor, eFontAlign_Right);
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "ItemsFoundByPlayer"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msPlayerItemAmount, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mTotalItemsColor, eFontAlign_Right);
+			fY += 35;
 		}
+
+		if (mbDisplayHealthRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "HealthUsed"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msHealthItemsUsed, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mHealthItemsColor, eFontAlign_Right);
+			fY += 35;
+		}
+
+		if (mbDisplayOilRank)
+		{
+			mpGuiSet->DrawFont(kTranslate("RankScreen", "OilUsed"), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+			mpGuiSet->DrawFont(msOilItemsUsed, mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, mOilItemsColor, eFontAlign_Right);
+			fY += 35;
+		}
+
+		////////////////
+		//Custom Rank Vars
+
+		if (mlCustomGlobalVarRankAmount != 0)
+		{
+			std::vector<cColor> vColorVec; //= mlStatuesVal == 12 ? mGoldStatusColor : mMessageFontColor;
+
+			for (int i = 0; i <= mlCustomGlobalVarRankAmount; ++i)
+			{
+				if (vCustomGlobalVarRankType[i] == "Int")
+				{
+					if(vCustomGlobalVarRankOper[i] == "==") vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] == vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == ">=") vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] >= vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "<=") vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] <= vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "<")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] < vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == ">")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] > vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "!=")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueInt[i] != vCustomGlobalVarRankNum[i] ? mGoldStatusColor : mMessageFontColor);
+				}
+				else if (vCustomGlobalVarRankType[i] == "Float")
+				{
+					if (vCustomGlobalVarRankOper[i] == "==") vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] == vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == ">=") vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] >= vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "<=") vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] <= vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "<")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] < vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == ">")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] > vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+					else if (vCustomGlobalVarRankOper[i] == "!=")  vColorVec.push_back(vCustomGlobalVarRankCurrentValueFloat[i] != vCustomGlobalVarRankNumFloat[i] ? mGoldStatusColor : mMessageFontColor);
+				}
+				else if (vCustomGlobalVarRankType[i] == "Bool")
+				{
+					vColorVec.push_back(vCustomGlobalVarCurrentBool[i] == vCustomGlobalVarRankBool[i] ? mGoldStatusColor : mMessageFontColor);
+				}
+
+				mpGuiSet->DrawFont(kTranslate("RankScreen", "CustomGlobalVarRank_"+cString::ToString(i+1)), mpFontMessage, cVector3f(fX, fY, 10), mvMessageFontSize, mMessageFontColor, eFontAlign_Left);
+				mpGuiSet->DrawFont(vCustomGlobalVarRankFinalTextData[i], mpFontMessage, cVector3f(fX2, fY, 10), mvMessageFontSize, vColorVec[i], eFontAlign_Right);
+				fY += 35;
+			}
+			
+		}
+
 	}
+	/*else if (mbShowRankScreen == false && mlValidSlideAmount != 0)
+	{
+		int i = mlCurrentRewardSlide;
+		{
+			eFontAlign eAlign = ToFontAlign(vRewardSlideTextAlign[i]);
+			int lGameClears = gpBase->mpEndingsHandler->GetTotalGameClears();
+			string sMode = "HardMode";
+			bool bHardMode = gpBase->mpEndingsHandler->GetEndingCompleted(sMode);
+			
+			if (vRewardSlideConditions[i] == "GameClear" && vRewardSlideGameClearAmount[i] == lGameClears || vRewardSlideConditions[i] == "HardMode" && bHardMode == true)
+			{
+				iTexture* pTex = gpBase->mpEngine->GetResources()->GetTextureManager()->Create2D(vRewardSlideBackgroundImage[i], false, eTextureType_Rect);
+				if (pTex) mpGfxBackground = mpGui->CreateGfxTexture(pTex, true, eGuiMaterial_Alpha);
+
+				mpGuiSet->DrawFont(kTranslate("RankScreen", vRewardSlideTextEntries[i]+"_Title"), mpFontMessage, vRewardSlideTitlePos[i], vRewardSlideTitleSize[i], vRewardSlideTextColors[i], eAlign);
+				mpGuiSet->DrawFont(kTranslate("RankScreen", vRewardSlideTextEntries[i] + "_Text"), mpFontMessage, vRewardSlideDescPos[i], vRewardSlideDescSize[i], vRewardSlideTextColors[i], eAlign);
+			}
+		}
+	}*/
 
 	//////////////////////////////////////////////
 	// Fade
@@ -495,7 +997,6 @@ void cLuxRankScreen::OnDraw(float afFrameTime)
 		mpGuiSet->DrawGfx(mpBlackGfx, mvGuiSetStartPos + cVector3f(0, 0, 20), mvGuiSetSize, cColor(1, mfFadeAlpha));
 	}
 
-	//gpBase->mpDebugHandler->AddMessage(cString::To16Char(msEndingReceived).c_str, false);
 }
 
 //-----------------------------------------------------------------------
@@ -524,7 +1025,28 @@ void cLuxRankScreen::AppGotInputFocus()
 
 bool cLuxRankScreen::ExitOnPressed(iWidget* apWidget, const cGuiMessageData& aData)
 {
-	Exit();
+	/*if (mbShowRankScreen == false && mlCurrentRewardSlide == mlValidSlideAmount || mbShowRankScreen && mlRewardSlideAmount <= 0)
+	{
+		mbStartFading = true;*/
+		Exit();
+	//}
+	//else if (mbShowRankScreen && mlValidSlideAmount != 0)
+	//{
+	//	mbStartFading = true;
+	//	mbShowRankScreen = false;
+	//	//mlCurrentRewardSlide += 1;
+	//	gpBase->mpInputHandler->ChangeState(eLuxInputState_Null);
+	//	mpGuiSet->SetDrawMouse(false);
+	//	mbRewardSlideSoundPlayed = false;
+	//}
+	//else if (mbShowRankScreen == false && mlValidSlideAmount != 0 && mlCurrentRewardSlide <= mlValidSlideAmount)
+	//{
+	//	mbStartFading = true;
+	//	//mlCurrentRewardSlide += 1;
+	//	gpBase->mpInputHandler->ChangeState(eLuxInputState_Null);
+	//	mpGuiSet->SetDrawMouse(false);
+	//	mbRewardSlideSoundPlayed = false;
+	//}
 	return true;
 }
 kGuiCallbackDeclaredFuncEnd(cLuxRankScreen, ExitOnPressed);
@@ -533,8 +1055,10 @@ bool cLuxRankScreen::UIExitOnPressed(iWidget* apWidget, const cGuiMessageData& a
 {
 	if (aData.mlVal == eUIButton_Primary)
 	{
-		
-		Exit();
+		//if (mbShowRankScreen == false && mlCurrentRewardSlide == mlValidSlideAmount || mbShowRankScreen && mlRewardSlideAmount <= 0)
+		//{
+			Exit();
+		//}
 		return true;
 		
 	}

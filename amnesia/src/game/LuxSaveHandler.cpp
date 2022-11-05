@@ -219,14 +219,14 @@ void cLuxSaveHandler::SaveGameToFile(const tWString& asFile, bool abSaveSnapshot
 	// Save snapshot?
 	if(abSaveSnapshot)
 	{
-		tWString sFileExt = cString::GetFileExtW(asFile);
+		/*tWString sFileExt = cString::GetFileExtW(asFile);
 		tWString sFileName = cString::SubW(asFile,0, asFile.size()-(sFileExt.size()+1)) +  _W(".jpg");
 		
 		cEngine *pEngine = gpBase->mpEngine;
 		
 		cBitmap *pBmp = pEngine->GetGraphics()->GetLowLevel()->CopyFrameBufferToBitmap();
 		pEngine->GetResources()->GetBitmapLoaderHandler()->SaveBitmap(pBmp,sFileName,0);
-		hplDelete(pBmp);
+		hplDelete(pBmp);*/
 	}
 
 	Log("-------- END SAVE ---------\n");
@@ -264,7 +264,7 @@ bool cLuxSaveHandler::AutoSave()
 
 	DeleteOldestSaveFiles(gpBase->msProfileSavePath, mlMaxAutoSaves);
 	
-	SaveGameToFile(gpBase->msProfileSavePath+GetSaveName(_W("AutoSave")));
+	SaveGameToFile(gpBase->msProfileSavePath+GetSaveName(_W("AutoSave")), true);
 
 	return true;
 }
@@ -325,7 +325,7 @@ bool cLuxSaveHandler::SaveFileExists()
 // HARDMODE
 bool cLuxSaveHandler::HardModeSave()
 {
-	SaveGameToFile(gpBase->msProfileSavePath + GetSaveName(_W("HardMode")));
+	SaveGameToFile(gpBase->msProfileSavePath + GetSaveName(_W("HardMode")), true);
 	return true;
 }
 

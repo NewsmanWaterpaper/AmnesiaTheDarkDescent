@@ -47,6 +47,7 @@ private:
 	cVector2f mvWindowSize;
 
 	tWStringVec mvSavedGameFileNames;
+	tWStringVec mvSavedGameFileImages;
 
 	////////////////////////
 	// Layout
@@ -84,6 +85,9 @@ private:
 
 	bool LoadSelectionClickChange(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(LoadSelectionClickChange);
+
+	bool ChangeLoadImage(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(ChangeLoadImage);
 
 	bool LockLoadList(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(LockLoadList);

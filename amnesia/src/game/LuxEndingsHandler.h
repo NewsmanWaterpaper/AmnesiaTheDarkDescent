@@ -29,7 +29,7 @@ public:
 	void LoadUserConfig();
 	void SaveUserConfig();
 
-	void AddEndingLog(eLuxEnding aEnding, bool mbCompletedOnHardMode);
+	void AddEndingLog(string& msEnding, bool mbCompletedOnHardMode);
 
 	//const string& GetPreviousEnding() { return msPreviousEnding; }
 	string& GetPreviousEnding(){return msPreviousEnding;}
@@ -42,6 +42,12 @@ public:
 	bool mbAllowBonusFeatures;
 
 private:
+
+	int mlEndingAmount;
+	std::vector<int> vEndingNumbers;
+	tStringVec vEndingNames;
+	tBoolVec vGotEnding;
+
 	int mlTotalGameClears;
 	bool mbGotDefaultGoodEnding;
 	bool mbGotDefaultBadEnding;

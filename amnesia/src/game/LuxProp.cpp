@@ -21,6 +21,7 @@
 
 #include "LuxMap.h"
 #include "LuxPlayer.h"
+#include "LuxPlayerHelpers.h"
 #include "LuxInteractConnections.h"
 #include "LuxEffectRenderer.h"
 #include "LuxDebugHandler.h"
@@ -493,6 +494,9 @@ void iLuxProp::FlashIfNearPlayer(float afTimeStep)
 
 	/////////////////////////////////
 	// If near player, flash
+	string sPropName = msName;
+	bool bLanternOn = gpBase->mpPlayer->GetHelperLantern()->IsActive();
+	bool bHardMode = gpBase->mbHardMode;
 	cCamera* pCam = gpBase->mpPlayer->GetCamera();
 	cVector3f vCameraPos = pCam->GetPosition();
 	cVector3f vBodyPos = mvBodies[0]->GetLocalPosition();
@@ -500,7 +504,8 @@ void iLuxProp::FlashIfNearPlayer(float afTimeStep)
 	vBodyPos.y = 0;
 
 	float fDistSqrt = cMath::Vector3DistSqr(vCameraPos, vBodyPos);
-	if (fDistSqrt < 4.0f * 4.0f)
+	if (fDistSqrt < 4.0f * 4.0f && bLanternOn && !bHardMode || fDistSqrt < 4.0f && !bLanternOn && !bHardMode || 
+		fDistSqrt < 4.0f && bHardMode && cString::GetFirstStringPos(msName, "SaveStation") >= 0)
 	{
 		mfFlashAlpha += afTimeStep;
 		if (mfFlashAlpha > 1)mfFlashAlpha = 1;

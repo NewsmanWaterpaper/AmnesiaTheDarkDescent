@@ -67,6 +67,7 @@ void cLuxMainMenu_LoadGame::CreateGui()
 	//Saved game list
 	mpLBSavedGames = mpGuiSet->CreateWidgetListBox(vPos+cVector3f(0,0,1), cVector2f(mvWindowSize.x-fBorderSize*2,300), mpWindow);
 	mpLBSavedGames->AddCallback(eGuiMessage_SelectionDoubleClick, this, kGuiCallback(PressOK));
+	mpLBSavedGames->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(ChangeLoadImage));
 	mpLBSavedGames->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(LoadSelectionClickChange));
 	mpLBSavedGames->AddCallback(eGuiMessage_GetUINavFocus, this, kGuiCallback(LockLoadList));
 	mpLBSavedGames->AddCallback(eGuiMessage_UIButtonPress, this, kGuiCallback(UIPressList));
@@ -148,6 +149,9 @@ void cLuxMainMenu_LoadGame::OnSetActive(bool abX)
 typedef std::multimap<cDate, tWString, std::greater<cDate> > tLoadGameFileListMap;
 typedef tLoadGameFileListMap::iterator tLoadGameFileListMapIt;
 
+typedef std::multimap<cDate, tWString, std::greater<cDate> > tLoadGameFileListMap;
+typedef tLoadGameFileListMap::iterator tLoadGameFileListMapIt;
+
 void cLuxMainMenu_LoadGame::PopulateSavedGameList()
 {
 	/////////////////////////////////////////////////
@@ -160,17 +164,21 @@ void cLuxMainMenu_LoadGame::PopulateSavedGameList()
 	tLoadGameFileListMap mapSortedFiles;
 
 	tWStringList lstSavedGameFiles;
+	tWStringList lstSavedGameImages;
 	cPlatform::FindFilesInDir(lstSavedGameFiles, gpBase->msProfileSavePath, _W("*.sav"));
+	cPlatform::FindFilesInDir(lstSavedGameImages, gpBase->msProfileSavePath, _W("*.jpg"));
 	
 	tWStringListIt it = lstSavedGameFiles.begin();
 	for(;it!=lstSavedGameFiles.end();++it)
 	{
 		const tWString& sSavedGameFile = *it;
+
 		tWString sPath = gpBase->msProfileSavePath + sSavedGameFile;
 
 		cDate date = cPlatform::FileModifiedDate(sPath);
 		mapSortedFiles.insert(tLoadGameFileListMap::value_type(date, sSavedGameFile));
 	}
+
 
 	/////////////////////////////////
 	// Add items to listbox and array
@@ -315,6 +323,14 @@ bool cLuxMainMenu_LoadGame::LoadSelectionClickChange(iWidget* apWidget, const cG
 	return true;
 }
 kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_LoadGame, LoadSelectionClickChange);
+
+//-----------------------------------------------------------------------
+
+bool cLuxMainMenu_LoadGame::ChangeLoadImage(iWidget* apWidget, const cGuiMessageData& aData)
+{
+	return true;
+}
+kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_LoadGame, ChangeLoadImage);
 
 //-----------------------------------------------------------------------
 

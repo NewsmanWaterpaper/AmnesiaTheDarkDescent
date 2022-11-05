@@ -148,6 +148,8 @@ void cLuxMainMenu_CustomStory::SetCurrentStory(cLuxCustomStorySettings* apStory)
 	if(apStory==NULL)
 	{
 		gpBase->SetCustomStory(NULL);
+		gpBase->SetCurrentCustomStoryName(NULL);
+		gpBase->SetIsInCustomStory(false);
 		return;
 	}
 
@@ -302,6 +304,7 @@ kGuiCallbackDeclaredFuncEnd(cLuxMainMenu_CustomStory, PressLoadGame);
 bool cLuxMainMenu_CustomStory::PressBack(iWidget* apWidget, const cGuiMessageData& aData)
 {
 	SetCurrentStory(NULL);
+	gpBase->SetIsInCustomStory(false);
 	gpBase->mpMainMenu->SetWindowActive(eLuxMainMenuWindow_CustomStoryList);
 
 	return true; 
@@ -578,6 +581,8 @@ bool cLuxMainMenu_CustomStoryList::ExitCallback(iWidget* apWidget, const cGuiMes
 	if(bOkPressed==false)
 	{
 		gpBase->SetCustomStory(NULL);
+		gpBase->SetIsInCustomStory(false);
+		gpBase->SetCurrentCustomStoryName(NULL);
 		return true;
 	}
 

@@ -50,6 +50,7 @@ public:
 	bool IsPauseMessageActive() { return mbPauseMessageActive; }
 	void SetPauseMessageActive(bool abX);
 	void OnPress(bool abYes);
+	void OnPress(int alButton);
 
 	cGuiSet* GetSet() { return mpGuiSet; }
 	
@@ -94,6 +95,7 @@ private:
 	float mfPauseMessageAlpha;
 	bool mbPressedYes;
 	bool mbExitingPauseFromPress;
+	int mlButtonPressed;
 
 	string msCallback;
 

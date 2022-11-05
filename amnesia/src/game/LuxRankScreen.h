@@ -21,6 +21,25 @@
 #include "LuxBase.h"
 
 //----------------------------------------------
+class cLuxRankScreenTextElement
+{
+public:
+	bool Load(cXmlElement* apElement, const cVector2f& avGuiSetSize);
+
+	cWidgetLabel* CreateLabel(cGuiSet* apSet);
+
+private:
+	tWString	msText;
+	cVector3f	mvPos;
+	cVector2f	mvFrameSize;
+	cVector2f	mvFontSize;
+	cColor		mColor;
+	tString		msFontFile;
+	eFontAlign	mAlign;
+
+	float		mfTime;
+};
+//----------------------------------------------
 class cLuxRankScreen : public iLuxUpdateable
 {
 public:
@@ -29,13 +48,15 @@ public:
 
 	void LoadData();
 
+	void LoadRankScreenTextElements(cConfigFile cFile);
+
 	void LoadFonts();
 
 	void Reset();
 
 	void Update(float afTimeStep);
 
-	void Setup(const tString& asMusic, bool abLoopMusic, string& asImageName);
+	void Setup(const tString& asMusic, bool abLoopMusic,float afMusicVol,float afMusicFade, string& asImageName);
 
 	void OnEnterContainer(const tString& asOldContainer);
 	void OnLeaveContainer(const tString& asNewContainer);
@@ -54,10 +75,18 @@ public:
 private:
 	void SetUpButtonLabel(cWidgetLabel* apLabel, float* apFadeValue, tGuiCallbackFunc apCallback);
 
+	void PassCustomVarStringToVector(tString asVarString, tString asVarVec);
+
 	bool ExitOnPressed(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(ExitOnPressed);
 	bool UIExitOnPressed(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(UIExitOnPressed);
+
+	bool Continue_Pressed(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(Continue_Pressed);
+
+	bool Continue_UIPressed(iWidget* apWidget, const cGuiMessageData& aData);
+	kGuiCallbackDeclarationEnd(Continue_UIPressed);
 
 	bool ButtonLabelOnUpdate(iWidget* apWidget, const cGuiMessageData& aData);
 	kGuiCallbackDeclarationEnd(ButtonLabelOnUpdate);
@@ -93,10 +122,82 @@ private:
 	cVector2f mvButtonSize;
 	cVector2f mvTitleFontSize;
 
+	bool mbShowRankScreen;
+
 	float mfTextWidth;
 	float mfTextY;
 	float mfExitButtonY;
 	float mfFadeSpeed;
+
+	int mlTimeHourRank;
+	int mlTimeMinRank;
+	int mlTimeSecRank;
+	bool mbDisplayTimeRank;
+	tString msTimeRankOperator;
+
+
+	bool mbDisplayEndingRank;
+	tString msEndingRank;
+
+	bool mbDisplayGameClearRank;
+	bool mbDisplayGameModeRank;
+
+	float mfMinDamageRank;
+	bool mbDisplayDamageRank;
+	
+	int mfMinDeathCountRank;
+	bool mbDisplayDeathRank;
+
+	int mlItemAmount;
+	int mfMinItemCountRank;
+	int mfMinItemPercentRank;
+	bool mbDisplayItemRank;
+
+	int mfMinHealthItemUsedRank;
+	bool mbDisplayHealthRank;
+
+	int mfMinOilItemUsedRank;
+	bool mbDisplayOilRank;
+
+	int mlCustomGlobalVarRankAmount;
+
+	tStringVec vCustomGlobalVarRankNames;
+	tStringVec vCustomGlobalVarRankType;
+	tStringVec vCustomGlobalVarRankOper;
+	tStringVec vCustomGlobalVarRankCurrentValueString;
+	tWStringVec vCustomGlobalVarRankFinalTextData;
+
+	tStringVec vRankingVariableStrings;
+	tStringVec vRankingTitleStrings;
+
+	tBoolVec vCustomGlobalVarRankBool;
+	tBoolVec vCustomGlobalVarCurrentBool;
+
+	std::vector<int> vCustomGlobalVarRankNum;
+	std::vector<int> vCustomGlobalVarRankCurrentValueInt;
+	std::vector<float> vCustomGlobalVarRankCurrentValueFloat;
+	std::vector<float> vCustomGlobalVarRankNumFloat;
+
+
+	int mlRewardSlideAmount;
+	int mlValidSlideAmount;
+	int mlCurrentRewardSlide;
+	tStringVec vRewardSlideConditions;
+	tStringVec vRewardSlideSounds;
+	tStringVec vRewardSlideBackgroundImage;
+	tStringVec vRewardSlideTextCategories;
+	tStringVec vRewardSlideTextEntries;
+	tStringVec vRewardSlideTextAlign;
+
+	std::vector<int> vRewardSlideGameClearAmount;
+	std::vector<cColor>vRewardSlideTextColors;
+	std::vector<cVector3f> vRewardSlideTextPos;
+	std::vector<cVector2f> vRewardSlideTextSize;
+	std::vector<cVector3f> vRewardSlideTitlePos;
+	std::vector<cVector2f> vRewardSlideTitleSize;
+	std::vector<cVector3f> vRewardSlideDescPos;
+	std::vector<cVector2f> vRewardSlideDescSize;
+	std::vector<cVector2f> vRewardSlideFrameSizes;
 
 	cColor mMessageFontColor;
 	cColor mButtonFontColor;
@@ -116,9 +217,13 @@ private:
 	int lHour;
 
 	bool mbExiting;
+	bool mbStartFading;
+	bool mbRewardSlideSoundPlayed;
 
 	tString msMusic;
 	bool mbLoopMusic;
+	float mfMusicVolume;
+	float mfMusicFade;
 
 
 	float mfExitFade;

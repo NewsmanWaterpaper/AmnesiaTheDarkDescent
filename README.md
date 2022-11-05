@@ -17,6 +17,19 @@ All code is under the GPL Version 3 license. Read the LICENSE file for terms of 
 
 Script Function Documentation:
 -------------------
+## Global & Local Vars:
+Local variables can be used throughout the same script file.
+```as
+void SetLocalVarBool(string &in asName, bool abVal);
+bool GetLocalVarBool(string& asName)
+```
+
+Global variables can be used throughout several maps and can be accessed by several script files.
+```as
+void SetGlobalVarBool(string &in asName, bool abVal);
+bool GetGlobalVarBool(string& asName)
+```
+
 ## Game:
 ```as
 void SetProgLogTimerActive(bool abTimerActive);
@@ -43,8 +56,15 @@ Additional settings for the in-game timer display.
 7. *afTimerSize* -  How big should the timer text should be
 8. *asTimerAlign* -  Which side of the screen should the timer should be displayed at; can  be either "Left","Right" or "Center".
 ---------------------------------------
+
 ```as
-void StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, string& asImageName);
+int GetCurrentInGameHour();
+int GetCurrentInGameMin();
+int GetCurrentInGameSec();
+```
+Returns either the in-game hour, minute or second.
+```as
+StartCreditsAndRankScreen(string& asMusicCredits, bool abLoopMusicCredits, string& asTextCat, string& asTextEntry, bool abCreditsBackground, string& asMusicRank, bool abLoopMusicRank, float afRankMusicVol, float afRankMusicFade, string& asImageName);
 ```
 Starts the credits as well as the rank screen at the end of it.
 1. *asMusicCredits* -  The music to play during the credits
@@ -54,12 +74,20 @@ Starts the credits as well as the rank screen at the end of it.
 5. *abCreditsBackground* -  Should the credits background should be displayed
 6. *asMusicRank* -  The music to play during the rank screen
 7. *abLoopMusicRank* -  Whether the rank screen music should loop
-7. *asImageName* -  What image to display during the rank screen.
+8. *afRankMusicVol* -  Sets the volume for rank screen music
+9. *afRankMusicFade* -  Sets the time for rank screen music to fade in
+10. *asImageName* -  What image to display during the rank screen.
 ---------------------------------------
 ```as
-void StartRankScreen();
+void StartRankScreen(string& asMusic, bool abLoopMusic, float afRankMusicVol, float afRankMusicFade, string& asImageName);
 ```
 Starts the rank screen. 
+1. *asMusic* -  The music to play during the rank scrren
+2. *abLoopMusic* -  Whether the music should loop
+3. *afRankMusicVol* -  Sets the volume for rank screen music
+4. *afRankMusicFade* -  Sets the time for rank screen music to fade in
+5. *asImageName* -  What image to display during the rank screen.
+---------------------------------------
 ```as
 SetEnding(string& asEnding, bool abCompletedOnHardMode);
 ```

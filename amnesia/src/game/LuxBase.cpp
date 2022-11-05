@@ -285,6 +285,8 @@ void cLuxCustomStorySettings::SetActive()
 	cLuxCustomStorySettings* pStory = hplNew(cLuxCustomStorySettings,(this));
 	
 	gpBase->SetCustomStory(pStory);
+	gpBase->SetCurrentCustomStoryName(pStory->msName);
+	gpBase->SetIsInCustomStory(true);
 }
 
 //-----------------------------------------------------------------------
@@ -299,6 +301,8 @@ bool cLuxCustomStorySettings::StartGame()
 	gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 
 	gpBase->mpProgressLogHandler->CreateAndResetLogFile();
+
+	gpBase->SetIsInCustomStory(true);
 
 	return gpBase->StartGame(msStartMap, msMapsFolder, msStartPos);
 }

@@ -39,10 +39,14 @@ cLuxEndingsHandler::~cLuxEndingsHandler()
 //--------------------------------------------------------------------------------------------
 void cLuxEndingsHandler::LoadUserConfig()
 {
-	mbGotDefaultGoodEnding = gpBase->mpUserEndingConfig->GetBool("Endings", "GotDefaultGoodEnding", false);
-	mbGotDefaultBadEnding = gpBase->mpUserEndingConfig->GetBool("Endings", "GotDefaultBadEnding", false);
-	mbGotGoodJokeEnding = gpBase->mpUserEndingConfig->GetBool("Endings", "GotGoodJokeEnding", false);
-	mbGotBadJokeEnding = gpBase->mpUserEndingConfig->GetBool("Endings", "GotBadJokeEnding", false);
+	mlEndingAmount = gpBase->mpUserEndingConfig->GetInt("Endings", "AmountOfEndings", 1);
+
+	for (int i = 0; i < mlEndingAmount; ++i)
+	{
+		vEndingNames.push_back(gpBase->mpUserEndingConfig->GetString("RankScreen", "Ending_"+ cString::ToString(i + 1)+"_Name", ""));
+		vGotEnding.push_back(gpBase->mpUserEndingConfig->GetBool("Endings", "GotEnding_"+ cString::ToString(i+1), false));
+	}
+
 	msPreviousEnding = gpBase->mpUserEndingConfig->GetString("Endings", "MostRecentEnding", "None");
 	mbBeatenHardMode = gpBase->mpUserEndingConfig->GetBool("Endings", "BeatenHardMode", false);
 	mbAllowHardmode = gpBase->mpUserEndingConfig->GetBool("Endings", "AllowHardMode", false);
@@ -52,10 +56,16 @@ void cLuxEndingsHandler::LoadUserConfig()
 
 void cLuxEndingsHandler::SaveUserConfig()
 {
-	gpBase->mpUserEndingConfig->SetBool("Endings", "GotDefaultGoodEnding", mbGotDefaultGoodEnding);
-	gpBase->mpUserEndingConfig->SetBool("Endings", "GotDefaultBadEnding", mbGotDefaultBadEnding);
-	gpBase->mpUserEndingConfig->SetBool("Endings", "GotGoodJokeEnding", mbGotGoodJokeEnding);
-	gpBase->mpUserEndingConfig->SetBool("Endings", "GotBadJokeEnding", mbGotBadJokeEnding);
+
+	gpBase->mpUserEndingConfig->SetInt("Endings", "AmountOfEndings", mlEndingAmount);
+
+	for (int i = 0; i < mlEndingAmount; ++i)
+	{
+		//vGotEnding.push_back(gpBase->mpUserEndingConfig->GetBool("Endings", "GotEnding_" + cString::ToString(i + 1), false));
+
+		gpBase->mpUserEndingConfig->SetString("Endings", "Ending_" + cString::ToString(i + 1) + "_Name", vEndingNames[i]);
+		gpBase->mpUserEndingConfig->SetBool("Endings", "GotEnding_" + cString::ToString(i + 1), vGotEnding[i]);
+	}
 	gpBase->mpUserEndingConfig->SetString("Endings", "MostRecentEnding", msPreviousEnding);
 	gpBase->mpUserEndingConfig->SetBool("Endings", "BeatenHardMode", mbBeatenHardMode);
 	gpBase->mpUserEndingConfig->SetBool("Endings", "AllowHardMode", mbAllowHardmode);
@@ -63,27 +73,15 @@ void cLuxEndingsHandler::SaveUserConfig()
 	gpBase->mpUserEndingConfig->SetInt("Endings", "TotalGameClear", mlTotalGameClears);
 }
 //--------------------------------------------------------------------------------------------
-void cLuxEndingsHandler::AddEndingLog(eLuxEnding aEnding, bool mbCompletedOnHardMode)
+void cLuxEndingsHandler::AddEndingLog(string& msEnding, bool mbCompletedOnHardMode)
 {
-	if(aEnding == eLuxEnding_DefaultGood)
+	for (int i = 0; i < vEndingNames.size(); i++)
 	{
-		mbGotDefaultGoodEnding = true;
-		msPreviousEnding = "DefaultGood";
-	}
-	else if(aEnding == eLuxEnding_DefaultBad)
-	{
-		mbGotDefaultBadEnding = true;
-		msPreviousEnding = "DefaultBad";
-	}
-	else if(aEnding == eLuxEnding_GoodJoke)
-	{
-		mbGotGoodJokeEnding = true;
-		msPreviousEnding = "GoodJoke";
-	}
-	else if(aEnding == eLuxEnding_BadJoke)
-	{
-		mbGotBadJokeEnding = true;
-		msPreviousEnding = "BadJoke";
+		if (vEndingNames[i] == msEnding)
+		{
+			msPreviousEnding = vEndingNames[i];
+			vGotEnding.push_back(true);
+		}
 	}
 
 	if(mbCompletedOnHardMode)
@@ -111,23 +109,15 @@ void cLuxEndingsHandler::AddEndingLog(eLuxEnding aEnding, bool mbCompletedOnHard
 
 bool cLuxEndingsHandler::GetEndingCompleted(string& asEndingType)
 {
-	if(asEndingType == "DefaultGood")
+	for (int i = 0; i < vEndingNames.size(); i++)
 	{
-		return mbGotDefaultGoodEnding;
+		if (vEndingNames[i] == asEndingType)
+		{
+			return vGotEnding[i];
+		}
 	}
-	else if(asEndingType == "DefaultBad")
-	{
-		return mbGotDefaultBadEnding;
-	}
-	else if(asEndingType == "GoodJoke")
-	{
-		return mbGotGoodJokeEnding;
-	}
-	else if(asEndingType == "BadJoke")
-	{
-		return mbGotBadJokeEnding;
-	}
-	else if(asEndingType == "HardMode")
+
+	if(asEndingType == "HardMode")
 	{
 		return mbBeatenHardMode; 
 	}

@@ -104,6 +104,25 @@ tString cLuxProgressLogHandler::GetPlayTime()
 }
 //-----------------------------------------------------------------------
 
+int cLuxProgressLogHandler::GetCurrentInGameHour()
+{
+	int lHour = mlCounter / (60 * 60 * 60);
+	return lHour;
+}
+
+int cLuxProgressLogHandler::GetCurrentInGameMinute()
+{
+	int lMin = (mlCounter / (60 * 60)) % 60;
+	return lMin;
+}
+
+int cLuxProgressLogHandler::GetCurrentInGameSecond()
+{
+	int lSec = (mlCounter / 60) % 60;
+	return lSec;
+}
+//-----------------------------------------------------------------------
+
 void cLuxProgressLogHandler::CreateAndResetLogFile()
 {
 	if(mbActive==false) return;
