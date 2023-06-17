@@ -450,6 +450,8 @@ public:
 	virtual const tString & GetWalkAnimationName() { return msWalkAnimationName[eLuxEnemyMoveType_Normal][mCurrentPose]; }
 	virtual const tString & GetRunAnimationName() { return msRunAnimationName[eLuxEnemyMoveType_Normal][mCurrentPose]; }
 
+	tString GetCurrentPoseSuffix();
+
 	//////////////////////
 	//Patrol nodes
 	void AddPatrolNode(cAINode *apNode, float afWaitTime, const tString & asAnimation, bool abLoopAnimation=false);
@@ -593,7 +595,7 @@ protected:
 	// Update and related
 	void AddTransitionAnimation(const tString& asMainAnim, const tString& asTransAnim, const tString& asPrevAnim, float afMinTime = -1, float afMaxTime = -1);
 
-	tString GetCurrentPoseSuffix();
+	//tString GetCurrentPoseSuffix();
 
 	bool StateEvent(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage);
 	virtual bool StateEventImplement(int alState, eLuxEnemyStateEvent aEvent, cLuxStateMessage *apMessage)=0;

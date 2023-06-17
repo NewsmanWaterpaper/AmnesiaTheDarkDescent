@@ -279,7 +279,7 @@ void cLuxRankScreen::LoadData()
 	if (gpBase->GetIsInCustomStory() == true)
 	{
 		tString sErrorMsg;
-		tWString sStoryName = gpBase->GetCurrentCustomStoryName();
+		tString sStoryName = gpBase->GetCurrentCustomStoryName();
 
 		tWStringListIt it = lstStoryDirs.begin();
 
@@ -294,8 +294,8 @@ void cLuxRankScreen::LoadData()
 			bool bValid = pCustomStoryCfg->Load();
 			if (bValid)
 			{
-				tWString sTempName = cString::To16Char(pCustomStoryCfg->GetString("Main", "Name", ""));
-				if (sTempName == _W(""))
+				tString sTempName = pCustomStoryCfg->GetString("Main", "Name", "");
+				if (sTempName == "")
 				{
 					sErrorMsg = "custom story has no name!";
 				}

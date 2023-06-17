@@ -538,6 +538,8 @@ private:
 	static void __stdcall SetTeslaPigEasyEscapeDisabled(string& asName, bool abX);
 	static void __stdcall ForceTeslaPigSighting(string& asName);
 
+	static string& __stdcall GetManPigCurrentPose(string& asName);
+
 	//static void __stdcall SetWraithFlyMode(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashMode(string& asName, bool abX);
 	static void __stdcall SetWraithStealthDashAtWill(string& asName, bool abX);

@@ -159,8 +159,8 @@ public:
 	void PreloadParticleSystem(const tString &asFile);
 
 	void SetCustomStory(cLuxCustomStorySettings* apCustomStory);
-	void SetCurrentCustomStoryName(tWString asName) { msCustomStoryName = asName; }
-	tWString GetCurrentCustomStoryName() { return msCustomStoryName; }
+	void SetCurrentCustomStoryName(tString asName) { msCustomStoryName = asName; }
+	tString GetCurrentCustomStoryName() { return msCustomStoryName; }
 	void SetIsInCustomStory(bool abX) { mbIsInCustomStory = abX; }
 	bool GetIsInCustomStory() { return mbIsInCustomStory; }
 
@@ -262,7 +262,7 @@ public:
 	bool mbShowMenu;
 
 	bool mbIsInCustomStory;
-	tWString msCustomStoryName;
+	tString msCustomStoryName;
 
 	tString msStartMapFile;
 	tString msStartMapFolder;

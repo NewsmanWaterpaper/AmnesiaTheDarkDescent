@@ -801,6 +801,7 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("float GetEnemyPlayerDistance(string &in asEnemyName)", (void*)GetEnemyPlayerDistance);
 	AddFunc("bool GetPlayerCanSeeEnemy(string &in asEnemyName)", (void*)GetPlayerCanSeeEnemy);
 
+	AddFunc("string& GetManPigCurrentPose(string& asName)", (void*)GetManPigCurrentPose);
 	AddFunc("void ChangeManPigPose(string&in asName, string&in asPoseType)",(void *)ChangeManPigPose);
 	AddFunc("void ChangeEnemyPatrolSpeed(string& asName, string& asSpeedType)", (void*)ChangeEnemyPatrolSpeed);
 	AddFunc("void ChangeEnemyState(string& asName, string& asState)", (void*)ChangeEnemyState);
@@ -4198,6 +4199,19 @@ bool __stdcall cLuxScriptHandler::GetPlayerCanSeeEnemy(string& asEnemyName)
 
 
 //-----------------------------------------------------------------------
+
+string& __stdcall cLuxScriptHandler::GetManPigCurrentPose(string& asName)
+{
+
+	cLuxEnemy_ManPig* pEnemy = ToManPig(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return gsScriptNull;
+	}
+
+	return pEnemy->GetCurrentPoseSuffix();
+}
 
 void __stdcall cLuxScriptHandler::ChangeManPigPose(string& asName, string& asPoseType)
 {

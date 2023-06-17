@@ -89,6 +89,11 @@ void cLuxPropLoader_Lamp::LoadInstanceVariables(iLuxProp *apProp, cResourceVarsO
 	pLamp->mbConnectionLightUseOnColor = apInstanceVars->GetVarBool("ConnectionLightUseOnColor",false);
 	pLamp->mbConnectionLightUseSpec = apInstanceVars->GetVarBool("ConnectionLightUseSpec",false);
 
+	pLamp->msConnectionLight2 = apInstanceVars->GetVarString("ConnectedLight2", "");
+	pLamp->mfConnectionLight2Amount = apInstanceVars->GetVarFloat("ConnectionLight2Amount", 0);
+	pLamp->mbConnectionLight2UseOnColor = apInstanceVars->GetVarBool("ConnectionLight2UseOnColor", false);
+	pLamp->mbConnectionLight2UseSpec = apInstanceVars->GetVarBool("ConnectionLight2UseSpec", false);
+
 	pLamp->mbSynchronizeFlickering = apInstanceVars->GetVarBool("SynchronizeFlickering", false);
 
 	pLamp->SetFlickerActive(apInstanceVars->GetVarBool("FlickerActive", false));
@@ -113,6 +118,7 @@ cLuxLampLightConnection::~cLuxLampLightConnection()
 	{
 		cLuxLampLightConnection_Lamp *pLampConnection = *it;
 		pLampConnection->mpLamp->mpLightConnection = NULL;
+		pLampConnection->mpLamp->mpLightConnection2 = NULL;
 	}
 
 	STLDeleteAll(mlstLamps);
@@ -186,6 +192,7 @@ cLuxProp_Lamp::cLuxProp_Lamp(const tString &asName,int alID, cLuxMap *apMap) : i
 {
 	mbLit = true;
 	mpLightConnection = NULL;
+	mpLightConnection2 = NULL;
 	mbLightConnectionSetup = false;
 }
 
@@ -195,6 +202,9 @@ cLuxProp_Lamp::~cLuxProp_Lamp()
 {
 	if(mpLightConnection)
 		mpLightConnection->RemoveLamp(this);
+
+	if (mpLightConnection2)
+		mpLightConnection2->RemoveLamp(this);
 }
 
 //-----------------------------------------------------------------------
@@ -484,6 +494,32 @@ void cLuxProp_Lamp::SetupLampLightConnection()
 			Error("Light '%s' that is connected to lamp '%s' does not exist!\n", msConnectionLight.c_str(), msName.c_str());
 		}
 	}
+
+	if (msConnectionLight2 != "")
+	{
+		iLight* pConnectionLight2 = NULL;
+		//Iterate all lights and get light with name and with NO parent (otherwise a light connected to an entity is gotten).
+		cLightListIterator lightIt = mpWorld->GetLightIterator();
+		while (lightIt.HasNext())
+		{
+			iLight* pLight = lightIt.Next();
+			if (pLight->GetEntityParent() == NULL && pLight->GetName() == msConnectionLight2)
+			{
+				pConnectionLight2 = pLight;
+				break;
+			}
+		}
+
+		if (pConnectionLight2)
+		{
+			mpMap->AddLampLightConnection(this, pConnectionLight2, mfConnectionLight2Amount, mbConnectionLight2UseOnColor, mbConnectionLight2UseSpec);
+		}
+		else
+		{
+			Error("Light '%s' that is connected to lamp '%s' does not exist!\n", msConnectionLight2.c_str(), msName.c_str());
+		}
+	}
+
 	mbLightConnectionSetup = true;
 }
 
@@ -510,6 +546,10 @@ kSerializeVar(msConnectionLight,			eSerializeType_String)
 kSerializeVar(mfConnectionLightAmount,		eSerializeType_Float32)
 kSerializeVar(mbConnectionLightUseOnColor,	eSerializeType_Bool)
 kSerializeVar(mbConnectionLightUseSpec,		eSerializeType_Bool)
+kSerializeVar(msConnectionLight2, eSerializeType_String)
+kSerializeVar(mfConnectionLight2Amount, eSerializeType_Float32)
+kSerializeVar(mbConnectionLight2UseOnColor, eSerializeType_Bool)
+kSerializeVar(mbConnectionLight2UseSpec, eSerializeType_Bool)
 kSerializeVar(mbCanBeLitByPlayer, eSerializeType_Bool)
 kSerializeVar(mbCanBeGrabbed, eSerializeType_Bool)
 kSerializeVar(mbCanBeTurnedOff, eSerializeType_Bool)
@@ -541,6 +581,10 @@ void cLuxProp_Lamp::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mfConnectionLightAmount);
 	kCopyToVar(pData,mbConnectionLightUseOnColor);
 	kCopyToVar(pData,mbConnectionLightUseSpec);
+	kCopyToVar(pData, msConnectionLight2);
+	kCopyToVar(pData, mfConnectionLight2Amount);
+	kCopyToVar(pData, mbConnectionLight2UseOnColor);
+	kCopyToVar(pData, mbConnectionLight2UseSpec);
 	kCopyToVar(pData,mbSynchronizeFlickering);
 	kCopyToVar(pData,mbFlickerActive);	
 	kCopyToVar(pData, mbCanBeLitByPlayer);
@@ -565,6 +609,10 @@ void cLuxProp_Lamp::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData,mfConnectionLightAmount);
 	kCopyFromVar(pData,mbConnectionLightUseOnColor);
 	kCopyFromVar(pData,mbConnectionLightUseSpec);
+	kCopyFromVar(pData, msConnectionLight2);
+	kCopyFromVar(pData, mfConnectionLight2Amount);
+	kCopyFromVar(pData, mbConnectionLight2UseOnColor);
+	kCopyFromVar(pData, mbConnectionLight2UseSpec);
 	kCopyFromVar(pData,mbSynchronizeFlickering);
 	kCopyFromVar(pData,mbFlickerActive);
 	kCopyFromVar(pData, mbCanBeLitByPlayer);

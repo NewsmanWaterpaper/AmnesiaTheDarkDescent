@@ -37,6 +37,10 @@ public:
 	float mfConnectionLightAmount;
 	bool mbConnectionLightUseOnColor;
 	bool mbConnectionLightUseSpec;
+	tString msConnectionLight2;
+	float mfConnectionLight2Amount;
+	bool mbConnectionLight2UseOnColor;
+	bool mbConnectionLight2UseSpec;
 	bool mbSynchronizeFlickering;
 	bool mbFlickerActive;
 	bool mbCanBeLitByPlayer;
@@ -138,10 +142,15 @@ private:
 	bool mbLightConnectionSetup;
 
 	cLuxLampLightConnection *mpLightConnection;
+	cLuxLampLightConnection *mpLightConnection2;
 	tString msConnectionLight;
 	float mfConnectionLightAmount;
 	bool mbConnectionLightUseOnColor;
 	bool mbConnectionLightUseSpec;
+	tString msConnectionLight2;
+	float mfConnectionLight2Amount;
+	bool mbConnectionLight2UseOnColor;
+	bool mbConnectionLight2UseSpec;
 
 	bool mbSynchronizeFlickering;
 

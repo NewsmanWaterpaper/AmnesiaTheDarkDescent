@@ -285,7 +285,8 @@ void cLuxCustomStorySettings::SetActive()
 	cLuxCustomStorySettings* pStory = hplNew(cLuxCustomStorySettings,(this));
 	
 	gpBase->SetCustomStory(pStory);
-	gpBase->SetCurrentCustomStoryName(pStory->msName);
+	tString sCustomName = cString::To8Char(pStory->msName);
+	gpBase->SetCurrentCustomStoryName(sCustomName);
 	gpBase->SetIsInCustomStory(true);
 }
 
