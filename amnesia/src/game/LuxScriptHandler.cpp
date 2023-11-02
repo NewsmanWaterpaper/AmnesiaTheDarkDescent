@@ -840,6 +840,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEnemyHearVolume(string &in asName, float afHearVolume)", (void*)SetEnemyHearVolume);
 	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
 	AddFunc("void SetEnemyRunSpeedMul(string &in asName, float afRunSpeedMul)", (void*)SetEnemyRunSpeedMul);
+	AddFunc("float GetEnemySearchTime(string& asName)", (void*)GetEnemySearchTime);
+	AddFunc("void SetEnemySearchTime(string& asName, float afSearchTime)", (void*)SetEnemySearchTime);
 	AddFunc("void SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed)", (void*)SetEnemyRegenHealthSpeed);
 	AddFunc("float GetEnemyRegenHealthSpeed(string& asName)", (void*)GetEnemyRegenHealthSpeed);
 	AddFunc("void SetManPigFleeHealth(string& asName, float afFleeHealth)", (void*)SetManPigFleeHealth);
@@ -4726,6 +4728,28 @@ void __stdcall cLuxScriptHandler::SetEnemyRunSpeedMul(string& asName, float afRu
 
 		iLuxEnemy* pEnemy = ToEnemy(pEntity);
 	pEnemy->SetRunSpeedMul(afRunSpeedMul);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+float __stdcall cLuxScriptHandler::GetEnemySearchTime(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetSearchTime();
+}
+
+void __stdcall cLuxScriptHandler::SetEnemySearchTime(string& asName, float afSearchTime)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetSearchTime(afSearchTime);
 
 	END_SET_PROPERTY
 }

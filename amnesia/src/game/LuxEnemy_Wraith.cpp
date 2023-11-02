@@ -84,7 +84,7 @@ void cLuxEnemyLoader_Wraith::LoadVariables(iLuxEnemy* apEnemy, cXmlElement* apRo
 	pWraith->mAVFlameLightColor = GetVarColor("FlameLightColor", cColor(0.527, 0.235, 0, 1));
 	pWraith->mfAVFlameLightBrightness = GetVarFloat("FlameLightBrightness", 2.5f);
 	pWraith->mfAVFlameLightRadius = GetVarFloat("FlameLightRadius", 6.5f);
-	pWraith->mfAVFlameLightBrightness = GetVarFloat("FlameLightBrightness", 2.5f);
+	//pWraith->mfAVFlameLightBrightness = GetVarFloat("FlameLightBrightness", 2.5f);
 
 	pWraith->mTeleportLightColor = GetVarColor("TeleportLightColor", cColor(0.4, 0.9, 1.0));
 	pWraith->mfTeleportLightBrightness = GetVarFloat("TeleportLightBrightness", 17.0f);
@@ -113,8 +113,8 @@ void cLuxEnemyLoader_Wraith::LoadVariables(iLuxEnemy* apEnemy, cXmlElement* apRo
 	pWraith->mvArchvilePS_AttackStartOffset = GetVarVector3f("ArchvilePS_AttackStartOffset", cVector3f(0, 0.25, 0));
 	pWraith->msArchvilePS_AttackEnd = GetVarString("ArchvilePS_AttackEnd", "");
 	pWraith->mvArchvilePS_AttackEndOffset = GetVarVector3f("ArchvilePS_AttackEndOffset", cVector3f(0, 0.25, 0));
-	pWraith->msProjectilePS_AttackStart = GetVarString("ProjectilePS_AttackStart", "");
-	pWraith->msProjectilePS_AttackEnd = GetVarString("ProjectilePS_AttackEnd", "");
+	//pWraith->msProjectilePS_AttackStart = GetVarString("ProjectilePS_AttackStart", "");
+	//pWraith->msProjectilePS_AttackEnd = GetVarString("ProjectilePS_AttackEnd", "");
 
 	pWraith->mfHuntPauseMinTime = GetVarFloat("HuntPauseMinTime", 0);
 	pWraith->mfHuntPauseMaxTime = GetVarFloat("HuntPauseMaxTime", 0);
@@ -123,7 +123,7 @@ void cLuxEnemyLoader_Wraith::LoadVariables(iLuxEnemy* apEnemy, cXmlElement* apRo
 
 	pWraith->msIdleStillLoop = GetVarString("IdleStillSoundLoop");
 	pWraith->msIdleMoveLoop = GetVarString("IdleMoveSoundLoop");
-	pWraith->msStealthLoop = GetVarString("StealthSoundLoop");
+	//pWraith->msStealthLoop = GetVarString("StealthSoundLoop");
 	pWraith->msSearchLoop = GetVarString("SearchSoundLoop");
 	pWraith->msChaseLoop = GetVarString("ChaseSoundLoop");
 	pWraith->msSpotlightLoop = GetVarString("SpotlightSoundLoop");
@@ -148,7 +148,7 @@ void cLuxEnemyLoader_Wraith::LoadVariables(iLuxEnemy* apEnemy, cXmlElement* apRo
 
 	gpBase->PreloadSound(pWraith->msIdleStillLoop);
 	gpBase->PreloadSound(pWraith->msIdleMoveLoop);
-	gpBase->PreloadSound(pWraith->msStealthLoop);
+	//gpBase->PreloadSound(pWraith->msStealthLoop);
 	gpBase->PreloadSound(pWraith->msChaseLoop);
 	gpBase->PreloadSound(pWraith->msSpotlightLoop);
 	gpBase->PreloadSound(pWraith->msTeleportingLoop);
@@ -159,8 +159,8 @@ void cLuxEnemyLoader_Wraith::LoadVariables(iLuxEnemy* apEnemy, cXmlElement* apRo
 	gpBase->PreloadParticleSystem(pWraith->msTeleportDashPS_Teleport);
 	gpBase->PreloadParticleSystem(pWraith->msTeleportDashPS_Trail);
 	gpBase->PreloadParticleSystem(pWraith->msAttackMeleePS);
-	gpBase->PreloadParticleSystem(pWraith->msProjectilePS_AttackStart);
-	gpBase->PreloadParticleSystem(pWraith->msProjectilePS_AttackEnd);
+	//gpBase->PreloadParticleSystem(pWraith->msProjectilePS_AttackStart);
+	//gpBase->PreloadParticleSystem(pWraith->msProjectilePS_AttackEnd);
 
 	//pWraith->mbIsActualWraith = GetVarBool("IsWraith", true);
 
@@ -172,8 +172,8 @@ static eLuxAttackType ToAttackType(const tString& asStr)
 {
 	if (asStr == "Archvile") return eLuxAttackType_Archvile;
 	if (asStr == "HeatRay") return eLuxAttackType_HeatRay;
-	if (asStr == "Projectile") return eLuxAttackType_Projectile;
-	if (asStr == "Meele") return eLuxAttackType_Melee;
+	if (asStr == "Melee") return eLuxAttackType_Melee;
+	//if (asStr == "Projectile") return eLuxAttackType_Projectile;
 
 	Error("eLuxAttackType '%s' does not exist, falling back to melee!\n", asStr.c_str());
 	return eLuxAttackType_Melee;

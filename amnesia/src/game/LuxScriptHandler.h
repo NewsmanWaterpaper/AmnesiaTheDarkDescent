@@ -569,6 +569,8 @@ private:
 	static void __stdcall SetEnemyHearVolume(string& asName, float afHearVolume);
 	static float __stdcall GetEnemyRunSpeedMul(string& asName);
 	static void __stdcall SetEnemyRunSpeedMul(string& asName, float afRunSpeedMul);
+	static float __stdcall GetEnemySearchTime(string& asName);
+	static void __stdcall SetEnemySearchTime(string& asName, float afSearchTime);
 	static void __stdcall SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed);
 	static float __stdcall GetEnemyRegenHealthSpeed(string& asName);
 	static void __stdcall SetManPigFleeHealth(string& asName, float afFleeHealth);

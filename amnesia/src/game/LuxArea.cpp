@@ -204,6 +204,7 @@ void iLuxArea::OnUpdate(float afTimeStep)
 {
 	if (mpParentBody)
 	{
+		//mpBody->SetPosition(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition()); //mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
 		mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
 	}
 }

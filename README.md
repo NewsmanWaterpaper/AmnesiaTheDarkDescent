@@ -371,6 +371,14 @@ Modifies/returns how much an enemy's run speed is multiplied by.
 2. *afRunSpeedMul* - The amount to multiply the run speed with
 ---------------------------------------
 ```as
+void  SetEnemySearchTime(string& asName, float afSearchTime);
+float  GetEnemySearchTime(string& asName);
+```
+Modifies/returns  how much time an enemy spends in it's Search state.
+1. *asName* - Internal name of the enemy
+2. *afSearchTime* - The amount of time an enemy spends in it's Search state
+---------------------------------------
+```as
 void  SetEnemyHealth(string& asName, float afHealth);
 float  GetEnemyHealth(string& asName);
 ```

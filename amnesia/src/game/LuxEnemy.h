@@ -153,6 +153,8 @@ public:
 	bool mbPatrolMoveSpeedChanged;
 	bool mbSpecialSearchNode;
 
+	float mfPlayerSearchTime;
+
 	float mfCheckAtDoorCount;
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
@@ -489,6 +491,9 @@ public:
 	
 	void SetDeaf(bool abX) { mbDeaf = abX; }
 	void SetBlind(bool abX) { mbBlind = abX; }
+
+	void SetSearchTime(float abX) { mfPlayerSearchTime = abX; }
+	float GetSearchTime() { return mfPlayerSearchTime; }
 
 	void SetDisabled(bool abX);
 	bool IsDisabled(){ return mbDisabled;}

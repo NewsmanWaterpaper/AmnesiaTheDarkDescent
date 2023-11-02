@@ -558,7 +558,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			//cAINode * pNode = GetSearchForPlayerNode();
 			if (GetSpecialSearchNodeActive() == true)
 			{
-				cAINode* pNode = mpPathfinder->GetNodeAtPos(GetSpecialSearchNode(), 4, 12, false, false, true, NULL);
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(GetSpecialSearchNode(), 0, 12, false, false, true, NULL);
 				if (pNode)
 					mpPathfinder->MoveTo(pNode->GetPosition());
 				else
@@ -566,7 +566,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			}
 			else
 			{
-				cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 0, 30, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
+				cAINode* pNode = mpPathfinder->GetNodeAtPos(gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition(), 4, 12, false, false, true, NULL); //GetFeetPosition(), 4, 12,false, false, true, NULL);
 				if (pNode)
 					mpPathfinder->MoveTo(pNode->GetPosition());
 				else

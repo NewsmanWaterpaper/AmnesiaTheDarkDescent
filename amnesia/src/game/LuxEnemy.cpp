@@ -280,7 +280,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 	{
 		pEnemy->mfSightRange *= 1.15f;
 		pEnemy->mfDarknessSightRange *= 1.15f;
-		pEnemy->mfHearVolume *= 0.6f;
+		//pEnemy->mfHearVolume *= 0.6f;
 
 		pEnemy->mfFOV *= 1.1f;
 		pEnemy->mfFOVXMul *= 1.1f;
@@ -303,7 +303,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mfDefaultForwardSpeed[eLuxEnemyPoseType_Biped][eLuxEnemyMoveSpeed_Run]		*= 1.2f;
 		pEnemy->mfDefaultBackwardSpeed[eLuxEnemyPoseType_Biped][eLuxEnemyMoveSpeed_Run]		*= 1.2f;
 		pEnemy->mfDefaultForwardAcc[eLuxEnemyPoseType_Biped][eLuxEnemyMoveSpeed_Run]		*= 1.2f;
-		pEnemy->mfDefaultForwardDeacc[eLuxEnemyPoseType_Biped][eLuxEnemyMoveSpeed_Run]		*= 1.2f;
+		pEnemy->mfDefaultForwardDeacc[eLuxEnemyPoseType_Biped][eLuxEnemyMoveSpeed_Run]		*= 1.2f;*/
 
 		pEnemy->mfTurnSpeedMul		*= 1.35f;
 		pEnemy->mfTurnMaxSpeed		*= 1.0f;
@@ -313,7 +313,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mfStoppedToWalkSpeed[eLuxEnemyPoseType_Biped]	*= 1.0f;
 		pEnemy->mfWalkToStoppedSpeed[eLuxEnemyPoseType_Biped]	*= 1.0f;
 		pEnemy->mfWalkToRunSpeed[eLuxEnemyPoseType_Biped]		*= 1.0f;
-		pEnemy->mfRunToWalkSpeed[eLuxEnemyPoseType_Biped]		*= 1.0f;*/
+		pEnemy->mfRunToWalkSpeed[eLuxEnemyPoseType_Biped]		*= 1.0f;
 
 
 		pEnemy->mfWaterStepSpeedWalk	*= 1.5f;
@@ -2785,6 +2785,8 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mfForwardAcc);
 	kCopyToVar(pData, mfForwardDeacc);
 
+	kCopyToVar(pData, mfPlayerSearchTime);
+
 	kCopyToVar(pData, mfDarknessGlowAlpha);
 	kCopyToVar(pData, mfDarknessGlowAlphaGoal);
 
@@ -2952,6 +2954,8 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mfBackwardSpeed);
 	kCopyFromVar(pData, mfForwardAcc);
 	kCopyFromVar(pData, mfForwardDeacc);
+
+	kCopyFromVar(pData, mfPlayerSearchTime);
 
 	kCopyFromVar(pData, mfDarknessGlowAlpha);
 	kCopyFromVar(pData, mfDarknessGlowAlphaGoal);
