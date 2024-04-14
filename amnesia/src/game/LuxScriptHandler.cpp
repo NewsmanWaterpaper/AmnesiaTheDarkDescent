@@ -840,6 +840,8 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("void SetEnemyHearVolume(string &in asName, float afHearVolume)", (void*)SetEnemyHearVolume);
 	AddFunc("float GetEnemyRunSpeedMul(string& asName)", (void*)GetEnemyRunSpeedMul);
 	AddFunc("void SetEnemyRunSpeedMul(string &in asName, float afRunSpeedMul)", (void*)SetEnemyRunSpeedMul);
+	AddFunc("float GetEnemyDamageMul(string& asName)", (void*)GetEnemyDamageMul);
+	AddFunc("void SetEnemyDamageMul(string &in asName, float afDamageMul)", (void*)SetEnemyDamageMul);
 	AddFunc("float GetEnemySearchTime(string& asName)", (void*)GetEnemySearchTime);
 	AddFunc("void SetEnemySearchTime(string& asName, float afSearchTime)", (void*)SetEnemySearchTime);
 	AddFunc("void SetEnemyRegenHealthSpeed(string& asName, float afRegenHealthSpeed)", (void*)SetEnemyRegenHealthSpeed);
@@ -2857,6 +2859,11 @@ void __stdcall cLuxScriptHandler::SetEntityActive(string& asName, bool abActive)
 {
 	BEGIN_SET_PROPERTY(eLuxEntityType_LastEnum,-1)
 
+		if (pEntity->GetEntityType() == eLuxEntityType_Enemy && abActive == false)
+		{
+			iLuxEnemy* pEnemy = ToEnemy(pEntity);
+			pEnemy->RunCallbackFunc("OnAutoDisabled");
+		}
 		pEntity->SetActive(abActive);
 
 	END_SET_PROPERTY
@@ -2986,6 +2993,7 @@ static eLuxFocusCrosshair StringToCrossHair(const tString &asCrossHair)
 	if(sLowCross=="ladder")		return eLuxFocusCrosshair_Ladder;
 	if (sLowCross == "note")		return eLuxFocusCrosshair_Note;
 	if (sLowCross == "talk")		return eLuxFocusCrosshair_Talk;
+	if (sLowCross == "examine")		return eLuxFocusCrosshair_Examine;
 
     Error("CrossHair type '%s' does not exist!\n", asCrossHair.c_str());
 	return eLuxFocusCrosshair_Default;
@@ -4728,6 +4736,28 @@ void __stdcall cLuxScriptHandler::SetEnemyRunSpeedMul(string& asName, float afRu
 
 		iLuxEnemy* pEnemy = ToEnemy(pEntity);
 	pEnemy->SetRunSpeedMul(afRunSpeedMul);
+
+	END_SET_PROPERTY
+}
+//-----------------------------------------------------------------------
+float __stdcall cLuxScriptHandler::GetEnemyDamageMul(string& asName)
+{
+	iLuxEnemy* pEnemy = ToEnemy(GetEntity(asName, eLuxEntityType_Enemy, -1));
+	if (pEnemy == NULL)
+	{
+		Error("Can't find enemy '%s'!\n", asName.c_str());
+		return 0;
+	}
+
+	return pEnemy->GetDamageMul();
+}
+
+void __stdcall cLuxScriptHandler::SetEnemyDamageMul(string& asName, float afDamageMul)
+{
+	BEGIN_SET_PROPERTY(eLuxEntityType_Enemy, -1)
+
+		iLuxEnemy* pEnemy = ToEnemy(pEntity);
+	pEnemy->SetDamageMul(afDamageMul);
 
 	END_SET_PROPERTY
 }

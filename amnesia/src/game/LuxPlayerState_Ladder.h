@@ -59,6 +59,8 @@ public:
 	float mfStepCount;
 	bool mbPlayedSound;
 
+	bool mbHasJumpedOff;
+
 	float mfPitchMaxLimit;
 	float mfPitchMinLimit;
 
@@ -124,6 +126,7 @@ private:
 	float mfTimeCount;
 
 	cVector3f mvCharPosition;
+	//cVector3f mvCharPositionGoal;
 
 	cVector3f mvGoalPos;
 	cVector3f mvGoalRot;
@@ -139,6 +142,7 @@ private:
 	float mfStepLength;
 	float mfStepCount;
 	bool mbPlayedSound;
+	bool mbHasJumpedOff;
 
 	float mfPitchMaxLimit;
 	float mfPitchMinLimit;

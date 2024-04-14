@@ -944,7 +944,7 @@ kEndSerialize()
 //-----------------------------------------------------------------------
 void cLuxProgressLogHandler_SaveData::FromProgLog(cLuxProgressLogHandler* apProgLog)
 {
-	mlCounter = apProgLog->mlCounter; 
+	mlCounter = apProgLog->mlCounter;
 }
 void cLuxProgressLogHandler_SaveData::ToProgLog(cLuxMap* apMap, cLuxProgressLogHandler* apProgLog)
 {

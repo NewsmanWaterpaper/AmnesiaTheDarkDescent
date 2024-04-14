@@ -59,6 +59,10 @@ public:
 	//////////////////////
 	//Properties
 	cVector3f GetStartRotation();
+	cVector3f GetStartPosition();
+	cVector3f GetLadderWorldPosition();
+
+	bool GetIsAttachedToParentBody() { return mbHasParentBody; }
 	
 	const cVector3f& GetForward(){ return mvForward;}
 	float GetMaxY(){ return mfMaxY;}
@@ -79,13 +83,14 @@ public:
 protected:
 
 private:
-	cVector3f GetStartPosition();
+	//cVector3f GetStartPosition();
 
 	/////////////////////////
 	// Data
 	cVector3f mvForward;
 	float mfMaxY;
 	float mfMinY;
+	bool mbHasParentBody;
 
 	tString msMaterial;
 

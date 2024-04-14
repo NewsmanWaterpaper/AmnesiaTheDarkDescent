@@ -2292,7 +2292,7 @@ void cLuxPlayerDeath::PostUpdate(float afTimeStep)
 	//Reset game
 	gpBase->mpEngine->GetUpdater()->BroadcastMessageToAll(eUpdateableMessage_Reset);
 	gpBase->SetCustomStory(NULL);
-	gpBase->SetCurrentCustomStoryName(NULL);
+	gpBase->SetCurrentCustomStoryName("");
 	gpBase->SetIsInCustomStory(false);
 
 	//Start up menu again

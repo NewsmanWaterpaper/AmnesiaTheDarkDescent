@@ -159,6 +159,8 @@ public:
 	bool mbStuckAtDoor;
 	int mlStuckDoorID;
 
+	float mfDamageMul;
+
 	int mPatrolMoveSpeed;
 	float mfRunSpeedMul;
 	float mfForwardSpeed;
@@ -515,6 +517,9 @@ public:
 	void SetRunSpeedMul(float afX) { mfRunSpeedMul = afX; }
 	float GetRunSpeedMul() { return mfRunSpeedMul; }
 
+	void SetDamageMul(float afX) { mfDamageMul = afX; }
+	float GetDamageMul() { return mfDamageMul; }
+
 	void SetOverCallback(const tString& asFunc) { msOverCallback = asFunc; }
 	void SetEndOfPathCallback(const tString& asCallbackFunc, bool abRemoveWhenCalled);
 
@@ -687,6 +692,8 @@ protected:
 	float mfHallucinationEndDist;
 	float mfRunSpeedMul;
 	float mfFleeHealth;
+
+	float mfDamageMul;
 
 	float mfHealth;
 	bool mbCausesSanityDecrease;

@@ -108,6 +108,7 @@ cLuxEnemy_Grunt::cLuxEnemy_Grunt(const tString &asName, int alID, cLuxMap *apMap
 	mfWaitTime =0;
 	mfAlertRunTowardsCount = 0;
 	mfRunSpeedMul = 1.0f;
+	mfDamageMul = 1.0f;
 	mbPathReversed = false;
 	mbAlignEntityWithGroundRay = true;
 }
@@ -829,7 +830,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 			
 		
 		kLuxOnMessage(eLuxEnemyMessage_AnimationSpecialEvent)
-			Attack(mNormalAttackSize, mBreakDoorAttackDamage);
+			Attack(mNormalAttackSize, mBreakDoorAttackDamage,mfDamageMul);
 			
 
 		////////////////////////
@@ -856,7 +857,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 				ChangeState(mPreviousState);
 
 		kLuxOnMessage(eLuxEnemyMessage_AnimationSpecialEvent)
-			Attack(mNormalAttackSize, mNormalAttackDamage);
+			Attack(mNormalAttackSize, mNormalAttackDamage,mfDamageMul);
 		
 		////////////////////////
 		// Overload global
@@ -888,7 +889,7 @@ bool cLuxEnemy_Grunt::StateEventImplement(int alState, eLuxEnemyStateEvent aEven
 
 		kLuxOnMessage(eLuxEnemyMessage_AnimationSpecialEvent)
 			mlTempVal = 1;
-			Attack(mNormalAttackSize, mNormalAttackDamage);
+			Attack(mNormalAttackSize, mNormalAttackDamage,mfDamageMul);
 		
 		kLuxOnMessage(eLuxEnemyMessage_AnimationOver)
 			ChangeState(mPreviousState);
@@ -1120,6 +1121,9 @@ void cLuxEnemy_Grunt::PatrolEndOfPath()
 
 kBeginSerialize(cLuxEnemy_Grunt_SaveData, iLuxEnemy_SaveData)
 kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
+kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
+kSerializeVar(mbAllowZeroWaitTime, eSerializeType_Bool)
+kSerializeVar(mfDamageMul, eSerializeType_Float32)
 kEndSerialize()
 
 //-----------------------------------------------------------------------
@@ -1144,6 +1148,7 @@ void cLuxEnemy_Grunt::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mPatrolMoveSpeed);
 	kCopyToVar(pData, mbAllowZeroWaitTime);
 	kCopyToVar(pData, mfRunSpeedMul);
+	kCopyToVar(pData, mfDamageMul);
 	
 
 }
@@ -1162,6 +1167,7 @@ void cLuxEnemy_Grunt::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	mPatrolMoveSpeed = (eLuxEnemyMoveSpeed)pData->mPatrolMoveSpeed;
 	kCopyFromVar(pData, mbAllowZeroWaitTime);
 	kCopyFromVar(pData, mfRunSpeedMul);
+	kCopyFromVar(pData, mfDamageMul);
 	////////////////////////
 	// Handle changed enums
 	if (mCurrentState >= eLuxEnemyState_PigEnumStart) mCurrentState = eLuxEnemyState_LastEnum;

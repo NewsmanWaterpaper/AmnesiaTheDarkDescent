@@ -471,6 +471,7 @@ enum eLuxFocusCrosshair
 	eLuxFocusCrosshair_Ladder,
 	eLuxFocusCrosshair_Note,
 	eLuxFocusCrosshair_Talk,
+	eLuxFocusCrosshair_Examine,
 
     eLuxFocusCrosshair_LastEnum
 };

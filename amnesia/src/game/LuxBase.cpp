@@ -1191,7 +1191,7 @@ bool cLuxBase::InitEngine()
 	vars.mGraphics.mbFullscreen =  mpConfigHandler->mbFullscreen;
 	vars.mGraphics.msWindowCaption = msGameName + " Loading...";
 
-	
+	vars.mGame.mlMaxFramesPerSec = mpConfigHandler->mlMaxFramesPerSec;
 
 	vars.mSound.mlSoundDeviceID = mpConfigHandler->mlSoundDevID;
 	vars.mSound.mlMaxChannels = mpConfigHandler->mlMaxSoundChannels;

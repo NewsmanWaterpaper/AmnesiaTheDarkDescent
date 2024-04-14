@@ -178,15 +178,15 @@ void cLuxProgressLogHandler::Update(float afTimeStep)
 	if (mbCounterActive == false) return;
 
 	mlCounter++;
-	tWString sTimerText = cString::To16Char(GetPlayTime());
-	msTimerDisplayText = sTimerText;
+	//tWString sTimerText = cString::To16Char(GetPlayTime());
+	//msTimerDisplayText = sTimerText;
 	DrawHud(afTimeStep);
 
 }
 
 void cLuxProgressLogHandler::DrawHud(float afTimeStep)
 {
-	
+	msTimerDisplayText = cString::To16Char(GetPlayTime());
 	if(mbShowCounterHUD)
 	{
 		gpBase->mpGameHudSet->DrawFont(msTimerDisplayText, mpCountFont, mvCounterPos, mvCounterSize, mCounterTextColor, mCounterTextAlign);

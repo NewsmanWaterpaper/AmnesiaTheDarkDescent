@@ -91,6 +91,8 @@ cLuxEnemy_Child::cLuxEnemy_Child(const tString &asName, int alID, cLuxMap *apMap
 	mfWaitTime = 0;
 	mbPathReversed = false;
 
+	mfDamageMul = 1.0f;
+
 	for(int i=0; i<eLuxEnemyMoveType_LastEnum; ++i)
 	{
 		eLuxEnemyPoseType pose = eLuxEnemyPoseType_Biped;
@@ -514,6 +516,7 @@ kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kSerializeVar(mfWaitTime, eSerializeType_Float32)
 kSerializeVar(mbAllowZeroWaitTime, eSerializeType_Bool)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
+kSerializeVar(mfDamageMul, eSerializeType_Float32)
 
 
 kEndSerialize()
@@ -540,6 +543,7 @@ void cLuxEnemy_Child::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData,mfWaitTime);
 	kCopyToVar(pData, mbAllowZeroWaitTime);
 	kCopyToVar(pData, mfRunSpeedMul);
+	kCopyToVar(pData, mfDamageMul);
 }
 
 //-----------------------------------------------------------------------
@@ -557,6 +561,7 @@ void cLuxEnemy_Child::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mfWaitTime);
 	kCopyFromVar(pData, mbAllowZeroWaitTime);
 	kCopyFromVar(pData, mfRunSpeedMul);
+	kCopyFromVar(pData, mfDamageMul);
 }
 
 //-----------------------------------------------------------------------

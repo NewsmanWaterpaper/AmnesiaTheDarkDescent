@@ -26,6 +26,7 @@
 #include "LuxMapHandler.h"
 #include "LuxMap.h"
 #include "LuxPlayerHelpers.h"
+#include "LuxDebugHandler.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,7 @@ void cLuxPlayerState_Ladder::OnEnterState(eLuxPlayerState aPrevState)
 	mlState =0;
 	mfStepCount =0;
 	mbPlayedSound = false;
+	mbHasJumpedOff = false;
 	mfMoveMul =0;
 
 	///////////////////////////////////////
@@ -163,10 +165,20 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 	iCharacterBody *pCharBody = mpPlayer->GetCharacterBody();
 	cCamera *pCam = mpPlayer->GetCamera();
 
+	if (mpLadder->GetIsAttachedToParentBody() == true)
+	{
+		mvGoalPos = mpLadder->GetStartPosition();
+		mvPosAdd = (mvGoalPos - mpPlayer->GetCharacterBody()->GetPosition()) / 0.5; //Used when the Player is being attached to the Ladder
+
+		//cVector3f mvLadderPos = mpLadder->GetLadderWorldPosition(); //Gets the World Position of the Ladder Area
+		//cVector3f mvPlayerLadderOffset = mvGoalPos - mpPlayer->GetCharacterBody()->GetPosition(); //Gets the Offset between Player position and Ladder Area 
+	}
+
 	//////////////////////////////////
 	// Attach To Ladder
 	if(mlState ==0)
 	{
+
 		mfTimeCount -= afTimeStep;
 
 		mvCharPosition += mvPosAdd*afTimeStep;
@@ -199,7 +211,7 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 		//Up
 		if(mfMoveMul > 0)
 		{
-			mvCharPosition.y += mfMoveMul*mfUpSpeed* afTimeStep;
+			mvCharPosition.y += mfMoveMul*mfUpSpeed * afTimeStep;
 
 			if(mfStepCount<0)mfStepCount=0;
 		}
@@ -256,7 +268,33 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 		
 		/////////////////////////////////
 		//Update character body
-		pCharBody->SetPosition(mvCharPosition);
+		if (mpLadder->GetIsAttachedToParentBody() == true)
+		{
+			cVector3f mvLadderPos = mpLadder->GetLadderWorldPosition(); //Gets the World Position of the Ladder Area
+			cVector3f mvPlayerLadderOffset = mvGoalPos - mpPlayer->GetCharacterBody()->GetPosition(); //Gets the Offset between Player position and Ladder Area 
+			cVector3f mvCharPositionGoal = mvLadderPos - mpPlayer->GetCharacterBody()->GetPosition();
+
+			if (mvCharPosition.x != mvPlayerLadderOffset.x)
+			{
+				mvCharPosition.x = mvCharPosition.x + mvPlayerLadderOffset.x * afTimeStep;
+			}
+			if (mvCharPosition.y != mvPlayerLadderOffset.y + mvCharPosition.y)
+			{
+				mvCharPosition.y = mvCharPosition.y + mvPlayerLadderOffset.y * afTimeStep;
+			}
+			if (mvCharPosition.z != mvPlayerLadderOffset.z)
+			{
+				mvCharPosition.z = mvCharPosition.z + mvPlayerLadderOffset.z * afTimeStep;
+			}
+		}
+		
+		pCharBody->SetPosition(mvCharPosition); // += mvPlayerLadderOffset*afTimeStep
+		//gpBase->mpDebugHandler->AddMessage(_W("Ladder Max: ") + cString::ToStringW(mpLadder->GetMaxY()), true);
+		//gpBase->mpDebugHandler->AddMessage(_W("Ladder Max Req: ") + cString::ToStringW(mvCharPosition.y - pCharBody->GetSize().y * 0.5f), true);
+		
+		
+		//mvCharPosition mvCharPosition - mvLadderPos*afTimeStep
+		
 
 
 		/////////////////////////////////
@@ -272,9 +310,11 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 		//Check if at top
 		if(mfMoveMul > 0 && (mvCharPosition.y - pCharBody->GetSize().y*0.5f) > mpLadder->GetMaxY())
 		{
+			//mpLadder->GetIsAttachedToParentBody() == true && mfMoveMul > 0 && (mvCharPosition.y - pCharBody->GetSize().y * 0.5f) > mpLadder->GetMaxY() - 1.3
 			mlState = 2;
 			mfLeaveAtTopCount = 2;
 			PlaySound("dettach");
+			gpBase->mpDebugHandler->AddMessage(_W("Should be at the top"), true);
 		}
 		///////////////////////////
 		//Check if at bottom
@@ -286,6 +326,7 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 				)
 		{
 			mpPlayer->ChangeState(eLuxPlayerState_Normal);
+			//gpBase->mpDebugHandler->AddMessage(_W("Should be at the bottom"), true);
 		}
 
 		mfMoveMul =0;
@@ -294,11 +335,27 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 	// On the top of the ladder
 	else if(mlState == 2)
 	{
+		//gpBase->mpDebugHandler->AddMessage(_W("Getting off at the top of ladder"), true);
 		//mfLeaveAtTopCount -= afTimeStep;
 		pCharBody->Move(eCharDir_Forward,1);
 
-		cVector3f vRayStart = pCharBody->GetFeetPosition() + cVector3f(0,0.1f,0);
-		cVector3f vRayEnd = pCharBody->GetFeetPosition() - cVector3f(0,0.3f,0);
+		cVector3f vRayStart = pCharBody->GetFeetPosition() + cVector3f(0,0.1f,0); //0.1
+		cVector3f vRayEnd = pCharBody->GetFeetPosition() - cVector3f(0,0.3f,0); //0.3
+
+		if (mpLadder->GetIsAttachedToParentBody() == true)
+		{
+			//vRayStart = pCharBody->GetFeetPosition() + cVector3f(0, 1.85f, 0); //0.1
+			//vRayEnd = pCharBody->GetFeetPosition() - cVector3f(0, 0.3f, 0); //0.3
+			//cLuxMoveState_Normal* pMoveState = static_cast<cLuxMoveState_Normal*>(mpPlayer->GetMoveStateData(eLuxMoveState_Normal));
+			if (mbHasJumpedOff == false)
+			{
+				//mpPlayer->ChangeState(eLuxPlayerState_Normal);
+				//pMoveState->Jump();
+				//pMoveState->Jump();
+				//mbHasJumpedOff = true;
+			}
+
+		}
 
 		mfLeaveAtTopCount -= afTimeStep;
 		if( pCharBody->CheckRayIntersection(vRayStart, vRayEnd,NULL,NULL))
@@ -316,7 +373,7 @@ void cLuxPlayerState_Ladder::Update(float afTimeStep)
 
 void cLuxPlayerState_Ladder::PostUpdate(float afTimeStep)
 {
-
+	
 }
 
 //-----------------------------------------------------------------------

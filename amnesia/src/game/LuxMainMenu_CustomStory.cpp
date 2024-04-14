@@ -148,7 +148,7 @@ void cLuxMainMenu_CustomStory::SetCurrentStory(cLuxCustomStorySettings* apStory)
 	if(apStory==NULL)
 	{
 		gpBase->SetCustomStory(NULL);
-		gpBase->SetCurrentCustomStoryName(NULL);
+		gpBase->SetCurrentCustomStoryName("");
 		gpBase->SetIsInCustomStory(false);
 		return;
 	}
@@ -582,7 +582,7 @@ bool cLuxMainMenu_CustomStoryList::ExitCallback(iWidget* apWidget, const cGuiMes
 	{
 		gpBase->SetCustomStory(NULL);
 		gpBase->SetIsInCustomStory(false);
-		gpBase->SetCurrentCustomStoryName(NULL);
+		gpBase->SetCurrentCustomStoryName("");
 		return true;
 	}
 

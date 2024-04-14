@@ -242,7 +242,7 @@ iLuxProp::iLuxProp(const tString &asName, int alID, cLuxMap *apMap, eLuxPropType
 
 	mcGlowColor = cColor(1, 1, 1, 1);
 	mcGlowOutlineColor = cColor(1, 1, 1, 1);
-	mbGlowEnabled = true;
+	mbGlowEnabled = false;
 
 	mpParentBone = NULL;
 
@@ -504,7 +504,7 @@ void iLuxProp::FlashIfNearPlayer(float afTimeStep)
 	vBodyPos.y = 0;
 
 	float fDistSqrt = cMath::Vector3DistSqr(vCameraPos, vBodyPos);
-	if (fDistSqrt < 4.0f * 4.0f && bLanternOn && !bHardMode || fDistSqrt < 4.0f && !bLanternOn && !bHardMode || 
+	if (fDistSqrt < 4.0f * 6.0f && bLanternOn && !bHardMode || fDistSqrt < 4.0f && !bLanternOn && !bHardMode || 
 		fDistSqrt < 4.0f && bHardMode && cString::GetFirstStringPos(msName, "SaveStation") >= 0)
 	{
 		mfFlashAlpha += afTimeStep;

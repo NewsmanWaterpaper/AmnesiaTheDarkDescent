@@ -371,6 +371,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mbBlind = apInstanceVars->GetVarBool("Blind", false);
 		pEnemy->mbDeaf = apInstanceVars->GetVarBool("Deaf", false);
 		pEnemy->mfRunSpeedMul = apInstanceVars->GetVarFloat("RunSpeedMul", 1.0f);
+		pEnemy->mfDamageMul = apInstanceVars->GetVarFloat("DamageMul", 1.0f);
 		//pEnemy->msAttachmentBone = GetVarString("AttachmentBone");
 		//pEnemy->msAttachEntity = apInstanceVars->GetVarString("AttachmentEntity", "");
 		//pEnemy->mvAttachEntityPos = apInstanceVars->GetVarVector3f("AttachEntityPosition", 0);
@@ -1113,6 +1114,7 @@ void iLuxEnemy::ResetProperties()
 	mfFOVMul = 1.0f;
 
 	mfDamageCount =0;
+	mfDamageMul = 1.0f;
 
 	mvLastKnownPlayerPos =0;
 	mfLastPlayerPosCount =0;
@@ -2651,6 +2653,8 @@ kSerializeVar(mfCheckAtDoorCount, eSerializeType_Float32)
 kSerializeVar(mbStuckAtDoor, eSerializeType_Bool)
 kSerializeVar(mlStuckDoorID, eSerializeType_Int32)
 
+kSerializeVar(mfDamageMul, eSerializeType_Float32)
+
 kSerializeVar(mfForwardSpeed, eSerializeType_Float32)
 kSerializeVar(mPatrolMoveSpeed, eSerializeType_Int32)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
@@ -2777,6 +2781,8 @@ void iLuxEnemy::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyToVar(pData, mfCheckAtDoorCount);
 	kCopyToVar(pData, mbStuckAtDoor);
 	kCopyToVar(pData, mlStuckDoorID);
+
+	kCopyToVar(pData, mfDamageMul);
 
 	kCopyToVar(pData, mPatrolMoveSpeed);
 	kCopyToVar(pData, mfRunSpeedMul);
@@ -2954,6 +2960,8 @@ void iLuxEnemy::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	kCopyFromVar(pData, mfBackwardSpeed);
 	kCopyFromVar(pData, mfForwardAcc);
 	kCopyFromVar(pData, mfForwardDeacc);
+
+	kCopyFromVar(pData, mfDamageMul);
 
 	kCopyFromVar(pData, mfPlayerSearchTime);
 

@@ -28,6 +28,7 @@
 #include "LuxMessageHandler.h"
 #include "LuxMapHandler.h"
 #include "LuxMap.h"
+#include "LuxDebugHandler.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -115,7 +116,17 @@ void cLuxArea_Ladder::OnUpdate(float afTimeStep)
 
 	if (mpParentBody)
 	{
-		mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
+		//mpBody->StaticLinearMove(mvRelativeOffset + mpParentBody->GetWorldPosition() - mpBody->GetWorldPosition());
+		mpBody->SetPosition(mvRelativeOffset + mpParentBody->GetWorldPosition());
+
+		mbHasParentBody = true;
+
+		mfMaxY = mpBody->GetWorldPosition().y + mpBody->GetShape()->GetSize().y / 2.0f;
+		mfMinY = mpBody->GetWorldPosition().y - mpBody->GetShape()->GetSize().y / 2.0f;
+	}
+	else
+	{
+		mbHasParentBody = false;
 	}
 
 	///////////////////////////
@@ -175,6 +186,7 @@ bool cLuxArea_Ladder::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 	if(bFound==false)
 	{
 		//TODO: Message?
+		gpBase->mpDebugHandler->AddMessage(_W("Ladder not found"), false);
 		return false;
 	}
 
@@ -218,6 +230,19 @@ cVector3f cLuxArea_Ladder::GetStartPosition()
 
 	return vLadderPos;
 }
+
+//-----------------------------------------------------------------------
+
+cVector3f cLuxArea_Ladder::GetLadderWorldPosition()
+{
+	
+	cVector3f vLadderPos = mpBody->GetWorldPosition();
+
+	return vLadderPos;
+}
+
+//-----------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------
 

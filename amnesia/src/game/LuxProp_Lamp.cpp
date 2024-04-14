@@ -229,9 +229,12 @@ bool cLuxProp_Lamp::OnInteract(iPhysicsBody *apBody, const cVector3f &avPos)
 {
 	//////////////////////
 	//Turn off
-	if (mbCanBeTurnedOff)
+	if (mbLit)
 	{
-		SetLit(false, true);
+		if (mbCanBeTurnedOff)
+		{
+			SetLit(false, true);
+		}
 	}
 	//////////////////////
 	//Ignite

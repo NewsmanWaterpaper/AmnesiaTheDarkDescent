@@ -51,6 +51,7 @@ iLuxPlayerState_DefaultBase::iLuxPlayerState_DefaultBase(cLuxPlayer *apPlayer, e
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_Ladder] = pGui->CreateGfxImage("hud_crosshair_over_ladder.tga",eGuiMaterial_Alpha);
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_Talk] = pGui->CreateGfxImage("hud_crosshair_over_phone.tga", eGuiMaterial_Alpha);
 	mvFocusCrosshairGfx[eLuxFocusCrosshair_Note] = pGui->CreateGfxImage("hud_crosshair_over_note.tga", eGuiMaterial_Alpha);
+	mvFocusCrosshairGfx[eLuxFocusCrosshair_Examine] = pGui->CreateGfxImage("hud_crosshair_over_examine.tga", eGuiMaterial_Alpha);
 }
 
 //-----------------------------------------------------------------------

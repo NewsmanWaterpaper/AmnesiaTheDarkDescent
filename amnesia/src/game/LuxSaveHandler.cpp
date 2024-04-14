@@ -393,6 +393,7 @@ void cLuxSaveHandler::LoadSaveGameData(cLuxSaveGame_SaveData *apSave)
 		gpBase->mpInsanityHandler->Reset();
 		gpBase->mpLoadScreenHandler->Reset();
 		gpBase->mpMapHandler->GetSavedMapCollection()->Reset();
+		gpBase->mpProgressLogHandler->Reset();
 
 		gpBase->mpEngine->GetSound()->GetSoundHandler()->StopAll(eSoundEntryType_World | eSoundEntryType_Gui);
 		gpBase->mpEngine->GetSound()->GetMusicHandler()->Stop(100.0f);

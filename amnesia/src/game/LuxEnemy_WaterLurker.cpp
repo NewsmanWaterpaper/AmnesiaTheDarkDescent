@@ -106,6 +106,7 @@ cLuxEnemy_WaterLurker::cLuxEnemy_WaterLurker(const tString &asName, int alID, cL
 	mbCausesSanityDecrease = false;
 	mbCausesSanityDecreaseAsDefault = false;
 	mbPathReversed = false;
+	mfDamageMul = 1.0f;
 }
 
 //-----------------------------------------------------------------------
@@ -467,7 +468,7 @@ bool cLuxEnemy_WaterLurker::StateEventImplement(int alState, eLuxEnemyStateEvent
 		//Damage door
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)
 			//SplashWater(eWaterLurkerSplash_Attack);
-			Attack(mNormalAttackSize, mBreakDoorAttackDamage);
+			Attack(mNormalAttackSize, mBreakDoorAttackDamage,mfDamageMul);
 			SendMessage(eLuxEnemyMessage_TimeOut_2, cMath::RandRectf(0.5,1.5f), true);
 
 		///////////////////
@@ -504,7 +505,7 @@ bool cLuxEnemy_WaterLurker::StateEventImplement(int alState, eLuxEnemyStateEvent
 
 		kLuxOnMessage(eLuxEnemyMessage_TimeOut)
 			SplashWater(eWaterLurkerSplash_Attack);
-			Attack(mNormalAttackSize, mNormalAttackDamage);
+			Attack(mNormalAttackSize, mNormalAttackDamage,mfDamageMul);
 			SendMessage(eLuxEnemyMessage_TimeOut_2, 0.5f, true);
 			mpPathfinder->Stop();
 		
@@ -657,6 +658,7 @@ kBeginSerialize(cLuxEnemy_WaterLurker_SaveData, iLuxEnemy_SaveData)
 
 kSerializeVar(mfPlayerDetectionHeight, eSerializeType_Float32)
 kSerializeVar(mfRunSpeedMul, eSerializeType_Float32)
+kSerializeVar(mfDamageMul, eSerializeType_Float32)
 
 kEndSerialize()
 
@@ -680,6 +682,7 @@ void cLuxEnemy_WaterLurker::SaveToSaveData(iLuxEntity_SaveData* apSaveData)
 	//Set variables
 	kCopyToVar(pData,mfPlayerDetectionHeight);
 	kCopyToVar(pData, mfRunSpeedMul);
+	kCopyToVar(pData, mfDamageMul);
 }
 
 //-----------------------------------------------------------------------
@@ -695,6 +698,7 @@ void cLuxEnemy_WaterLurker::LoadFromSaveData(iLuxEntity_SaveData* apSaveData)
 	//Set variables
 	kCopyFromVar(pData,mfPlayerDetectionHeight);
 	kCopyFromVar(pData, mfRunSpeedMul);
+	kCopyFromVar(pData, mfDamageMul);
 	
 	////////////////////////
 	// Handle changed enums
