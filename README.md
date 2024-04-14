@@ -371,7 +371,7 @@ Modifies/returns how much an enemy's run speed is multiplied by.
 2. *afRunSpeedMul* - The amount to multiply the run speed with
 ---------------------------------------
 ```as
-void  SetEnemyDamagedMul(string& asName, float afDamageMul);
+void  SetEnemyDamageMul(string& asName, float afDamageMul);
 float  GetEnemyDamageMul(string& asName);
 ```
 Modifies/returns how much an enemy's damage does.
