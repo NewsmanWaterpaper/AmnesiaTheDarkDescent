@@ -289,7 +289,7 @@ void iLuxEnemyLoader::AfterLoad(cXmlElement *apRootElem, const cMatrixf &a_mtxTr
 		pEnemy->mfPlayerSearchMinDistMul *= 1.25f;
 		pEnemy->mfPlayerSearchMaxDistMul *= 1.25f;
 		
-		pEnemy->mfPlayerSearchTime *= 2.5f;
+		//pEnemy->mfPlayerSearchTime *= 2.5f;
 
 		pEnemy->mfPlayerPatrolMaxAngle	*= 1.25f;
 		pEnemy->mfPlayerPatrolMinDist	*= 1.5f;
@@ -418,8 +418,8 @@ void iLuxEnemyLoader::LoadAttackDamageData(const tString &asPrefix, cEnemyAttack
 	if (gpBase->mbHardMode)
 	{
 		// Double min & max damage
-		apData->mfMinDamage *= 2.0f;
-		apData->mfMaxDamage *= 2.0f;
+		//apData->mfMinDamage *= 2.0f;
+		//apData->mfMaxDamage *= 2.0f;
 	}
 }
 
