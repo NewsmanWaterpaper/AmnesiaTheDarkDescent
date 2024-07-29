@@ -117,7 +117,7 @@ void cEditorWindowEntityEditBoxPrimitive::AddPrimitivePropertySet(cWidgetTab* ap
 	vPos.y += mpInpCollides->GetSize().y+10;
 
 	mpInpCastShadows = CreateInputBool(vPos, _W("Cast Shadows"), "", apParentTab);
-
+	vPos.y += mpInpCollides->GetSize().y+10;									 
 	mpInpIsOccluder = CreateInputBool(vPos, _W("IsOccluder"), "", apParentTab);
 }
 
@@ -291,6 +291,11 @@ bool cEditorWindowEntityEditBoxPrimitive::WindowSpecificInputCallback(iEditorInp
 			cEditorHelper::LoadResourceFile(eEditorResourceType_Material, sFile, NULL))
 			pAction = mpEntity->CreateSetPropertyActionString(ePrimitiveStr_Material, sFile);
 		//pAction = hplNew(cEditorActionPrimitiveSetStringProperty,(pWorld, lID, ePrimitiveStringProperty_Material, cString::To8Char(mpInpMaterial->GetValue())));
+	}
+	else if (apInput == mpInpIsOccluder)
+	{
+		pAction = mpEntity->CreateSetPropertyActionBool(ePrimitiveBool_IsOccluder, mpInpIsOccluder->GetValue());
+		//pAction = hplNew(cEditorActionPrimitivePlaneSetBoolProperty,(pWorld, lID, ePrimitivePlaneBoolProperty_Collides, mpInpCollides->GetValue()));
 	}
 	else if(apInput==mpInpTileAmount)
 	{

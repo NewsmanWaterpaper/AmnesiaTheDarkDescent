@@ -790,9 +790,9 @@ iEditorViewport::~iEditorViewport()
 
 void iEditorViewport::LogDebug()
 {
-	//cCamera* pCam = mCamera.GetEngineCamera();
+	cCamera* pCam = mCamera.GetEngineCamera();
 
-	//Log("FocusedViewport debug info - FOV:%f Aspect:%f NearPlane:%f FarPlane:%f\n", pCam->GetFOV(), pCam->GetAspect(), pCam->GetNearClipPlane(), pCam->GetFarClipPlane());
+	Log("FocusedViewport debug info - FOV:%f Aspect:%f NearPlane:%f FarPlane:%f\n", pCam->GetFOV(), pCam->GetAspect(), pCam->GetNearClipPlane(), pCam->GetFarClipPlane());
 }
 
 //-------------------------------------------------------------

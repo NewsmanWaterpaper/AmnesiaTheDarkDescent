@@ -32,6 +32,7 @@ public:
 	~cIconEntityFogArea();
 
 	bool Create(const tString& asName);
+	void Update();
 };
 
 //---------------------------------------------------------------
@@ -66,11 +67,19 @@ enum eFogAreaFloat
 
 class cEntityWrapperTypeFogArea : public iEntityWrapperType
 {
+	friend class cIconEntityFogArea;
 public:
 	cEntityWrapperTypeFogArea();
 
+	bool IsVisible() { return mbFogAreaVisible; }
+	void SetVisible(bool abX);
+	bool IsActive() { return mbFogAreaActive; }
+	void SetActive(bool abX);
+
 protected:
 	iEntityWrapperData* CreateSpecificData();
+	static bool mbFogAreaVisible;
+	static bool mbFogAreaActive;
 };
 
 //---------------------------------------------------------------

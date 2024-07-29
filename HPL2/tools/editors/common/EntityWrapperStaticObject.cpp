@@ -186,10 +186,10 @@ bool cEntityWrapperStaticObject::SetProperty(int alPropID, const bool& abX)
 		break;
 	case eStaticObjectBool_IsOccluder:
 		SetIsOccluder(abX);
-		break;
+		break;						   			 	
 	default:
 		return false;
-	} 
+	}
 
 	return true;
 }

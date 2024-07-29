@@ -86,7 +86,7 @@ void cEditorWindowEntityEditBoxStaticObject::Create()
 	mpInpCastShadows->SetPosition(vPos);
 	vPos.y += mpInpCastShadows->GetSize().y+5;
 	mpInpCollides->SetPosition(vPos);
-	vPos.y += mpInpCastShadows->GetSize().y+5;
+	vPos.y += mpInpCastShadows->GetSize().y+5;									   
 	mpInpIsOccluder->SetPosition(vPos);
 }
 
@@ -127,6 +127,10 @@ bool cEditorWindowEntityEditBoxStaticObject::WindowSpecificInputCallback(iEditor
 	else if(apInput==mpInpCollides)
 	{
 		pAction = mpEntity->CreateSetPropertyActionBool( eStaticObjectBool_Collides, mpInpCollides->GetValue());
+	}
+	else if (apInput == mpInpIsOccluder)
+	{
+		pAction = mpEntity->CreateSetPropertyActionBool(eStaticObjectBool_IsOccluder, mpInpIsOccluder->GetValue());
 	}
 
 	mpEditor->AddAction(pAction);
