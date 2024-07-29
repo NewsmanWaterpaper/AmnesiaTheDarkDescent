@@ -235,7 +235,6 @@ void iEngineEntityMesh::SetCastShadows(bool abX)
 {
 	((cMeshEntity*)mpEntity)->SetRenderFlagBit(eRenderableFlag_ShadowCaster,abX);
 }
-
 //-----------------------------------------------------------------------
 
 void iEngineEntityMesh::SetIsOccluder(bool abX)

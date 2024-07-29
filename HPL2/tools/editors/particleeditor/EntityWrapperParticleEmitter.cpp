@@ -378,8 +378,8 @@ static tString PartSpinTypeToString(ePEPartSpinType aType)
 	AddColor(ePECol_StartRelColor, "StartRelColor");
 	AddColor(ePECol_MiddleRelColor, "MiddleRelColor");
 	AddColor(ePECol_EndRelColor, "EndRelColor");
-	AddFloat(ePEFloat_MinBrightness, "MinBrightness");
-	AddFloat(ePEFloat_MaxBrightness, "MaxBrightness");
+	AddFloat(ePEFloat_MinBrightness, "MinBrightness",1);
+	AddFloat(ePEFloat_MaxBrightness, "MaxBrightness",1);
 	AddFloat(ePEFloat_MiddleRelColorTime, "MiddleRelColorTime");
 	AddFloat(ePEFloat_MiddleRelColorLength, "MiddleRelColorLength");
 

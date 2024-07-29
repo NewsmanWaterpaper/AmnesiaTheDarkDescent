@@ -258,9 +258,10 @@ void cParticleEditorWindowEmitterParams::OnInitLayout()
 		vPos.x += mpInpMinCol->GetSize().x + 10;
 		mpInpMaxCol = CreateInputColorFrame(vPos, _W("Max Color"), "InputMaxCol", pGroup);
 
-		mpInpMinBrightness = CreateInputNumber(vPos + cVector3f(mpInpMaxCol->GetSize().x + 50,0,0), _W("Min Brightness"), "InputMinBrightness", pGroup);
+		mpInpMinBrightness = CreateInputNumber(vPos + cVector3f(mpInpMaxCol->GetSize().x + 10,0,0), _W("Min Brightness"), "InputMinBrightness", pGroup);
 		mpInpMinBrightness->SetLayoutStyle(eEditorInputLayoutStyle_RowLabelOnLeft);
-		mpInpMaxBrightness = CreateInputNumber(vPos + cVector3f(mpInpMinBrightness->GetSize().x + 0,10,0), _W("Max Brightness"), "InputMaxBrightness", pGroup);
+		vPos.x += mpInpMinBrightness->GetSize().x + 10;
+		mpInpMaxBrightness = CreateInputNumber(vPos + cVector3f(mpInpMinBrightness->GetSize().x + 10,0,0), _W("Max Brightness"), "InputMaxBrightness", pGroup);
 		mpInpMaxBrightness->SetLayoutStyle(eEditorInputLayoutStyle_RowLabelOnLeft);
 
 		pGroup = mpSet->CreateWidgetGroup(cVector3f(10, 145, 0.1f), cVector2f(480,120), _W("Fading"), pTab);
@@ -696,7 +697,7 @@ bool cParticleEditorWindowEmitterParams::WindowSpecificInputCallback(iEditorInpu
 		mpEmitter->SetMinBrightness(mpInpMinBrightness->GetValue());
 	
 	else if(apInput==mpInpMaxBrightness)
-		mpEmitter->SetMinBrightness(mpInpMaxBrightness->GetValue());
+		mpEmitter->SetMaxBrightness(mpInpMaxBrightness->GetValue());
 
 	else if(apInput==mpInpMiddleRelColStart)
 		mpEmitter->SetMiddleRelColorTime(mpInpMiddleRelColStart->GetValue());

@@ -22,7 +22,9 @@
 #include "EditorWindowEntityEditBoxFogArea.h"
 
 //------------------------------------------------------------------------------
-
+bool cEntityWrapperTypeFogArea::mbFogAreaVisible = true; 
+bool cEntityWrapperTypeFogArea::mbFogAreaActive = true; 
+//------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////
 // ICON ENTITY FOGAREA
 /////////////////////////////////////////////////////////////////
@@ -38,8 +40,21 @@ cIconEntityFogArea::~cIconEntityFogArea()
 	if(mpEntity)
 	{
 		cWorld* pWorld = mpParent->GetEditorWorld()->GetWorld();
+		cFogArea* pFog = (cFogArea*)mpEntity;
+		pFog->SetVisible(mpParent->IsActive() && mpParent->GetType()->IsActive());
 		pWorld->DestroyFogArea((cFogArea*)mpEntity);
 	}
+}
+
+//------------------------------------------------------------------------------
+
+void cIconEntityFogArea::Update()
+{
+	iEditorWorld* pWorld = mpParent->GetEditorWorld();
+	cFogArea* pFogArea = (cFogArea*)mpEntity;
+	pFogArea->SetVisible(mpParent->IsVisible() && mpParent->IsActive() && mpParent->GetType()->IsActive());
+	
+	cEntityWrapperFogArea* pParent = (cEntityWrapperFogArea*)mpParent;
 }
 
 //------------------------------------------------------------------------------
@@ -52,6 +67,28 @@ bool cIconEntityFogArea::Create(const tString& asName)
 	mpEntity = pWorld->CreateFogArea(asName);
 
 	return IsCreated();
+}
+
+//------------------------------------------------------------------------------
+
+void cEntityWrapperTypeFogArea::SetVisible(bool abX)
+{
+	if(mbFogAreaVisible==abX)
+		return; 
+
+	mbFogAreaVisible = abX; 
+	mpWorld->SetVisibilityUpdated(); 
+}
+
+//------------------------------------------------------------------------------
+
+void cEntityWrapperTypeFogArea::SetActive(bool abX)
+{
+	if(mbFogAreaActive==abX)
+		return; 
+
+	mbFogAreaActive = abX; 
+	mpWorld->SetVisibilityUpdated(); 
 }
 
 //------------------------------------------------------------------------------

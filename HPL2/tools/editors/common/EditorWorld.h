@@ -280,6 +280,11 @@ protected:
 	////////////////////////////////
 	// Global Lights
 	cLightBox* mpGlobalAmbientLight;
+	cLightBox* mpXAmbientLight;
+	cLightBox* mpMinusXAmbientLight;
+	cLightBox* mpZAmbientLight;
+	cLightBox* mpMinusZAmbientLight;
+	cLightBox* mpPlusZMinusXAmbientLight;
 	cLightPoint* mpGlobalPointLight;
 
 	bool mbWorldLightsEnabled;

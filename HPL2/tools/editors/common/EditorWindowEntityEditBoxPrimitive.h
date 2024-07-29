@@ -78,8 +78,8 @@ protected:
 
     cEditorInputBool* mpInpAlignToWorld;	
 	cEditorInputBool* mpInpCastShadows;
-	cEditorInputBool* mpInpCollides;
 	cEditorInputBool* mpInpIsOccluder;
+	cEditorInputBool* mpInpCollides;
 
 	tWStringVec mvLoadedFiles;
 	tWString msLastPath;

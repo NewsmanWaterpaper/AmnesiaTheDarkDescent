@@ -61,6 +61,41 @@ iEditorWorld::iEditorWorld(iEditorBase* apEditor, const tString& asElementName)
 	mpGlobalAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
 	mpGlobalAmbientLight->SetBoxLightPrio(1);
 
+	mpXAmbientLight = mpWorld->CreateLightBox("GlobalXAmbient");
+	mpXAmbientLight->SetPosition(cVector3f(500,0,0));
+	mpXAmbientLight->SetDiffuseColor(cColor(0.4f,1));
+	mpXAmbientLight->SetSize(500);
+	mpXAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
+	mpXAmbientLight->SetBoxLightPrio(1);
+
+	mpMinusXAmbientLight = mpWorld->CreateLightBox("GlobalMinusXAmbient");
+	mpMinusXAmbientLight->SetPosition(cVector3f(500,0,0));
+	mpMinusXAmbientLight->SetDiffuseColor(cColor(0.4f,1));
+	mpMinusXAmbientLight->SetSize(500);
+	mpMinusXAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
+	mpMinusXAmbientLight->SetBoxLightPrio(1);
+
+	mpZAmbientLight = mpWorld->CreateLightBox("GlobalZAmbient");
+	mpZAmbientLight->SetPosition(cVector3f(0,0,500));
+	mpZAmbientLight->SetDiffuseColor(cColor(0.4f,1));
+	mpZAmbientLight->SetSize(500);
+	mpZAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
+	mpZAmbientLight->SetBoxLightPrio(1);
+
+	mpMinusZAmbientLight = mpWorld->CreateLightBox("GlobalMinusZAmbient");
+	mpMinusZAmbientLight->SetPosition(cVector3f(0,0,-500));
+	mpMinusZAmbientLight->SetDiffuseColor(cColor(0.4f,1));
+	mpMinusZAmbientLight->SetSize(500);
+	mpMinusZAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
+	mpMinusZAmbientLight->SetBoxLightPrio(1);
+
+	mpPlusZMinusXAmbientLight = mpWorld->CreateLightBox("GlobalPlusZMinusXAmbient");
+	mpPlusZMinusXAmbientLight->SetPosition(cVector3f(-500,0,250));
+	mpPlusZMinusXAmbientLight->SetDiffuseColor(cColor(0.4f,1));
+	mpPlusZMinusXAmbientLight->SetSize(500);
+	mpPlusZMinusXAmbientLight->SetBlendFunc(eLightBoxBlendFunc_Add);
+	mpPlusZMinusXAmbientLight->SetBoxLightPrio(1);
+
 	mpGlobalPointLight = mpWorld->CreateLightPoint("GlobalPoint");
 	mpGlobalPointLight->SetPosition(cVector3f(0,100,0));
 	mpGlobalPointLight->SetRadius(500);
@@ -268,6 +303,11 @@ void iEditorWorld::SetGlobalAmbientLightEnabled(bool abX)
 {
 	if(mpGlobalAmbientLight)
 		mpGlobalAmbientLight->SetVisible(abX);
+		mpXAmbientLight->SetVisible(abX);
+		mpMinusXAmbientLight->SetVisible(abX);
+		mpZAmbientLight->SetVisible(abX);
+		mpMinusZAmbientLight->SetVisible(abX);
+		mpPlusZMinusXAmbientLight->SetVisible(abX);
 }
 
 //--------------------------------------------------------------------
