@@ -586,9 +586,9 @@ void cLevelEditor::OnInitLayout()
 	pHandle = mpLowerToolbar->AddClipPlaneControls();
 	pHandle->SetPosition(vHandlePos);
 	//New stuff:
-	//vHandlePos += cVector3f(pHandle->GetSize().x+10, 0, 0);
-	//pHandle = mpLowerToolbar->AddCommunityCredits();
-	//pHandle->SetPosition(vHandlePos);
+	vHandlePos += cVector3f(pHandle->GetSize().x+10, 0, 0);
+	pHandle = mpLowerToolbar->AddCommunityCredits();
+	pHandle->SetPosition(vHandlePos);
 
 	////////////////////////////////////
 	// Search Window
