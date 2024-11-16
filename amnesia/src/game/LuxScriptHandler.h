@@ -399,6 +399,10 @@ private:
 	static float __stdcall GetEntityRotationY(string& asName, int body);
 	static float __stdcall GetEntityRotationZ(string& asName, int body);
 
+	static float __stdcall GetCameraRotationX();
+	static float __stdcall GetCameraRotationY();
+	static float __stdcall GetCameraRotationZ();
+
 	static float __stdcall GetBonePosX(string& asEntity, string& asBoneName);
 	static float __stdcall GetBonePosY(string& asEntity, string& asBoneName);
 	static float __stdcall GetBonePosZ(string& asEntity, string& asBoneName);
@@ -412,6 +416,9 @@ private:
 
 	static void __stdcall SetEntityRotation(string& asName, float afX, float afY, float afZ, int body);
 	static void __stdcall SetEntityRotationAndPosition(string& asName, float afrX, float afrY, float afrZ, float afpX, float afpY, float afpZ, int body);
+
+	static void __stdcall AttachPlayerCameraToEntity(string& asPropName);
+	static void __stdcall DetachPlayerCamera();
 
 
 

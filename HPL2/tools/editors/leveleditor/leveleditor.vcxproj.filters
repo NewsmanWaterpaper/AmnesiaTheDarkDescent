@@ -584,9 +584,6 @@
     <ClInclude Include="..\common\EntityIcon.h">
       <Filter>Common\EntityWrappers</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\EntityWrapper.h">
-      <Filter>Common\EntityWrappers</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\EntityWrapperArea.h">
       <Filter>Common\EntityWrappers\Types</Filter>
     </ClInclude>
@@ -715,6 +712,9 @@
     </ClInclude>
     <ClInclude Include="..\common\EdWorld.h">
       <Filter>NewStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EntityWrapper.h">
+      <Filter>Common\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

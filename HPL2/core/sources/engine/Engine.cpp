@@ -59,7 +59,7 @@ namespace hpl {
 
 	cFPSCounter::cFPSCounter(iLowLevelSystem* apLowLevelSystem)
 	{
-		mfFPS = 60;
+		mfFPS = 240;
 
 		mlFramecounter=0;
 		mfFrametimestart=0;
@@ -190,7 +190,7 @@ namespace hpl {
 
 	bool cEngine::mbDevicePlugged = false;
 	bool cEngine::mbDeviceRemoved = false;
-	int cEngine::mlNumLogicLoops = 0;
+	//int cEngine::mlNumLogicLoops = 0;
 
 	//-----------------------------------------------------------------------
 
@@ -352,20 +352,20 @@ namespace hpl {
 		mfGameTime =0;
 
 		mbLimitFPS = true;
-		mfFPSLimit = 1.0 / double(apVars->mGame.mlMaxFramesPerSec);
-		mfLastFrameRender = 0;
+		//mfFPSLimit = 1.0 / double(apVars->mGame.mlMaxFramesPerSec);
+		//mfLastFrameRender = 0;
 
-		mvMaxGameLogic.reserve(300);
-		mvMaxRenderLogic.reserve(300);
+		//mvMaxGameLogic.reserve(300);
+		//mvMaxRenderLogic.reserve(300);
 
-		mfMaxGameLogic = 0;
-		mfMaxRenderLogic = 0;
+		//mfMaxGameLogic = 0;
+		//mfMaxRenderLogic = 0;
 
 		mpFPSCounter = hplNew( cFPSCounter,(mpSystem->GetLowLevel()) );
-		mpGameLogicTimer = cPlatform::CreateTimer();
-		mpInnerGameLogicTimer = cPlatform::CreateTimer();
-		mpRenderingLogicTimer = cPlatform::CreateTimer();
-		mpFrameLimitTimer = cPlatform::CreateTimer();
+		//mpGameLogicTimer = cPlatform::CreateTimer();
+		//mpInnerGameLogicTimer = cPlatform::CreateTimer();
+		//mpRenderingLogicTimer = cPlatform::CreateTimer();
+		//mpFrameLimitTimer = cPlatform::CreateTimer();
 		mpFrameTimer = cPlatform::CreateTimer();
 		Log("--------------------------------------------------------\n\n");
 
@@ -381,10 +381,10 @@ namespace hpl {
 
 		hplDelete(mpLogicTimer);
 		hplDelete(mpFPSCounter);
-		hplDelete(mpGameLogicTimer);
-		hplDelete(mpInnerGameLogicTimer);
-		hplDelete(mpRenderingLogicTimer);
-		hplDelete(mpFrameLimitTimer);
+		//hplDelete(mpGameLogicTimer);
+		//hplDelete(mpInnerGameLogicTimer);
+		//hplDelete(mpRenderingLogicTimer);
+		//hplDelete(mpFrameLimitTimer);
 		hplDelete(mpFrameTimer);
 		hplDelete(mpMutex);
 		
@@ -443,7 +443,7 @@ namespace hpl {
 		bool bSwappedOnce = false;
 		
 		//cMemoryManager::SetLogCreation(true);
-		mpFrameLimitTimer->Start();
+		//mpFrameLimitTimer->Start();
 		while(!GetGameIsDone())
 		{
 			//////////////////////////
@@ -464,15 +464,15 @@ namespace hpl {
 			{
 				//////////////////////////
 				//Update logic.
-				int lIterations = 0;
-				mpGameLogicTimer->Start();
+				//int lIterations = 0;
+				//mpGameLogicTimer->Start();
 				while(mpLogicTimer->WantUpdate() && !GetGameIsDone())
 				{
 					/////////////////////////////////////////////
 					// Run Update callback in updater
-					mpInnerGameLogicTimer->Start();
-					lIterations++;
-					mlNumLogicLoops++;
+					//mpInnerGameLogicTimer->Start();
+					//lIterations++;
+					//mlNumLogicLoops++;
 
 					mpUpdater->RunMessage(eUpdateableMessage_PreUpdate, GetStepSize());
 					mpUpdater->RunMessage(eUpdateableMessage_Update, GetStepSize());
@@ -507,32 +507,32 @@ namespace hpl {
 				
 					//Increase game time.
 					mfGameTime += GetStepSize();
-					mpInnerGameLogicTimer->Stop();
+					//mpInnerGameLogicTimer->Stop();
 
-					mvMaxGameLogic.push_back(mpInnerGameLogicTimer->GetTimeInMilliSec());
+					//mvMaxGameLogic.push_back(mpInnerGameLogicTimer->GetTimeInMilliSec());
 				}
 				mpLogicTimer->EndUpdateLoop();
 				////////////////
 				// Update timer
-				mpGameLogicTimer->Stop();
+				//mpGameLogicTimer->Stop();
 
-				if (lIterations > 0)
-				{
-					static double fGameLogicTime = 0;
-					static int lGameLogicCount = 0;
-					static int lGameLogicIterations = 0;
+				//if (lIterations > 0)
+				//{
+				//	static double fGameLogicTime = 0;
+				//	static int lGameLogicCount = 0;
+				//	static int lGameLogicIterations = 0;
 
-					fGameLogicTime += mpGameLogicTimer->GetTimeInMilliSec() * lIterations;
-					lGameLogicCount += lIterations;
+				//	fGameLogicTime += mpGameLogicTimer->GetTimeInMilliSec() * lIterations;
+				//	lGameLogicCount += lIterations;
 
-					if (lGameLogicIterations++ % 60 == 0)
-					{
-						mfGameLogicTime = fGameLogicTime / double(lGameLogicCount);
-						mfGameLogicIterations = double(lGameLogicCount) / 60.0;
-						fGameLogicTime = 0;
-						lGameLogicCount = 0;
-					}
-				}
+				//	if (lGameLogicIterations++ % 60 == 0)
+				//	{
+				//		mfGameLogicTime = fGameLogicTime / double(lGameLogicCount);
+				//		mfGameLogicIterations = double(lGameLogicCount) / 60.0;
+				//		fGameLogicTime = 0;
+				//		lGameLogicCount = 0;
+				//	}
+				//}
 			}
 
 			//if(GetGameIsDone()) Log("1\n");
@@ -569,28 +569,28 @@ namespace hpl {
 
 			//////////////
 			// Limit fps
-			if (mbLimitFPS)
-			{
-				double fNextFrame = mfLastFrameRender + mfFPSLimit;
-				double fTime = mpFrameLimitTimer->GetTimeInSec();
+			//if (mbLimitFPS)
+			//{
+			//	double fNextFrame = mfLastFrameRender + mfFPSLimit;
+			//	double fTime = mpFrameLimitTimer->GetTimeInSec();
 
-				if (fTime < fNextFrame) continue;
+			//	if (fTime < fNextFrame) continue;
 
-				////////////////
-				// If the game is running slower than fps limit set time else just add 1.0 / MaxFPS
-				if (fNextFrame + mfFPSLimit < fTime)  mfLastFrameRender = fTime;
-				else								 mfLastFrameRender = mfLastFrameRender + mfFPSLimit;
-			}
+			//	////////////////
+			//	// If the game is running slower than fps limit set time else just add 1.0 / MaxFPS
+			//	if (fNextFrame + mfFPSLimit < fTime)  mfLastFrameRender = fTime;
+			//	else								 mfLastFrameRender = mfLastFrameRender + mfFPSLimit;
+			//}
 
 			////////////////////////////////////
 			// Render frame
-			if(bIsUpdated)
+			if(mbLimitFPS==false || bIsUpdated)
 			{
 				///////////////////////////////////////
            		//Get the the from the last frame.
 				UpdateFrameTimer();
 
-				mpRenderingLogicTimer->Start();
+				//mpRenderingLogicTimer->Start();
 				//On draw callback sending that to gui, etc
 				START_TIMING(OnDraw)
 				mpUpdater->RunMessage(eUpdateableMessage_OnDraw, mfFrameTime);
@@ -612,7 +612,7 @@ namespace hpl {
 				//Update fps counter.
 				mpFPSCounter->AddFrame();
 				
-				mpRenderingLogicTimer->Stop();
+				/*mpRenderingLogicTimer->Stop();
 
 				static double fRenderingLogic = 0;
 				static int lRenderingLogicIterations = 0;
@@ -623,13 +623,13 @@ namespace hpl {
 				{
 					mfRenderingLogicTime = fRenderingLogic / 60.0;
 					fRenderingLogic = 0;
-				}
+				}*/
 
 				fNumOfTimes++;
 				bIsUpdated = false;
 				bBufferSwap = true;
 			}
-			if (mvMaxGameLogic.size() > 300)
+			/*if (mvMaxGameLogic.size() > 300)
 			{
 				mfMaxGameLogic = 0;
 
@@ -645,11 +645,11 @@ namespace hpl {
 				for (size_t i = 0; i < mvMaxRenderLogic.size(); ++i) mfMaxRenderLogic = mfMaxRenderLogic < mvMaxRenderLogic[i] ? mvMaxRenderLogic[i] : mfMaxRenderLogic;
 
 				mvMaxRenderLogic.clear();
-			}
+			}*/
 
 			//if(GetGameIsDone()) Log("4\n");
 		}
-		mpFrameLimitTimer->Stop();
+		//mpFrameLimitTimer->Stop();
 		Log("--------------------------------------------------------\n\n");
 	
 		Log("Statistics\n");
@@ -731,10 +731,10 @@ namespace hpl {
 		return (1.0f/mpFPSCounter->mfFPS)*1000.0f;
 	}
 	
-	float cEngine::GetRenderingLogicTime()
+	/*float cEngine::GetRenderingLogicTime()
 	{
 		return mfRenderingLogicTime;
-	}
+	}*/
 	
 	//-----------------------------------------------------------------------
 

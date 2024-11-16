@@ -340,6 +340,10 @@ namespace hpl {
 		void* GetUserData(){ return mpUserData;}
 		
 		void SetCallback(iCharacterBodyCallback *apCallback){ mpCallback = apCallback;}
+
+		////////////////////
+		// cam pos
+		void SetCamPosActive(bool abX, tString asPropName);
 		
 		///////////////////////////////////////
 		//Debug:
@@ -540,6 +544,11 @@ namespace hpl {
 		std::vector<iPhysicsBody*> mvBodies;
 
 		static std::vector<iPhysicsBody*> mvTempBodies;
+
+		//////////////////////
+		// cam pos
+		bool mbCamPosActive;
+		tString msCamPosObject;
 	};
 };
 #endif // HPL_CHARACTER_BODY_H

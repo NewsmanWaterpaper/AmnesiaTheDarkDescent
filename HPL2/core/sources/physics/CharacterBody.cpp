@@ -405,6 +405,9 @@ namespace hpl {
 		mpGravityCollideMaterial = NULL;
 
 		mfMoveDelayCount=0;
+
+		mbCamPosActive = false;
+		msCamPosObject = "";
 	}
 
 	//-----------------------------------------------------------------------
@@ -1991,6 +1994,19 @@ namespace hpl {
 	}
 
 	//-----------------------------------------------------------------------
+	void iCharacterBody::SetCamPosActive(bool abX, tString asPropName)
+	{
+		mbCamPosActive = abX;
+		if (abX == true) {
+			msCamPosObject = asPropName;
+		}
+		else
+		{
+			msCamPosObject = "";
+		}
+	}
+
+	//-----------------------------------------------------------------------
 
 
 	void iCharacterBody::UpdateCamera()
@@ -2006,53 +2022,56 @@ namespace hpl {
 
 		float fMainHeight = mvShapes[0]->GetSize().y;
 
-		///////////////////////////////
-		//Do NOT do any smoothing
-		if(mlCameraSmoothPosNum <=0)
+		if (!mbCamPosActive)
 		{
-			cVector3f vPos = mvPosition + cVector3f(0,fMainHeight - mvSize.y/2.0f,0);
-			mpCamera->SetPosition(vPos + vAdd);
-		}
-		///////////////////////////////
-		//Smooth the camera position
-		else
-		{
-			//////////////////////////////
-			//Add the newest position.
-			cVector3f vHeadPos = mvPosition + cVector3f(0,fMainHeight - mvSize.y/2.0f,0);
-			mlstCameraPos.push_back(vHeadPos);
-			
-			//If to too large remove the oldest.
-			if((int)mlstCameraPos.size() > mlCameraSmoothPosNum)
+			///////////////////////////////
+			//Do NOT do any smoothing
+			if (mlCameraSmoothPosNum <= 0)
 			{
-				mlstCameraPos.erase(mlstCameraPos.begin());
+				cVector3f vPos = mvPosition + cVector3f(0, fMainHeight - mvSize.y / 2.0f, 0);
+				mpCamera->SetPosition(vPos + vAdd);
+			}
+			///////////////////////////////
+			//Smooth the camera position
+			else
+			{
+				//////////////////////////////
+				//Add the newest position.
+				cVector3f vHeadPos = mvPosition + cVector3f(0, fMainHeight - mvSize.y / 2.0f, 0);
+				mlstCameraPos.push_back(vHeadPos);
+
+				//If to too large remove the oldest.
+				if ((int)mlstCameraPos.size() > mlCameraSmoothPosNum)
+				{
+					mlstCameraPos.erase(mlstCameraPos.begin());
+				}
+
+				float fPositionNum = (float)mlstCameraPos.size();
+
+				/////////////////////////////////////////
+				//Add all positions and devide by the number of em.
+				//that way we get the average
+				cVector3f vTotalPos(0, 0, 0);
+				tVector3fListIt it = mlstCameraPos.begin();
+				for (; it != mlstCameraPos.end(); ++it)
+				{
+					vTotalPos += *it;
+				}
+
+				cVector3f vPos = vTotalPos / fPositionNum;
+
+				//////////////////////////////////
+				// Set up new position
+				cVector3f vFirstSize = mvShapes[0]->GetSize();
+
+				//cVector3f vHeadPos = (vPos - cVector3f(0,mvSize.y/2.0f,0)) + cVector3f(0,vFirstSize.y,0);
+
+				mpCamera->SetPosition(vPos + vAdd);
 			}
 
-			float fPositionNum = (float)mlstCameraPos.size();
-
-			/////////////////////////////////////////
-			//Add all positions and devide by the number of em.
-			//that way we get the average
-			cVector3f vTotalPos(0,0,0);
-			tVector3fListIt it=mlstCameraPos.begin();
-			for(; it!= mlstCameraPos.end(); ++it)
-			{
-				vTotalPos += *it;
-			}
-
-			cVector3f vPos = vTotalPos / fPositionNum;
-			
-			//////////////////////////////////
-			// Set up new position
-			cVector3f vFirstSize = mvShapes[0]->GetSize();
-
-			//cVector3f vHeadPos = (vPos - cVector3f(0,mvSize.y/2.0f,0)) + cVector3f(0,vFirstSize.y,0);
-			
-			mpCamera->SetPosition(vPos + vAdd);
+			//No need to smooth this yaw.
+			mpCamera->SetYaw(mfYaw);
 		}
-
-		//No need to smooth this yaw.
-		mpCamera->SetYaw(mfYaw);
 	}
 
 	//-----------------------------------------------------------------------

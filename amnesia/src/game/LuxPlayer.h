@@ -270,6 +270,9 @@ public:
 	void SetEntityInFocus(iLuxEntity *apEntity){ mpEntityInFocus =apEntity;}
 	iLuxEntity* GetEntityInFocus(){ return mpEntityInFocus;}
 
+	////////////////////
+	// cam pos
+	void SetCamPosActive(bool abX, string& asPropName);
 
 	void SetBodyInFocus(iPhysicsBody *apBody){ mpBodyInFocus =apBody;}
 	iPhysicsBody* GetBodyInFocus(){ return mpBodyInFocus;}
@@ -323,6 +326,8 @@ public:
 	void RunHelperMessage(eUpdateableMessage aMessage, float afX);
 	void RunHelperLuxMessage(eLuxUpdateableMessage aMessage, void *apData);
 
+	float GetRoll() { return mfRoll; }
+	float GetLeanRoll() { return mfLeanRoll; }
 	
 private:
 	bool CanDrawCrossHair();
@@ -506,6 +511,11 @@ private:
 	// Free camera
 	bool mbFreeCameraActive;
 	float mfFreeCameraSpeed;
+
+	//////////////////////
+	// cam pos
+	bool mbCamPosActive;
+	tString msCamPosObject;
 };
 
 //----------------------------------------------

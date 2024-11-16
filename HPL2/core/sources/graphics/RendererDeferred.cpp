@@ -190,9 +190,9 @@ namespace hpl {
 		mfMinLargeLightNormalizedArea = 0.2f*0.2f;
 		mfMinRenderReflectionNormilzedLength = 0.15f;
 
-		mfShadowDistanceMedium = 40;
-		mfShadowDistanceLow = 80;
-		mfShadowDistanceNone = 160;
+		mfShadowDistanceMedium = 10;
+		mfShadowDistanceLow = 20;
+		mfShadowDistanceNone = 40;
 
 		mlMaxBatchLights = 100;
 
@@ -341,8 +341,7 @@ namespace hpl {
 									cVector3l(256, 256,1),
 									cVector3l(512, 512,1),
 									cVector3l(512, 512,1),
-									cVector3l(1024, 1024,1),
-									cVector3l(2048, 2048,1)
+									cVector3l(1024, 1024,1)
 		};
 		int lStartSize = 2;
 		if(mShadowMapResolution == eShadowMapResolution_Medium)		lStartSize = 1;

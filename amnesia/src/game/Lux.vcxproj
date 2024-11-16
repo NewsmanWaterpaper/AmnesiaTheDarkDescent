@@ -17,21 +17,23 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C6E72C29-38A3-4897-AA05-E87B0323AA71}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -143,6 +145,8 @@
     <ClCompile Include="LuxBase.cpp" />
     <ClCompile Include="LuxConfigHandler.cpp" />
     <ClCompile Include="LuxEnemy_ManPig.cpp" />
+    <ClCompile Include="LuxEnemy_Child.cpp" />
+    <ClCompile Include="LuxEnemy_Wraith.cpp" />
     <ClCompile Include="LuxHelpFuncs.cpp" />
     <ClCompile Include="LuxMainMenu_StartGame.cpp" />
     <ClCompile Include="LuxTypes.cpp" />
@@ -193,6 +197,7 @@
     <ClCompile Include="LuxStaticProp.cpp" />
     <ClCompile Include="LuxCompletionCountHandler.cpp" />
     <ClCompile Include="LuxCredits.cpp" />
+    <ClCompile Include="LuxEndingsHandler.cpp" />
     <ClCompile Include="LuxDebugHandler.cpp" />
     <ClCompile Include="LuxDemoEnd.cpp" />
     <ClCompile Include="LuxEffectHandler.cpp" />
@@ -214,9 +219,11 @@
     <ClCompile Include="LuxMapHandler.cpp" />
     <ClCompile Include="LuxMapHelper.cpp" />
     <ClCompile Include="LuxMessageHandler.cpp" />
+    <ClCompile Include="LuxPauseMessageButtonPrompt.cpp" />
     <ClCompile Include="LuxMusicHandler.cpp" />
     <ClCompile Include="LuxPostEffects.cpp" />
     <ClCompile Include="LuxPreMenu.cpp" />
+    <ClCompile Include="LuxRankScreen.cpp" />
     <ClCompile Include="LuxProgressLogHandler.cpp" />
     <ClCompile Include="LuxScriptHandler.cpp" />
     <ClCompile Include="LuxSavedEngineTypes.cpp" />
@@ -253,6 +260,8 @@
     <ClInclude Include="LuxBase.h" />
     <ClInclude Include="LuxConfigHandler.h" />
     <ClInclude Include="LuxEnemy_ManPig.h" />
+    <ClInclude Include="LuxEnemy_Child.h" />
+    <ClInclude Include="LuxEnemy_Wraith.h" />
     <ClInclude Include="LuxHelpFuncs.h" />
     <ClInclude Include="LuxIdleBehavior_ManPig.h" />
     <ClInclude Include="LuxMainMenu_StartGame.h" />
@@ -303,6 +312,7 @@
     <ClInclude Include="LuxStaticProp.h" />
     <ClInclude Include="LuxCompletionCountHandler.h" />
     <ClInclude Include="LuxCredits.h" />
+    <ClInclude Include="LuxEndingsHandler.h" />
     <ClInclude Include="LuxDebugHandler.h" />
     <ClInclude Include="LuxDemoEnd.h" />
     <ClInclude Include="LuxEffectHandler.h" />
@@ -324,9 +334,11 @@
     <ClInclude Include="LuxMapHandler.h" />
     <ClInclude Include="LuxMapHelper.h" />
     <ClInclude Include="LuxMessageHandler.h" />
+    <ClInclude Include="LuxPauseMessageButtonPrompt.h" />
     <ClInclude Include="LuxMusicHandler.h" />
     <ClInclude Include="LuxPostEffects.h" />
     <ClInclude Include="LuxPreMenu.h" />
+    <ClInclude Include="LuxRankScreen.h" />
     <ClInclude Include="LuxProgressLogHandler.h" />
     <ClInclude Include="LuxScriptHandler.h" />
     <ClInclude Include="LuxSavedEngineTypes.h" />

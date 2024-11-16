@@ -435,6 +435,7 @@ bool cLuxEnemy_ManPig::StateEventImplement(int alState, eLuxEnemyStateEvent aEve
 	//If enemy is out of range (having been in, then turn him off)
 	kLuxOnMessage(eLuxEnemyMessage_PlayerOutOfRange)
 		SetActive(false);
+		RunCallbackFunc("OnAutoDisabled");
 
 	//------------------------------
 
@@ -2160,6 +2161,15 @@ void cLuxEnemy_ManPig::FinishPatrolEndOfPath(bool callPatrolUpdateNow)
 		if (mbAutoReverseAtPathEnd)
 		{
 			mbPathReversed = !mbPathReversed;
+		}
+
+		if (mbIsSeenByPlayer == false && DistToPlayer() > 10 && mbAutoRemoveAtPathEnd)
+		{
+			SetActive(false);
+
+			RunCallbackFunc("OnAutoDisabled");
+
+			return;
 		}
 	}
 

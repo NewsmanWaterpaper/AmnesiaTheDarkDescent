@@ -1024,6 +1024,7 @@
     <ClInclude Include="include\impl\GamepadSDL2.h">
       <Filter>Impl\Input</Filter>
     </ClInclude>
+    <ClInclude Include="include\graphics\PostEffect_ColorGrading.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sources\system\Container.cpp">
@@ -1860,6 +1861,7 @@
     <ClCompile Include="sources\impl\GamepadSDL2.cpp">
       <Filter>Impl\Input</Filter>
     </ClCompile>
+    <ClCompile Include="sources\graphics\PostEffect_ColorGrading.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="buildcounterinput.txt" />

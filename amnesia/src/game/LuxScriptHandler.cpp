@@ -716,6 +716,10 @@ void cLuxScriptHandler::InitScriptFunctions()
 	AddFunc("float GetEntityRotationZ(string &in asName, int body)", (void*)GetEntityRotationZ);
 	AddFunc("void SetEntityRotation(string &in asName, float afrX, float afrY, float afrZ, int body)", (void*)SetEntityRotation);
 	AddFunc("void SetEntityRotationAndPosition(string &in asName, float afrX, float afrY, float afrZ, float afpX, float afpY, float afpZ, int body)", (void*)SetEntityRotationAndPosition);
+
+	AddFunc("float GetCameraRotationX()", (void*)GetCameraRotationX);
+	AddFunc("float GetCameraRotationY()", (void*)GetCameraRotationY);
+	AddFunc("float GetCameraRotationZ()", (void*)GetCameraRotationZ);
 	
 	AddFunc("float GetBonePosX(string &in asEntity, string &in asBone)", (void*)GetBonePosX);
 	AddFunc("float GetBonePosY(string &in asEntity, string &in asBone)", (void*)GetBonePosY);
@@ -727,6 +731,9 @@ void cLuxScriptHandler::InitScriptFunctions()
 
 	AddFunc("void AttachPropToBone(string &in asChildEntityName, string &in asParentEntityName, string &in asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)", (void*)AttachPropToBone);
 	AddFunc("void DetachPropFromBone(string &in asChildEntityName)", (void*)DetachPropFromBone);
+
+	AddFunc("void AttachPlayerCameraToEntity(string &in asProp)", (void*)AttachPlayerCameraToEntity);
+	AddFunc("void DetachPlayerCamera()", (void*)DetachPlayerCamera);
 
 	AddFunc("void SetEntityCustomFocusCrossHair(string &in asName, string &in asCrossHair)",(void *)SetEntityCustomFocusCrossHair);
 	AddFunc("void CreateEntityAtArea(string &in asEntityName, string &in asEntityFile, string &in asAreaName, bool abFullGameSave)",(void *)CreateEntityAtArea);
@@ -3141,6 +3148,29 @@ void __stdcall cLuxScriptHandler::SetEntityRotationAndPosition(string& asName, f
 	pEntity->GetBody(body)->SetMatrix(mtxTrans);
 }
 //-----------------------------------------------------------------------
+float __stdcall cLuxScriptHandler::GetCameraRotationX()
+{
+	cCamera* pCam = gpBase->mpPlayer->GetCamera();
+	return pCam->GetPitch();
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetCameraRotationY()
+{
+	cCamera* pCam = gpBase->mpPlayer->GetCamera();
+	return pCam->GetYaw();
+}
+
+//-----------------------------------------------------------------------
+
+float __stdcall cLuxScriptHandler::GetCameraRotationZ()
+{
+	cCamera* pCam = gpBase->mpPlayer->GetCamera();
+	return pCam->GetRoll();
+}
+
+//-----------------------------------------------------------------------
 
 float __stdcall cLuxScriptHandler::GetBonePosX(string& asEntity, string& asBoneName)
 {
@@ -3302,6 +3332,20 @@ void __stdcall cLuxScriptHandler::AttachPropToBone(string& asChildEntityName, st
 
 	pChildProp->SetParentBone(pParentBone, mtxTransform, asParentEntityName, asParentBoneName);
 }
+//-----------------------------------------------------------------------
+void __stdcall cLuxScriptHandler::AttachPlayerCameraToEntity(string& asPropName)
+{
+	gpBase->mpPlayer->SetCamPosActive(true, asPropName);
+}
+
+//-----------------------------------------------------------------------
+
+void __stdcall cLuxScriptHandler::DetachPlayerCamera()
+{
+	tString a = "";
+	gpBase->mpPlayer->SetCamPosActive(false, a);
+}
+
 //-----------------------------------------------------------------------
 
 void __stdcall cLuxScriptHandler::CreateEntityAtArea(string& asEntityName, string& asEntityFile, string& asAreaName, bool abFullGameSave)

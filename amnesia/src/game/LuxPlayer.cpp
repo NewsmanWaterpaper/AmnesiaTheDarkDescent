@@ -69,6 +69,9 @@ cLuxPlayer::cLuxPlayer() : iLuxUpdateable("LuxPlayer"), iLuxCollideCallbackConta
 	mbFreeCameraActive = false;
 	mfFreeCameraSpeed = 0.1f;
 
+	mbCamPosActive = false;
+	msCamPosObject = "";
+
 	//TODO: More setup?
 	cVector2f vScreenSize = gpBase->mpEngine->GetGraphics()->GetLowLevel()->GetScreenSizeFloat();
 	mfAspect = vScreenSize.x / vScreenSize.y;
@@ -345,6 +348,9 @@ void cLuxPlayer::Reset()
 	mpCamera->SetYaw(0.0f);
 	mpCamera->SetFOV(mfFOV*mfFOVMul);
 	mpCamera->SetAspect(mfAspect*mfAspectMul);
+
+	mbCamPosActive = false;
+	msCamPosObject = "";
 
 	///////////////
 	// Free camera
@@ -1161,6 +1167,19 @@ void cLuxPlayer::SetFreeCamSpeed(float afSpeed)
 	mfFreeCameraSpeed = afSpeed;
 }
 
+void cLuxPlayer::SetCamPosActive(bool abX, string& asPropName)
+{
+	mbCamPosActive = abX;
+	if (abX == true) {
+		msCamPosObject = asPropName;
+	}
+	else
+	{
+		msCamPosObject = "";
+	}
+	mpCharBody->SetCamPosActive(abX, asPropName);
+}
+
 //-----------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////
@@ -1334,50 +1353,71 @@ void cLuxPlayer::UpdateCamera(float afTimeStep)
 		mpCamera->SetAspect(mfAspect*mfAspectMul);
 	}
 
-	bool bUpdatedRoll = false;
-	////////////////
-	// Roll
-	if(mfRoll != mfRollGoal)
+	if (!mbCamPosActive) 
 	{
-		float fSpeed = (mfRollGoal - mfRoll) * mfRollSpeedMul;
-		if(fSpeed > mfRollMaxSpeed) fSpeed = mfRollMaxSpeed;
-		if(fSpeed < -mfRollMaxSpeed) fSpeed = -mfRollMaxSpeed;
-		
-		mfRoll += afTimeStep * fSpeed;
+		bool bUpdatedRoll = false;
+		////////////////
+		// Roll
+		if (mfRoll != mfRollGoal)
+		{
+			float fSpeed = (mfRollGoal - mfRoll) * mfRollSpeedMul;
+			if (fSpeed > mfRollMaxSpeed) fSpeed = mfRollMaxSpeed;
+			if (fSpeed < -mfRollMaxSpeed) fSpeed = -mfRollMaxSpeed;
 
-		if(cMath::Abs(mfRollGoal - mfRoll) < 0.004f) mfRoll = mfRollGoal;
+			mfRoll += afTimeStep * fSpeed;
 
-		bUpdatedRoll = true;
+			if (cMath::Abs(mfRollGoal - mfRoll) < 0.004f) mfRoll = mfRollGoal;
+
+			bUpdatedRoll = true;
+		}
+
+		////////////////
+		// Lean Roll
+		if (mfLeanRoll != mfLeanRollGoal)
+		{
+			float fSpeed = (mfLeanRollGoal - mfLeanRoll) * mfLeanRollSpeedMul;
+			if (fSpeed > mfLeanRollMaxSpeed) fSpeed = mfLeanRollMaxSpeed;
+			if (fSpeed < -mfLeanRollMaxSpeed) fSpeed = -mfLeanRollMaxSpeed;
+
+			mfLeanRoll += afTimeStep * fSpeed;
+
+			if (cMath::Abs(mfLeanRollGoal - mfLeanRoll) < 0.004f) mfLeanRoll = mfLeanRollGoal;
+
+			bUpdatedRoll = true;
+		}
+
+		if (bUpdatedRoll)
+			mpCamera->SetRoll(mfRoll + mfLeanRoll);
+
+		////////////////
+		// Cam pos
+		if (mvCamAnimPos != mvCamAnimPosGoal)
+		{
+			cVector3f vDir = mvCamAnimPosGoal - mvCamAnimPos;
+			float fSpeed = vDir.Length() * mfCamAnimPosSpeedMul;
+			if (fSpeed > mfCamAnimPosMaxSpeed) fSpeed = mfCamAnimPosMaxSpeed;
+			vDir.Normalize();
+
+			mvCamAnimPos += vDir * fSpeed;
+		}
 	}
-
-	////////////////
-	// Lean Roll
-	if(mfLeanRoll != mfLeanRollGoal)
+	else
 	{
-		float fSpeed = (mfLeanRollGoal - mfLeanRoll) * mfLeanRollSpeedMul;
-		if(fSpeed > mfLeanRollMaxSpeed) fSpeed = mfLeanRollMaxSpeed;
-		if(fSpeed < -mfLeanRollMaxSpeed) fSpeed = -mfLeanRollMaxSpeed;
+		cLuxMap* pMap = gpBase->mpMapHandler->GetCurrentMap();
+		if (pMap == NULL)
+		{
+			Error("GetEntity(..) failed! No map was set!\n");
+			return;
+		}
 
-		mfLeanRoll += afTimeStep * fSpeed;
+		iLuxEntity* pEntity = pMap->GetEntityByName(msCamPosObject);
+		if (pEntity == NULL)
+		{
+			Warning("Entity '%s' does not exist!\n", msCamPosObject.c_str());
+			return;
+		}
 
-		if(cMath::Abs(mfLeanRollGoal - mfLeanRoll) < 0.004f) mfLeanRoll = mfLeanRollGoal;
-
-		bUpdatedRoll = true;
-	}
-
-	if(bUpdatedRoll)
-		mpCamera->SetRoll(mfRoll + mfLeanRoll);
-
-	////////////////
-	// Cam pos
-	if(mvCamAnimPos != mvCamAnimPosGoal)
-	{
-		cVector3f vDir = mvCamAnimPosGoal - mvCamAnimPos;
-		float fSpeed = vDir.Length() * mfCamAnimPosSpeedMul;
-		if(fSpeed > mfCamAnimPosMaxSpeed) fSpeed = mfCamAnimPosMaxSpeed;
-		vDir.Normalize();
-
-        mvCamAnimPos += vDir * fSpeed;
+		mpCamera->SetMatrix(pEntity->GetBody(0)->GetLocalMatrix());
 	}
 
 }
